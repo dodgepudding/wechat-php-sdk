@@ -6,7 +6,7 @@ weixin developer SDK.
 
 使用范例
 -------
-'''
+```
 $options = array(
 		'token'=>'tokenaccesskey' //填写你设定的key
 	);
@@ -25,9 +25,9 @@ switch($type) {
 	default:
 			$weObj->text("help info")->reply();
 }
-'''
+```
 
 License
 -------
-This is licensed under the GNU LGPL, version 2.1 or later.
+This is licensed under the GNU LGPL, version 2.1 or later.   
 For details, see: http://creativecommons.org/licenses/LGPL/2.1/
