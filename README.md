@@ -4,11 +4,15 @@ wechat-php-sdk
 微信公众平台php开发包,细化各项接口操作,支持链式调用,欢迎Fork此项目  
 weixin developer SDK.
 
-使用范例
+使用详解
 -------
-wechat.class.php调用官方API，wechatext.class.php为非官方API，需要配置账户和密码，能实现主动点对点微信，此方式不保证长期有效  
+使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
+http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A3%E6%8C%87%E5%8D%97  
 
-* 基础API调用示例1：  
+wechat.class.php调用官方API， 支持链式调用操作 ；  
+wechatext.class.php为非官方API，需要配置账户和密码，能实现主动点对点微信，此方式不保证长期有效  。
+
+* 基础API调用示例：  
 ```
 include "wechat.class.php"
 $options = array(
