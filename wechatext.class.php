@@ -68,7 +68,57 @@ class Wechatext
 		}
 		return $result;
 	}	
-
+	
+	/**
+	 * 发送图文消息
+	 * @param string $account 账户名称
+	 * @param string $title 标题
+	 * @param string $summary 摘要
+	 * @param string $content 内容
+	 * @param string $pic 图片
+	 * @param string $srcurl 原文链接
+	 * @return json
+	 */
+	public function sendNews($account,$title,$summary,$content,$pic,$srcurl='') {
+		$send_snoopy = new Snoopy;
+		$send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-upload&lang=zh_CN&type=2&formId=1";
+		$post = array('formId'=>'');
+		$postfile = array('uploadfile'=>$pic);
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->set_submit_multipart();
+		$submit = "http://mp.weixin.qq.com/cgi-bin/uploadmaterial?cgi=uploadmaterial&type=2&t=iframe-uploadfile&lang=zh_CN&formId=1";
+		$send_snoopy->submit($submit,$post,$postfile);
+		$tmp = $send_snoopy->results;
+		$this->log($tmp);
+		preg_match("/formId,.*?\'(\d+)\'/",$tmp,$matches);
+		if (isset($matches[1])) {
+			$photoid = $matches[1];
+			$send_snoopy = new Snoopy;
+			$submit = "http://mp.weixin.qq.com/cgi-bin/operate_appmsg?sub=preview&t=ajax-appmsg-preview";
+			$send_snoopy->set_submit_normal();
+			$send_snoopy->rawheaders['Cookie']= $this->cookie;
+			$send_snoopy->referer = 'http://mp.weixin.qq.com/cgi-bin/operate_appmsg?sub=edit&t=wxm-appmsgs-edit-new&type=10&subtype=3&lang=zh_CN';
+			$post = array(
+					'AppMsgId'=>'',
+					'ajax'=>1,
+					'content0'=>$content,
+					'count'=>1,
+					'digest0'=>$summary,
+					'error'=>'false',
+					'fileid0'=>$photoid,
+					'preusername'=>$account,
+					'sourceurl0'=>$srcurl,
+					'title0'=>$title,
+			);
+			$send_snoopy->submit($submit,$post);
+			$tmp = $send_snoopy->results;
+			$this->log($tmp);
+			$json = json_decode($tmp,true);
+			return $json;
+		}
+		return false;
+	}
+	
 	/**
 	 * 获取用户的信息
 	 * @param  string $id 用户的uid
@@ -221,7 +271,7 @@ class Snoopy
 	var $proxy_user		=	"";					// proxy user to use
 	var $proxy_pass		=	"";					// proxy password to use
 
-	var $agent			=	"Snoopy v1.2.4";	// agent we masquerade as
+	var $agent			=	"Mozilla/5.0";	// agent we masquerade as
 	var	$referer		=	"";					// referer info to pass
 	var $cookies		=	array();			// array of cookies to pass
 	// $cookies["username"]="joe";
@@ -454,7 +504,6 @@ class Snoopy
 		unset($postdata);
 
 		$postdata = $this->_prepare_post_body($formvars, $formfiles);
-			
 		$URI_PARTS = parse_url($URI);
 		if (!empty($URI_PARTS["user"]))
 			$this->user = $URI_PARTS["user"];
@@ -1385,7 +1434,7 @@ class Snoopy
 				break;
 
 			case "multipart/form-data":
-				$this->_mime_boundary = "Snoopy".md5(uniqid(microtime()));
+				$this->_mime_boundary = "--------".md5(uniqid(microtime()));
 
 				reset($formvars);
 				while(list($key,$val) = each($formvars)) {
@@ -1406,15 +1455,13 @@ class Snoopy
 				while (list($field_name, $file_names) = each($formfiles)) {
 					settype($file_names, "array");
 					while (list(, $file_name) = each($file_names)) {
-						if (!is_readable($file_name)) continue;
+						$file_content = file_get_contents($file_name);
+						if (!$file_content) continue;
 
-						$fp = fopen($file_name, "r");
-						$file_content = fread($fp, filesize($file_name));
-						fclose($fp);
 						$base_name = basename($file_name);
 
 						$postdata .= "--".$this->_mime_boundary."\r\n";
-						$postdata .= "Content-Disposition: form-data; name=\"$field_name\"; filename=\"$base_name\"\r\n\r\n";
+						$postdata .= "Content-Disposition: form-data; name=\"$field_name\"; filename=\"$base_name\"\r\nContent-Type: image/jpeg\r\n\r\n";
 						$postdata .= "$file_content\r\n";
 					}
 				}
