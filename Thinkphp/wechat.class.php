@@ -263,9 +263,9 @@ class Wechat
 			return false;
 	}
 	
-	private function xmlSafeStr($str)
+	public static function xmlSafeStr($str)
 	{   
-		return preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str);   
+		return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';   
 	} 
 	
 	/**
@@ -273,14 +273,14 @@ class Wechat
 	 * @param mixed $data 数据
 	 * @return string
 	 */
-	private function data_to_xml($data) {
+	public static function data_to_xml($data) {
 	    $xml = '';
 	    foreach ($data as $key => $val) {
 	        is_numeric($key) && $key = "item id=\"$key\"";
-	        $xml    .=  "<$key><![CDATA[";
-	        $xml    .=  ( is_array($val) || is_object($val)) ? $this->data_to_xml($val)  : $this->xmlSafeStr($val);
+	        $xml    .=  "<$key>";
+	        $xml    .=  ( is_array($val) || is_object($val)) ? self::data_to_xml($val)  : self::xmlSafeStr($val);
 	        list($key, ) = explode(' ', $key);
-	        $xml    .=  "]]></$key>";
+	        $xml    .=  "</$key>";
 	    }
 	    return $xml;
 	}	
@@ -306,7 +306,7 @@ class Wechat
 	    $attr   = trim($attr);
 	    $attr   = empty($attr) ? '' : " {$attr}";
 	    $xml   .= "<{$root}{$attr}>";
-	    $xml   .= $this->data_to_xml($data, $item, $id);
+	    $xml   .= self::data_to_xml($data, $item, $id);
 	    $xml   .= "</{$root}>";
 	    return $xml;
 	}
