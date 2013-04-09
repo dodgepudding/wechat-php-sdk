@@ -77,14 +77,27 @@ class Wechat
 	 */
 	public function valid($return=false)
     {
-        $echoStr = $_GET["echostr"];
-        if($this->checkSignature()){
-        		if ($return) {
-        			return $echoStr;
-        		} else {
-        			echo $echoStr;
-        			exit;
-        		}
+        $echoStr = isset($_GET["echostr"]) ? $_GET["echostr"]: '';
+        if ($return) {
+        		if ($echoStr) {
+        			if ($this->checkSignature()) 
+        				return $echoStr;
+        			else
+        				return false;
+        		} else 
+        			return $this->checkSignature();
+        } else {
+	        	if ($echoStr) {
+	        		if ($this->checkSignature())
+	        			die($echoStr);
+	        		else 
+	        			die('no access');
+	        	}  else {
+	        		if ($this->checkSignature())
+	        			return true;
+	        		else
+	        			die('no access');
+	        	}
         }
         return false;
     }
@@ -265,7 +278,7 @@ class Wechat
 	    foreach ($data as $key => $val) {
 	        is_numeric($key) && $key = "item id=\"$key\"";
 	        $xml    .=  "<$key><![CDATA[";
-	        $xml    .=  ( is_array($val) || is_object($val)) ? data_to_xml($val)  : $this->xmlSafeStr($val);
+	        $xml    .=  ( is_array($val) || is_object($val)) ? $this->data_to_xml($val)  : $this->xmlSafeStr($val);
 	        list($key, ) = explode(' ', $key);
 	        $xml    .=  "]]></$key>";
 	    }
@@ -293,7 +306,7 @@ class Wechat
 	    $attr   = trim($attr);
 	    $attr   = empty($attr) ? '' : " {$attr}";
 	    $xml   .= "<{$root}{$attr}>";
-	    $xml   .= data_to_xml($data, $item, $id);
+	    $xml   .= $this->data_to_xml($data, $item, $id);
 	    $xml   .= "</{$root}>";
 	    return $xml;
 	}

@@ -19,7 +19,7 @@ $options = array(
 		'token'=>'tokenaccesskey' //填写你设定的key
 	);
 $weObj = new Wechat($options);
-$weObj->valid();
+$weObj->valid(); //注意, 应用验证通过后,可将此句注释掉, 但会降低网站安全性
 $type = $weObj->getRev()->getRevType();
 switch($type) {
 	case Wechat::MSGTYPE_TEXT:
