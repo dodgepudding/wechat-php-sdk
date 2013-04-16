@@ -2,16 +2,16 @@
 /**
  * 微信扩展接口测试
  */
-	include("wechatext.class.php");
+	include("../wechatext.class.php");
 	
 	function logdebug($text){
-		file_put_contents('./data/log.txt',$text."\n",FILE_APPEND);		
+		file_put_contents('../data/log.txt',$text."\n",FILE_APPEND);		
 	};
 	
 	$options = array(
 		'account'=>'demo@domain.com',
 		'password'=>'demo',
-		'datapath'=>'./data/cookie_',
+		'datapath'=>'../data/cookie_',
 			'debug'=>true,
 			'logcallback'=>'logdebug'	
 	); 

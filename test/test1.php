@@ -3,10 +3,10 @@
  * 微信公共接口测试
  * 
  */
-	include("wechat.class.php");
+	include("../wechat.class.php");
 	
 	function logdebug($text){
-		file_put_contents('./data/log.txt',$text."\n",FILE_APPEND);		
+		file_put_contents('../data/log.txt',$text."\n",FILE_APPEND);		
 	};
 	$options = array(
 		'token'=>'tokenaccesskey', //填写你设定的key

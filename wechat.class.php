@@ -1,9 +1,9 @@
 <?php
 /**
- *	微信公众平台PHP-SDK
- *  @author dodgepudding@gmail.com
+ *	微信公众平台PHP-SDK, 官方API部分
+ *  @author  dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
- *  @version 1.0
+ *  @version 1.1
  *  usage:
  *   $options = array(
  *			'token'=>'tokenaccesskey' //填写你设定的key

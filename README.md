@@ -10,10 +10,12 @@ weixin developer SDK.
 http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A3%E6%8C%87%E5%8D%97  
 
 wechat.class.php调用官方API， 支持链式调用操作 ；  
-wechatext.class.php为非官方API，需要配置账户和密码，能实现主动点对点微信，此方式不保证长期有效  。
+wechatext.class.php为非官方API，需要配置公众平台账户和密码，能实现主动点对点微信，此方式不保证长期有效。  
+wechatauth.class.php为通过微信二维码登陆微信的API, 能同时实现在网站同步登陆.
 
 * 基础API调用示例：  
 ```
+//test1.php
 include "wechat.class.php"
 $options = array(
 		'token'=>'tokenaccesskey' //填写你设定的key
@@ -35,8 +37,9 @@ switch($type) {
 }
 ```
 
-* 扩展包调用示例:  
+* 扩展包调用示例: 
 ```
+//test2.php 
 	include("wechatext.class.php");
 	
 	function logdebug($text){
@@ -59,6 +62,37 @@ switch($type) {
 		var_dump($data);
 	}
 ```
+
+* 微信二维码登陆示例:  
+```
+	include("../wechatauth.class.php");
+	session_start();
+	$sid  = session_id();
+	$options = array(
+		'account'=>$sid,
+		'datapath'=>'../data/cookiecode_',
+	); 
+	$wechat = new Wechatauth($options);
+	
+	if (isset($_POST['code'])) {
+		$logincode = $_POST['code'];
+		$vres = $wechat->set_login_code($logincode)->verify_code();
+		if ($vres===false) {
+			$result = array('status'=>0);
+		} else {
+			$result = array('status'=>$vres);
+			if ($vres==200) {
+				$result['info'] = $wechat->get_login_info();
+				$result['cookie'] = $wechat->get_login_cookie(true);
+			}
+		}
+		
+		die(json_encode($result));	
+	}
+	$logincode =  $wechat->get_login_code(); //获取授权码
+	$qrimg = $wechat->get_code_image(); //待输出的二维码图片
+```
+HTML部分请看test/test3.php, 主要是不断ajax提交查询是否已经授权成功
 
 License
 -------
