@@ -14,7 +14,7 @@
  *  @version 1.1
  *  
  */
-include "snoopy.class.php";
+include "Snoopy.class.php";
 class Wechatauth
 {
 	private $cookie;
