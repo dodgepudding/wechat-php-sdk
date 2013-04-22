@@ -23,6 +23,7 @@ class Wechatext
 	private $_datapath = './data/cookie_';
 	private $debug;
 	private $_logcallback;
+	private $_token;
 	
 	public function __construct($options)
 	{
@@ -46,6 +47,7 @@ class Wechatext
 		$post = array();
 		$post['tofakeid'] = $id;
 		$post['type'] = 1;
+		$post['token'] = $this->_token;
 		$post['content'] = $content;
 		$post['ajax'] = 1;
         $send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/singlemsgpage?fromfakeid={$id}&msgid=&source=&count=20&t=wxm-singlechat&lang=zh_CN";
@@ -71,6 +73,7 @@ class Wechatext
 			$post = array();
 			$post['type'] = 1;
 			$post['content'] = $content;
+			$post['token'] = $this->_token;
 			$post['ajax'] = 1;
             $send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/singlemsgpage?fromfakeid={$value}&msgid=&source=&count=20&t=wxm-singlechat&lang=zh_CN";
 			$send_snoopy->rawheaders['Cookie']= $this->cookie;
@@ -125,6 +128,7 @@ class Wechatext
 					'sourceurl0'=>$srcurl,
 					'title0'=>$title,
 			);
+			$post['token'] = $this->_token;
 			$send_snoopy->submit($submit,$post);
 			$tmp = $send_snoopy->results;
 			$this->log($tmp);
@@ -143,8 +147,10 @@ class Wechatext
 	{
 		$send_snoopy = new Snoopy; 
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
 		$submit = "http://mp.weixin.qq.com/cgi-bin/getcontactinfo?t=ajax-getcontactinfo&lang=zh_CN&fakeid=".$id;
-		$send_snoopy->submit($submit,array());
+		$post = array('ajax'=>1,'token'=>$this->_token);
+		$send_snoopy->submit($submit,$post);
 		$this->log($send_snoopy->results);
 		$result = json_decode($send_snoopy->results,1);
 		if(!$result){
@@ -172,6 +178,16 @@ class Wechatext
 				$tmp = str_replace("Set-Cookie: ","",$value);
 				$tmp = str_replace("Path=/","",$tmp);
 				$cookie.=$tmp;
+			}
+		}
+		if ($cookie) {
+			$send_snoopy = new Snoopy; 
+			$send_snoopy->rawheaders['Cookie']= $cookie;
+			$url = "http://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-index&lang=zh_CN";
+			$send_snoopy->fetch($url);
+			preg_match("/token:\s+\"(\d+)\"/i",$send_snoopy->results,$matches);
+			if($matches){
+				$this->_token = $matches[1];
 			}
 		}
 		$this->saveCookie($this->_cookiename,$cookie);
@@ -205,13 +221,14 @@ class Wechatext
 		if($data){
 			$send_snoopy = new Snoopy; 
 			$send_snoopy->rawheaders['Cookie']= $data;
-			$submit = "http://mp.weixin.qq.com/cgi-bin/getcontactinfo?t=ajax-getcontactinfo&lang=zh_CN&fakeid=";
-			$send_snoopy->submit($submit,array());
-			$this->log($send_snoopy->results);
-			$result = json_decode($send_snoopy->results,1);
-			if(!$result){
+			$url = "http://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-index&lang=zh_CN";
+			$send_snoopy->fetch($url);
+			preg_match("/token:\s+\"(\d+)\"/i",$send_snoopy->results,$matches);
+			$this->log(print_r($matches,true));
+			if(empty($matches)){
 				return $this->login();
 			}else{
+				$this->_token = $matches[1];
 				return $data;
 			}
 		}else{
@@ -226,7 +243,7 @@ class Wechatext
 	public function checkValid()
 	{
 		$send_snoopy = new Snoopy; 
-		$post = array();
+		$post = array('ajax'=>1,'token'=>$this->_token);
 		$submit = "http://mp.weixin.qq.com/cgi-bin/getregions?id=1017&t=ajax-getregions&lang=zh_CN";
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$send_snoopy->submit($submit,$post);
