@@ -76,13 +76,6 @@ class Wechatauth
 			preg_match("/window.QRLogin.uuid\s+=\s+\"([^\"]+)\"/",$result,$matches);
 			if(count($matches)>1) {
 				$this->_logincode = $matches[1];
-				$reporturl = 'https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxstatreport?type=1&r='.$t;
-				$send_snoopy = new Snoopy; 
-				$post['BaseRequest'] = array('Sid'=>0,'Uin'=>0);
-				$post['Count']=1;
-				$post['List']=array(array('Text'=>'Load QRcode success, uuid: '.$this->_logincode.', time: 501ms','Type'=>1));
-				$postdata = json_encode($post);
-				$send_snoopy->submit($reporturl,$postdata);
 				$_SESSION['login_step'] = 0;
 				return $this->_logincode;
 			}
@@ -201,5 +194,25 @@ class Wechatauth
 		$result = json_decode($send_snoopy->results,true);
 		if ($result['BaseResponse']['Ret']<0) return false;
 		return $result;
+	}
+	
+	/**
+	 *  获取头像
+	 *  @param string $url 传入从用户信息接口获取到的头像地址
+	 */
+	public function get_avatar($url) {
+		if (!$this->cookie) return false;
+		if (strpos($url, 'http')===false) {
+			$url = 'http://wx.qq.com'.$url;
+		}
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://wx.qq.com/";
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+		if ($result) 
+			return $result;
+		else
+			return false;
 	}
 }
