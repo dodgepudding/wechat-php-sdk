@@ -14,7 +14,7 @@ wechatext.class.php为非官方API，需要配置公众平台账户和密码，�
 wechatauth.class.php为通过微信二维码登陆微信的API, 能同时实现在网站同步登陆.
 
 * 基础API调用示例：  
-```
+```php
 //test1.php
 include "wechat.class.php"
 $options = array(
@@ -38,7 +38,7 @@ switch($type) {
 ```
 
 * 扩展包调用示例: 
-```
+```php
 //test2.php 
 	include("wechatext.class.php");
 	
@@ -64,7 +64,7 @@ switch($type) {
 ```
 
 * 微信二维码登陆示例:  
-```
+```php
 	include("../wechatauth.class.php");
 	session_start();
 	$sid  = session_id();
