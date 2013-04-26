@@ -147,7 +147,7 @@ class Wechatext
 		$send_snoopy = new Snoopy; 
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
-		$submit = "http://mp.weixin.qq.com/cgi-bin/getcontactinfo?t=ajax-getcontactinfo&lang=zh_CN&fakeid=".$id;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/getcontactinfo?t=ajax-getcontactinfo&lang=zh_CN&fakeid=".$id;
 		$post = array('ajax'=>1,'token'=>$this->_token);
 		$send_snoopy->submit($submit,$post);
 		$this->log($send_snoopy->results);
@@ -173,20 +173,21 @@ class Wechatext
 		$this->log($snoopy->headers);
 		foreach ($snoopy->headers as $key => $value) {
 			$value = trim($value);
-			if(strpos($value,'Set-Cookie: ') || strpos($value,'Set-Cookie: ')===0){
-				$tmp = str_replace("Set-Cookie: ","",$value);
-				$tmp = str_replace("Path=/","",$tmp);
-				$cookie.=$tmp;
-			}
+			if(preg_match('/^set-cookie:[\s]+([^=]+)=([^;]+)/i', $value,$match))
+				$cookie .=$match[1].'='.$match[2].'; ';
 		}
 		if ($cookie) {
 			$send_snoopy = new Snoopy; 
 			$send_snoopy->rawheaders['Cookie']= $cookie;
-			$url = "http://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-index&lang=zh_CN";
+			$send_snoopy->maxredirs = 0;
+			$url = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-index&lang=zh_CN";
 			$send_snoopy->fetch($url);
-			preg_match("/token:\s+\"(\d+)\"/i",$send_snoopy->results,$matches);
+			$header = implode(',',$send_snoopy->headers);
+			$this->log('header:'.print_r($send_snoopy->headers,true));
+			preg_match("/token=(\d+)/i",$header,$matches);
 			if($matches){
 				$this->_token = $matches[1];
+				$this->log('token:'.$this->_token);
 			}
 		}
 		$this->saveCookie($this->_cookiename,$cookie);
@@ -212,11 +213,13 @@ class Wechatext
 		$data = S($filename);
 		if($data){
 			$send_snoopy = new Snoopy; 
-			$send_snoopy->rawheaders['Cookie']= $data;
-			$url = "http://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-index&lang=zh_CN";
+			$send_snoopy->rawheaders['Cookie']= $cookie;
+			$send_snoopy->maxredirs = 0;
+			$url = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-index&lang=zh_CN";
 			$send_snoopy->fetch($url);
-			preg_match("/token:\s+\"(\d+)\"/i",$send_snoopy->results,$matches);
-			$this->log(print_r($matches,true));
+			$header = implode(',',$send_snoopy->headers);
+			$this->log('header:'.print_r($send_snoopy->headers,true));
+			preg_match("/token=(\d+)/i",$header,$matches);
 			if(empty($matches)){
 				return $this->login();
 			}else{

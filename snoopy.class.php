@@ -223,7 +223,7 @@ class Snoopy
 					if($this->maxredirs > $this->_redirectdepth)
 					{
 						// only follow redirect if it's on this site, or offsiteok is true
-						if(preg_match("|^http://".preg_quote($this->host)."|i",$this->_redirectaddr) || $this->offsiteok)
+						if(preg_match("|^https://".preg_quote($this->host)."|i",$this->_redirectaddr) || $this->offsiteok)
 						{
 							/* follow the redirect */
 							$this->_redirectdepth++;
@@ -386,7 +386,7 @@ class Snoopy
 							$this->_redirectaddr = $this->_expandlinks($this->_redirectaddr,$URI_PARTS["scheme"]."://".$URI_PARTS["host"]);
 
 						// only follow redirect if it's on this site, or offsiteok is true
-						if(preg_match("|^http://".preg_quote($this->host)."|i",$this->_redirectaddr) || $this->offsiteok)
+						if(preg_match("|^https://".preg_quote($this->host)."|i",$this->_redirectaddr) || $this->offsiteok)
 						{
 							/* follow the redirect */
 							$this->_redirectdepth++;
@@ -1007,7 +1007,7 @@ class Snoopy
 			}
 			$data = curl_exec($ch);
 			if ($data === false) {
-				$this->error = "Error: Curl error  ".$curl_error($ch);
+				$this->error = "Error: Curl error  ".curl_error($ch);
 					return false;
 			}
 			$parts = explode("\r\n\r\n",$data);
@@ -1056,7 +1056,7 @@ class Snoopy
 				if(!preg_match("|\:\/\/|",$matches[2]))
 				{
 					// no host in the path, so prepend
-					$this->_redirectaddr = $URI_PARTS["scheme"]."://".$this->host.":".$this->port;
+					$this->_redirectaddr = $URI_PARTS["scheme"]."://".$this->host;
 					// eliminate double slash
 					if(!preg_match("|^/|",$matches[2]))
 						$this->_redirectaddr .= "/".$matches[2];
