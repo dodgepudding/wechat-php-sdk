@@ -865,18 +865,20 @@ class Snoopy
 				// get URL portion of the redirect
 				preg_match("/^(Location:|URI:)[ ]+(.*)/i",chop($currentHeader),$matches);
 				// look for :// in the Location header to see if hostname is included
-				if(!preg_match("|\:\/\/|",$matches[2]))
-				{
-					// no host in the path, so prepend
-					$this->_redirectaddr = $URI_PARTS["scheme"]."://".$this->host.":".$this->port;
-					// eliminate double slash
-					if(!preg_match("|^/|",$matches[2]))
-						$this->_redirectaddr .= "/".$matches[2];
+				if (!empty($matches)) {
+					if(!preg_match("|\:\/\/|",$matches[2]))
+					{
+						// no host in the path, so prepend
+						$this->_redirectaddr = $URI_PARTS["scheme"]."://".$this->host.":".$this->port;
+						// eliminate double slash
+						if(!preg_match("|^/|",$matches[2]))
+							$this->_redirectaddr .= "/".$matches[2];
+						else
+							$this->_redirectaddr .= $matches[2];
+					}
 					else
-						$this->_redirectaddr .= $matches[2];
+						$this->_redirectaddr = $matches[2];
 				}
-				else
-					$this->_redirectaddr = $matches[2];
 			}
 
 			if(preg_match("|^HTTP/|",$currentHeader))
@@ -998,6 +1000,8 @@ class Snoopy
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $URI);
 			curl_setopt($ch, CURLOPT_HEADER, true); 
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); 
 			curl_setopt($ch, CURLOPT_TIMEOUT, $this->read_timeout);
@@ -1053,18 +1057,20 @@ class Snoopy
 				// get URL portion of the redirect
 				preg_match("/^(Location: |URI:)\s+(.*)/",chop($result_headers[$currentHeader]),$matches);
 				// look for :// in the Location header to see if hostname is included
-				if(!preg_match("|\:\/\/|",$matches[2]))
-				{
-					// no host in the path, so prepend
-					$this->_redirectaddr = $URI_PARTS["scheme"]."://".$this->host;
-					// eliminate double slash
-					if(!preg_match("|^/|",$matches[2]))
-						$this->_redirectaddr .= "/".$matches[2];
+				if (!empty($matches)) {
+					if(!preg_match("|\:\/\/|",$matches[2]))
+					{
+						// no host in the path, so prepend
+						$this->_redirectaddr = $URI_PARTS["scheme"]."://".$this->host;
+						// eliminate double slash
+						if(!preg_match("|^/|",$matches[2]))
+							$this->_redirectaddr .= "/".$matches[2];
+						else
+							$this->_redirectaddr .= $matches[2];
+					}
 					else
-						$this->_redirectaddr .= $matches[2];
+						$this->_redirectaddr = $matches[2];
 				}
-				else
-					$this->_redirectaddr = $matches[2];
 			}
 
 			if(preg_match("|^HTTP/|",$result_headers[$currentHeader]))
