@@ -35,6 +35,7 @@ class Wechat
 	const MSGTYPE_EVENT = 'event';
 	const MSGTYPE_MUSIC = 'music';
 	const MSGTYPE_NEWS = 'news';
+	const MSGTYPE_VOICE = 'voice';
 	private $token;
 	private $_msg;
 	private $_funcflag = false;
@@ -253,6 +254,19 @@ class Wechat
 			return array(
 				'event'=>$this->_receive['Event'],
 				'key'=>$this->_receive['EventKey'],
+			);
+		} else 
+			return false;
+	}
+	
+	/**
+	 * 获取接收语言推送
+	 */
+	public function getRevVoice(){
+		if (isset($this->_receive['MediaId'])){
+			return array(
+				'mediaid'=>$this->_receive['MediaId'],
+				'format'=>$this->_receive['Format'],
 			);
 		} else 
 			return false;
