@@ -157,7 +157,111 @@ class Wechatext
 		}
 		return $result;
 	}
-
+	
+	/**
+	 * 获取消息更新数目
+	 * @param int $lastid 最近获取的消息ID,为0时获取总消息数目
+	 * @return int 数目
+	 */
+	public function getNewMsgNum($lastid=0){
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/getnewmsgnum?t=ajax-getmsgnum&lastmsgid=".$lastid;
+		$post = array('ajax'=>1,'token'=>$this->_token);
+		$send_snoopy->submit($submit,$post);
+		$this->log($send_snoopy->results);
+		$result = json_decode($send_snoopy->results,1);
+		if(!$result){
+			return false;
+		}
+		return intval($result['newTotalMsgCount']);
+	}
+	
+	/**
+	 * 获取最新一条消息
+	 * @return array {"id":"最新一条id","type":"类型号(1为文字,2为图片,3为语音)","fileId":"0","hasReply":"0","fakeId":"用户uid","nickName":"昵称","dateTime":"时间戳","content":"文字内容","playLength":"0","length":"0","source":"","starred":"0","status":"4"}        
+	 */
+	public function getTopMsg(){
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
+		$lastid = $lastid===0 ? '':$lastid;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=ajax-message&lang=zh_CN&count=1&timeline=0&day=0&star=0&cgi=getmessage&offset=0";
+		$post = array('ajax'=>1,'token'=>$this->_token);
+		$send_snoopy->submit($submit,$post);
+		$this->log($send_snoopy->results);
+		$result = json_decode($send_snoopy->results,1);
+		if($result && count($result)>0)
+			return $result[0];
+		else 
+			return false;
+	}
+	
+	/**
+	 * 获取新消息
+	 * @param $lastid 传入最后的消息id编号,为0则从最新一条起倒序获取
+	 * @param $offset lastid起算第一条的偏移量
+	 * @param $perpage 每页获取多少条
+	 * @param $day 最近几天消息(1:昨天,2:前天,3:五天内)
+	 * @param $today 是否只显示今天的消息, 与$day参数不能同时大于0
+	 * @param $star 是否星标组信息
+	 */
+	public function getMsg($lastid=0,$offset=0,$perpage=50,$day=0,$today=0,$star=0){
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
+		$lastid = $lastid===0 ? '':$lastid;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=ajax-message&lang=zh_CN&count=$perpage&timeline=$today&day=$day&star=$star&frommsgid=$lastid&cgi=getmessage&offset=$offset";
+		$post = array('ajax'=>1,'token'=>$this->_token);
+		$send_snoopy->submit($submit,$post);
+		$this->log($send_snoopy->results);
+		$result = json_decode($send_snoopy->results,1);
+		if(!$result){
+			return false;
+		}
+		return $result;
+	}
+	
+	/**
+	 * 获取图片消息
+	 * @param int $msgid 消息id
+	 * @param string $mode 图片尺寸(large/small)
+	 * @return jpg二进制文件
+	 */
+	public function getMsgImage($msgid,$mode='large'){
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/cgi-bin/getimgdata?token=".$this->_token."&msgid=$msgid&mode=$mode&source=&fileId=0";
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+		$this->log('msg image:'.$msgid.';length:'.strlen($result));
+		if(!$result){
+			return false;
+		}
+		return $result;
+	}
+	
+	/**
+	 * 获取语音消息
+	 * @param int $msgid 消息id
+	 * @return mp3二进制文件
+	 */
+	public function getMsgVoice($msgid){
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/cgi-bin/getvoicedata?token=".$this->_token."&msgid=$msgid&fileId=0";
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+		$this->log('msg voice:'.$msgid.';length:'.strlen($result));
+		if(!$result){
+			return false;
+		}
+		return $result;
+	}
+	
 	/**
 	 * 模拟登录获取cookie
 	 * @return [type] [description]
