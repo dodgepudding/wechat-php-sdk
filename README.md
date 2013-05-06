@@ -13,6 +13,7 @@ wechat.class.php调用官方API， 支持链式调用操作 ；
 wechatext.class.php为非官方API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。   
 类方法里提及的用户id在接口返回结构里表述为FakeId是同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  
 调用下列方法前必须经过login()方法和checkValid()验证方法才能获得调用权限.  
+
 类主要方法:
  *  send($id,$content) 向某用户id发送微信文字信息  
  *  batch($ids,$content) 批量向一批用户发送微信文字信息  
@@ -25,7 +26,8 @@ wechatext.class.php为非官方API，需要配置公众平台账户和密码，�
  *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据  
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据  
 
-wechatauth.class.php为通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 验证步骤请看test3.php例子.  
+wechatauth.class.php为通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 验证步骤请看test3.php例子. 
+
 类主要方法:
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码  
  *  get_code_image($code='') 将上面获取的授权码转换为图片二维码  
@@ -34,7 +36,8 @@ wechatauth.class.php为通过微信二维码登陆微信的API, 能实现第三�
  *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息  
  *  get_avatar($url) 获取用户头像图片数据  
 
-* 基础API调用示例：  
+官方Wechat调用示例：
+--------  
 ```php
 //test1.php
 include "wechat.class.php"
@@ -58,7 +61,8 @@ switch($type) {
 }
 ```
 
-* 扩展包调用示例: 
+扩展包Wechatext调用示例: 
+--------
 ```php
 //test2.php 
 	include("wechatext.class.php");
@@ -88,8 +92,10 @@ switch($type) {
 	}
 ```
 
-* 微信二维码登陆示例:  
+微信二维码Wechatauth登陆示例: 
+-------- 
 ```php
+//test3.php
 	include("../wechatauth.class.php");
 	session_start();
 	$sid  = session_id();
@@ -117,7 +123,7 @@ switch($type) {
 	$logincode =  $wechat->get_login_code(); //获取授权码
 	$qrimg = $wechat->get_code_image(); //待输出的二维码图片
 ```
-HTML部分请看test/test3.php, 主要是不断ajax提交查询是否已经授权成功
+HTML部分请看test/test3.php, 主要是定时ajax查询是否已经授权成功
 
 License
 -------
