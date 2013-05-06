@@ -2,10 +2,18 @@
 /**
  *	微信公众平台PHP-SDK
  *  Wechatext为非官方微信发送API
+ *  注: 用户id为通过getMsg()方法获取的FakeId值
  *  主要实现如下功能:
  *  send($id,$content) 向某用户id发送微信文字信息
  *  batch($ids,$content) 批量向一批用户发送微信文字信息
  *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息
+ *  getInfo($id) 根据id获取用户资料
+ *  getNewMsgNum($lastid) 获取从$lastid算起新消息的数目
+ *  getTopMsg() 获取最新一条消息的数据, 此方法获取的消息id可以作为检测新消息的$lastid依据
+ *  getMsg($lastid,$offset=0,$perpage=50,$day=0,$today=0,$star=0) 获取最新的消息列表, 列表将返回消息id, 用户id, 消息类型, 文字消息等参数
+ *  消息返回结构:  {"id":"消息id","type":"类型号(1为文字,2为图片,3为语音)","fileId":"0","hasReply":"0","fakeId":"用户uid","nickName":"昵称","dateTime":"时间戳","content":"文字内容"} 
+ *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据
+ *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据
  *  @author dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
  *  @version 1.1
@@ -38,7 +46,7 @@ class Wechatext
 
 	/**
 	 * 主动发消息
-	 * @param  string $id      用户的uid
+	 * @param  string $id      用户的uid(即FakeId)
 	 * @param  string $content 发送的内容
 	 */
 	public function send($id,$content)
@@ -207,6 +215,7 @@ class Wechatext
 	 * @param $day 最近几天消息(1:昨天,2:前天,3:五天内)
 	 * @param $today 是否只显示今天的消息, 与$day参数不能同时大于0
 	 * @param $star 是否星标组信息
+	 * @return array[] 同getTopMsg()返回的字段结构相同
 	 */
 	public function getMsg($lastid=0,$offset=0,$perpage=50,$day=0,$today=0,$star=0){
 		$send_snoopy = new Snoopy; 

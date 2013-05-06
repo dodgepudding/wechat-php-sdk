@@ -19,7 +19,11 @@
 	if ($wechat->checkValid()) {
 		// 获取用户信息
 		$data = $wechat->getInfo('3974255');
-		// 主动发消息
-		//$wechat->send('3974255','hello '.time());
 		var_dump($data);
+		// 获取最新一条消息
+		$topmsg = $wechat->getTopMsg();
+		var_dump($topmsg);
+		// 主动回复消息
+		if ($topmsg && $topmsg['hasReply']==0)
+		$wechat->send($topmsg['fakeId'],'hi '.$topmsg['nickName'].',rev:'.$topmsg['content']);	
 	}
