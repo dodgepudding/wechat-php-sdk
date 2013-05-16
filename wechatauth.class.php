@@ -25,6 +25,7 @@ class Wechatauth
 	private $_datapath = './data/cookie_';
 	private $debug;
 	private $_logcallback;
+	public $login_user; //当前登陆用户, 调用get_login_info后获取
 	
 	public function __construct($options)
 	{
@@ -58,6 +59,15 @@ class Wechatauth
 			if ($data) $this->cookie = $data;
 		} 
 		return $this->cookie;
+	}
+	
+	/*
+	 * 删除cookie
+	 */
+	public function deleteCookie($filename) {
+		$this->cookie = '';
+		@unlink($filename);
+		return true;
 	}
 	
 	private function log($log){
@@ -198,6 +208,7 @@ class Wechatauth
 		$this->log('login_info:'.$send_snoopy->results);
 		$result = json_decode($send_snoopy->results,true);
 		if ($result['BaseResponse']['Ret']<0) return false;
+		$this->_login_user = $result['User'];
 		return $result;
 	}
 	
@@ -219,5 +230,24 @@ class Wechatauth
 			return $result;
 		else
 			return false;
+	}
+	
+	/**
+	 * 登出当前登陆用户
+	 */
+	public function logout(){
+		if (!$this->cookie) return false;
+		preg_match("/wxuin=(\w+);/",$this->cookie,$matches);
+		if (count($matches)>1) $uid = $matches[1];
+		preg_match("/wxsid=(\w+);/",$this->cookie,$matches);
+		if (count($matches)>1) $sid = $matches[1];
+		$this->log('logout: uid='.$uid.';sid='.$sid);
+		$send_snoopy = new Snoopy; 
+		$submit = 'https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxlogout?redirect=1&type=1';
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://wx.qq.com/";
+		$send_snoopy->submit($submit,array('uin'=>$uid,'sid'=>$sid));
+		$this->deleteCookie($this->_cookiename);
+		return true;
 	}
 }
