@@ -16,8 +16,6 @@ wechatext.class.php为非官方API，需要配置公众平台账户和密码，�
 
 类主要方法:
  *  send($id,$content) 向某用户id发送微信文字信息  
- *  batch($ids,$content) 批量向一批用户发送微信文字信息  
- *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息  
  *  getInfo($id) 根据id获取用户资料,注: 非关注关系用户资料不能获取  
  *  getNewMsgNum($lastid) 获取从$lastid算起新消息的数目  
  *  getTopMsg() 获取最新一条消息的数据, 此方法获取的消息id可以作为检测新消息的$lastid依据  
