@@ -5,6 +5,11 @@
  *  注: 用户id为通过getMsg()方法获取的FakeId值
  *  主要实现如下功能:
  *  send($id,$content) 向某用户id发送微信文字信息
+ *  sendNews($id,$msgid) 发送图文消息
+ *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
+ *  sendImage($id,$fid) 发送图片消息
+ *  sendAudio($id,$fid) 发送音频消息
+ *  sendVideo($id,$fid) 发送视频消息
  *  getInfo($id) 根据id获取用户资料
  *  getNewMsgNum($lastid) 获取从$lastid算起新消息的数目
  *  getTopMsg() 获取最新一条消息的数据, 此方法获取的消息id可以作为检测新消息的$lastid依据
@@ -14,7 +19,7 @@
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据
  *  @author dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
- *  @version 1.1
+ *  @version 1.2
  *  
  */
 
@@ -63,7 +68,160 @@ class Wechatext
 		$this->log($send_snoopy->results);
 		return $send_snoopy->results;
 	}
-
+	
+	/**
+	 * 发送图文信息,必须从图文库里选取消息ID发送
+	 * @param  string $id      用户的uid(即FakeId)
+	 * @param  string $msgid 图文消息id
+	 */
+	public function sendNews($id,$msgid)
+	{
+		$send_snoopy = new Snoopy; 
+		$post = array();
+		$post['tofakeid'] = $id;
+		$post['type'] = 10;
+		$post['token'] = $this->_token;
+		$post['fid'] = $msgid;
+		$post['appmsgid'] = $msgid;
+		$post['error'] = 'false';
+		$post['ajax'] = 1;
+        $send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/singlemsgpage?fromfakeid={$id}&msgid=&source=&count=20&t=wxm-singlechat&lang=zh_CN";
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response";
+		$send_snoopy->submit($submit,$post);
+		$this->log($send_snoopy->results);
+		return $send_snoopy->results;
+	}
+	
+	/**
+	 * 上传附件(图片/音频/视频)
+	 * @param string $filepath 本地文件地址
+	 * @param int $type 文件类型: 2:图片 3:音频 4:视频
+	 */
+	public function uploadFile($filepath,$type=2) {
+		$send_snoopy = new Snoopy;
+		$send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-upload&lang=zh_CN&type=2&formId=1";
+		$t = time().strval(mt_rand(100,999));
+		$post = array('formId'=>'');
+		$postfile = array('uploadfile'=>$filepath);
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->set_submit_multipart();
+		$submit = "http://mp.weixin.qq.com/cgi-bin/uploadmaterial?cgi=uploadmaterial&type=$type&token=".$this->_token."&t=iframe-uploadfile&lang=zh_CN&formId=	file_from_".$t;
+		$send_snoopy->submit($submit,$post,$postfile);
+		$tmp = $send_snoopy->results;
+		$this->log('upload:'.$tmp);
+		preg_match("/formId,.*?\'(\d+)\'/",$tmp,$matches);
+		if (isset($matches[1])) {
+			return $matches[1];
+		}
+		return false;
+	}
+	
+	/**
+	 * 发送媒体文件
+	 * @param $id 用户的uid(即FakeId)
+	 * @param $fid 文件id
+	 * @param $type 文件类型
+	 */
+	public function sendFile($id,$fid,$type) {
+		$send_snoopy = new Snoopy; 
+		$post = array();
+		$post['tofakeid'] = $id;
+		$post['type'] = $type;
+		$post['token'] = $this->_token;
+		$post['fid'] = $fid;
+		$post['fileid'] = $fid;
+		$post['error'] = 'false';
+		$post['ajax'] = 1;
+        $send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/singlemsgpage?fromfakeid={$id}&msgid=&source=&count=20&t=wxm-singlechat&lang=zh_CN";
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response";
+		$send_snoopy->submit($submit,$post);
+		$this->log($send_snoopy->results);
+		return $send_snoopy->results;
+	}
+	
+	/**
+	 * 发送图文信息,必须从库里选取文件ID发送
+	 * @param  string $id      用户的uid(即FakeId)
+	 * @param  string $fid 文件id
+	 */
+	public function sendImage($id,$fid)
+	{
+		return $this->sendFile($id,$fid,2);
+	}
+	
+	/**
+	 * 发送语音信息,必须从库里选取文件ID发送
+	 * @param  string $id      用户的uid(即FakeId)
+	 * @param  string $fid 语音文件id
+	 */
+	public function sendAudio($id,$fid)
+	{
+		return $this->sendFile($id,$fid,3);
+	}
+	
+	/**
+	 * 发送视频信息,必须从库里选取文件ID发送
+	 * @param  string $id      用户的uid(即FakeId)
+	 * @param  string $fid 视频文件id
+	 */
+	public function sendVideo($id,$fid)
+	{
+		return $this->sendFile($id,$fid,4);
+	}
+	
+	/**
+	 * 发送预览图文消息
+	 * @param string $account 账户名称
+	 * @param string $title 标题
+	 * @param string $summary 摘要
+	 * @param string $content 内容
+	 * @param string $pic 本地图片地址
+	 * @param string $srcurl 原文链接
+	 * @return json
+	 */
+	public function sendPreview($account,$title,$summary,$content,$pic,$srcurl='') {
+		$send_snoopy = new Snoopy;
+		$send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-upload&lang=zh_CN&type=2&formId=1";
+		$post = array('formId'=>'');
+		$postfile = array('uploadfile'=>$pic);
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->set_submit_multipart();
+		$submit = "http://mp.weixin.qq.com/cgi-bin/uploadmaterial?cgi=uploadmaterial&type=2&token=".$this->_token."&t=iframe-uploadfile&lang=zh_CN&formId=1";
+		$send_snoopy->submit($submit,$post,$postfile);
+		$tmp = $send_snoopy->results;
+		$this->log('step1:'.$tmp);
+		preg_match("/formId,.*?\'(\d+)\'/",$tmp,$matches);
+		if (isset($matches[1])) {
+			$photoid = $matches[1];
+			$send_snoopy = new Snoopy;
+			$submit = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?sub=preview&t=ajax-appmsg-preview";
+			$send_snoopy->set_submit_normal();
+			$send_snoopy->rawheaders['Cookie']= $this->cookie;
+			$send_snoopy->referer = 'https://mp.weixin.qq.com/cgi-bin/operate_appmsg?sub=edit&t=wxm-appmsgs-edit-new&type=10&subtype=3&lang=zh_CN';
+			$post = array(
+					'AppMsgId'=>'',
+					'ajax'=>1,
+					'content0'=>$content,
+					'count'=>1,
+					'digest0'=>$summary,
+					'error'=>'false',
+					'fileid0'=>$photoid,
+					'preusername'=>$account,
+					'sourceurl0'=>$srcurl,
+					'title0'=>$title,
+			);
+			$post['token'] = $this->_token;
+			$send_snoopy->submit($submit,$post);
+			$tmp = $send_snoopy->results;
+			$this->log('step2:'.$tmp);
+			$json = json_decode($tmp,true);
+			return $json;
+		}
+		return false;
+	}
+	
 	/**
 	 * 获取用户的信息
 	 * @param  string $id 用户的uid(即FakeId)
