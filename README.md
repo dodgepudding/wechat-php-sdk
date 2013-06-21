@@ -14,14 +14,9 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A
 
 2. wechatext.class.php  
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
-
 类方法里提及的用户id在接口返回结构里表述为FakeId, 属同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  
-  
-调用下列方法前必须经过login()方法和checkValid()验证方法才能获得调用权限. 有的账户无法通过登陆可能因为要求提供验证码, 可以手动登陆后把获取到的cookie写进程序存放cookie的文件解决  
-  
+调用下列方法前必须经过login()方法和checkValid()验证方法才能获得调用权限. 有的账户无法通过登陆可能因为要求提供验证码, 可以手动登陆后把获取到的cookie写进程序存放cookie的文件解决.  
 程序使用了经过修改的snoopy兼容式HTTP类方法, 在类似BAE/SAE云服务器上可能不能正常运行, 因为云服务的curl方法是经过重写的, 某些header参数如网站来源参数不被支持.  
-
-
 类主要方法:
  *  send($id,$content) 向某用户id发送微信文字信息 
  *  sendNews($id,$msgid) 发送图文消息
@@ -37,8 +32,8 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A
  *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据  
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据  
 
-wechatauth.class.php为通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 验证步骤请看test3.php例子. 
-
+3.wechatauth.class.php  
+通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 验证步骤请看test3.php例子.  
 类主要方法:
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码  
  *  get_code_image($code='') 将上面获取的授权码转换为图片二维码  
