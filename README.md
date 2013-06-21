@@ -32,8 +32,8 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A
  *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据  
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据  
 
-3.wechatauth.class.php  
-通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 验证步骤请看test3.php例子.  
+3. wechatauth.class.php  
+通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 首先程序分别通过get_login_code和get_code_image方法获取授权二维码图片, 然后利用微信手机客户端扫描二维码图片后将自动跳出授权页面, 用户点击授权后即可获取对应的用户资料和头像信息. 详细验证步骤请看test3.php例子.   
 类主要方法:
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码  
  *  get_code_image($code='') 将上面获取的授权码转换为图片二维码  
@@ -41,6 +41,7 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A
  *  get_login_cookie() 鉴定成功后调用此方法即可获取用户基本信息  
  *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息  
  *  get_avatar($url) 获取用户头像图片数据  
+ *  logout() 注销登陆  
 
 官方Wechat调用示例：
 --------  
