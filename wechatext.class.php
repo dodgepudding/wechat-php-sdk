@@ -137,8 +137,13 @@ class Wechatext
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$submit = "https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response";
 		$send_snoopy->submit($submit,$post);
-		$this->log($send_snoopy->results);
-		return $send_snoopy->results;
+		$result = $send_snoopy->results;
+		$this->log('sendfile:'.$result);
+		$json = json_decode($result,true);
+		if ($json && $json['ret']==0) 
+			return true;
+		else
+			return false;
 	}
 	
 	/**
