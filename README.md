@@ -19,8 +19,10 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A
 程序使用了经过修改的snoopy兼容式HTTP类方法, 在类似BAE/SAE云服务器上可能不能正常运行, 因为云服务的curl方法是经过重写的, 某些header参数如网站来源参数不被支持.  
 类主要方法:
  *  send($id,$content) 向某用户id发送微信文字信息 
- *  sendNews($id,$msgid) 发送图文消息
+ *  sendNews($id,$msgid) 发送图文消息, 可通过getNewsList获取$msgid
+ *  getNewsList($page,$pagesize) 获取图文信息列表 
  *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
+ *  getFileList($type,$page,$pagesize) 获取素材库文件列表
  *  sendImage($id,$fid) 发送图片消息
  *  sendAudio($id,$fid) 发送音频消息
  *  sendVideo($id,$fid) 发送视频消息 
