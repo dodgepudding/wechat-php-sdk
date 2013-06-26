@@ -314,7 +314,7 @@ class Wechat
 	    }
 	    $attr   = trim($attr);
 	    $attr   = empty($attr) ? '' : " {$attr}";
-	    $xml   .= "<{$root}{$attr}>";
+	    $xml   = "<{$root}{$attr}>";
 	    $xml   .= self::data_to_xml($data, $item, $id);
 	    $xml   .= "</{$root}>";
 	    return $xml;

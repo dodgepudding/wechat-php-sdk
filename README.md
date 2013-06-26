@@ -47,7 +47,7 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A
 --------  
 ```php
 //test1.php
-include "wechat.class.php"
+include "wechat.class.php";
 $options = array(
 		'token'=>'tokenaccesskey' //填写你设定的key
 	);
@@ -72,7 +72,7 @@ switch($type) {
 --------
 ```php
 //test2.php 
-	include("wechatext.class.php");
+	include "wechatext.class.php";
 	
 	function logdebug($text){
 		file_put_contents('./data/log.txt',$text."\n",FILE_APPEND);		
@@ -103,7 +103,7 @@ switch($type) {
 -------- 
 ```php
 //test3.php
-	include("../wechatauth.class.php");
+	include "../wechatauth.class.php";
 	session_start();
 	$sid  = session_id();
 	$options = array(
