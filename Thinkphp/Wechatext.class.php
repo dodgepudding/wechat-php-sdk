@@ -6,7 +6,9 @@
  *  主要实现如下功能:
  *  send($id,$content) 向某用户id发送微信文字信息
  *  sendNews($id,$msgid) 发送图文消息
+ *  getNewsList($page,$pagesize) 获取图文信息列表
  *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
+ *  getFileList($type,$page,$pagesize) 获取素材库文件列表
  *  sendImage($id,$fid) 发送图片消息
  *  sendAudio($id,$fid) 发送音频消息
  *  sendVideo($id,$fid) 发送视频消息
@@ -67,6 +69,28 @@ class Wechatext
 		$send_snoopy->submit($submit,$post);
 		$this->log($send_snoopy->results);
 		return $send_snoopy->results;
+	}
+	
+	/**
+	 * 获取图文信息列表
+	 * @param $page 页码(从0开始)
+	 * @param $pagesize 每页大小
+	 * @return array
+	 */
+	public function getNewsList($page,$pagesize=10) {
+		$send_snoopy = new Snoopy;
+		$t = time().strval(mt_rand(100,999));
+		$type=10;
+		$post = array();
+		$post['token'] = $this->_token;
+		$post['ajax'] = 1;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-upload&lang=zh_CN&type=2&formId=1";
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?token=".$this->_token."&lang=zh_CN&sub=list&t=ajax-appmsgs-fileselect&type=$type&r=".str_replace(' ','',microtime())."&pageIdx=$page&pagesize=$pagesize&subtype=3&formid=file_from_".$t;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		$this->log('newslist:'.$result);
+		return json_decode($result,true);
 	}
 	
 	/**
@@ -145,7 +169,29 @@ class Wechatext
 		else
 			return false;
 	}
-	
+
+	/**
+	 * 获取素材库文件列表
+	 * @param $type 文件类型: 2:图片 3:音频 4:视频
+	 * @param $page 页码(从0开始)
+	 * @param $pagesize 每页大小
+	 * @return array
+	 */
+	public function getFileList($type,$page,$pagesize=10) {
+		$send_snoopy = new Snoopy;
+		$t = time().strval(mt_rand(100,999));
+		$post = array();
+		$post['token'] = $this->_token;
+		$post['ajax'] = 1;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-upload&lang=zh_CN&type=2&formId=1";
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/filemanagepage?token=".$this->_token."&lang=zh_CN&t=ajax-fileselect&type=$type&r=".str_replace(' ','',microtime())."&pageIdx=$page&pagesize=$pagesize&formid=file_from_".$t;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		$this->log('filelist:'.$result);
+		return json_decode($result,true);
+	}
+		
 	/**
 	 * 发送图文信息,必须从库里选取文件ID发送
 	 * @param  string $id      用户的uid(即FakeId)
