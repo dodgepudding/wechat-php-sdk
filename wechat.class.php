@@ -400,8 +400,8 @@ class Wechat
 	
 	/**
 	 * 
-	 * 回复微信服务器, 此函数支持炼师操作
-	 * Example: $this->text('msg tips')->reply();
+	 * 回复微信服务器, 此函数支持链式操作
+	 * @example $this->text('msg tips')->reply();
 	 * @param string $msg 要发送的信息, 默认取$this->_msg
 	 * @param bool $return 是否返回信息而不抛出到浏览器 默认:否
 	 */
