@@ -36,6 +36,8 @@ class Wechat
 	const MSGTYPE_MUSIC = 'music';
 	const MSGTYPE_NEWS = 'news';
 	const MSGTYPE_VOICE = 'voice';
+	const MSGTYPE_VIDEO = 'video';
+
 	private $token;
 	private $_msg;
 	private $_funcflag = false;
