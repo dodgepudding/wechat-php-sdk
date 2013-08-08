@@ -55,9 +55,9 @@ class Wechat
 	 */	
 	private function checkSignature()
 	{
-        $signature = $_GET["signature"];
-        $timestamp = $_GET["timestamp"];
-        $nonce = $_GET["nonce"];	
+        $signature = isset($_GET["signature"])?$_GET["signature"]:'';
+        $timestamp = isset($_GET["timestamp"])?$_GET["timestamp"]:'';
+        $nonce = isset($_GET["nonce"])?$_GET["nonce"]:'';
         		
 		$token = $this->token;
 		$tmpArr = array($token, $timestamp, $nonce);
