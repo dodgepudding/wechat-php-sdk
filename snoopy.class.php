@@ -63,7 +63,7 @@ class Snoopy
 	var	$pass			=	"";					// password for http authentication
 
 	// http accept types
-	var $accept			=	"image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*";
+	var $accept			=	"application/json, text/javascript, */*; q=0.01";
 
 	var $results		=	"";					// where the content is put
 
@@ -791,7 +791,7 @@ class Snoopy
 			$headers .= "User-Agent: ".$this->agent."\r\n";
 		if(!empty($this->host) && !isset($this->rawheaders['Host'])) {
 			$headers .= "Host: ".$this->host;
-			if(!empty($this->port))
+			if(!empty($this->port) && $this->port!=80)
 				$headers .= ":".$this->port;
 			$headers .= "\r\n";
 		}
@@ -957,7 +957,7 @@ class Snoopy
 		if(!empty($this->agent))
 			$headers[] = "User-Agent: ".$this->agent;
 		if(!empty($this->host))
-			if(!empty($this->port))
+			if(!empty($this->port) && $this->port!=80)
 			$headers[] = "Host: ".$this->host.":".$this->port;
 		else
 			$headers[] = "Host: ".$this->host;

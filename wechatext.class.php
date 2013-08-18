@@ -388,33 +388,33 @@ class Wechatext
 	 * 模拟登录获取cookie
 	 * @return [type] [description]
 	 */
+	/**
+	 * 模拟登录获取cookie
+	 * @return [type] [description]
+	 */
 	public function login(){
 		$snoopy = new Snoopy; 
-		$submit = "https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
+		$submit = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 		$post["username"] = $this->_account;
 		$post["pwd"] = md5($this->_password);
 		$post["f"] = "json";
+		$post["imgcode"] = "";
+		$snoopy->referer = "https://mp.weixin.qq.com/";
 		$snoopy->submit($submit,$post);
 		$cookie = '';
-		$this->log($snoopy->headers);
+		$this->log($snoopy->results);
+		$result = json_decode($snoopy->results,true);
+		if ($result['ErrCode']!=0) return false;
 		foreach ($snoopy->headers as $key => $value) {
 			$value = trim($value);
 			if(preg_match('/^set-cookie:[\s]+([^=]+)=([^;]+)/i', $value,$match))
 				$cookie .=$match[1].'='.$match[2].'; ';
 		}
-		if ($cookie) {
-			$send_snoopy = new Snoopy; 
-			$send_snoopy->rawheaders['Cookie']= $cookie;
-			$send_snoopy->maxredirs = 0;
-			$url = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-index&lang=zh_CN";
-			$send_snoopy->fetch($url);
-			$header = implode(',',$send_snoopy->headers);
-			$this->log('header:'.print_r($send_snoopy->headers,true));
-			preg_match("/token=(\d+)/i",$header,$matches);
-			if($matches){
-				$this->_token = $matches[1];
-				$this->log('token:'.$this->_token);
-			}
+		
+		preg_match("/token=(\d+)/i",$result['ErrMsg'],$matches);
+		if($matches){
+			$this->_token = $matches[1];
+			$this->log('token:'.$this->_token);
 		}
 		$this->saveCookie($this->_cookiename,$cookie);
 		return $cookie;
@@ -471,6 +471,7 @@ class Wechatext
 	 */
 	public function checkValid()
 	{
+		if (!$this->cookie || !$this->_token) return false;
 		$send_snoopy = new Snoopy; 
 		$post = array('ajax'=>1,'token'=>$this->_token);
 		$submit = "https://mp.weixin.qq.com/cgi-bin/getregions?id=1017&t=ajax-getregions&lang=zh_CN";

@@ -26,4 +26,6 @@
 		// 主动回复消息
 		if ($topmsg && $topmsg['hasReply']==0)
 		$wechat->send($topmsg['fakeId'],'hi '.$topmsg['nickName'].',rev:'.$topmsg['content']);	
+	} else {
+		echo "login error";
 	}
