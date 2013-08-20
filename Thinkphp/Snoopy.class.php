@@ -1014,7 +1014,7 @@ class Snoopy
 				$this->error = "Error: Curl error  ".curl_error($ch);
 					return false;
 			}
-			$parts = explode("\r\n\r\n",$data);
+			$parts = explode("\r\n\r\n",$data,2);
 			$result_headers = explode("\r\n",$parts[0]);
 			$results = $parts[1];
 			unset($parts);
