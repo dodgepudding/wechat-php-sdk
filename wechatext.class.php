@@ -304,19 +304,19 @@ class Wechatext
 	 * @return array {"id":"最新一条id","type":"类型号(1为文字,2为图片,3为语音)","fileId":"0","hasReply":"0","fakeId":"用户uid","nickName":"昵称","dateTime":"时间戳","content":"文字内容","playLength":"0","length":"0","source":"","starred":"0","status":"4"}        
 	 */
 	public function getTopMsg(){
-		$send_snoopy = new Snoopy; 
+		$send_snoopy = new Snoopy;
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
-		$lastid = $lastid===0 ? '':$lastid;
-		$submit = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=ajax-message&lang=zh_CN&count=1&timeline=0&day=0&star=0&cgi=getmessage&offset=0";
-		$post = array('ajax'=>1,'token'=>$this->_token);
-		$send_snoopy->submit($submit,$post);
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->fetch($submit);
 		$this->log($send_snoopy->results);
-		$result = json_decode($send_snoopy->results,1);
-		if($result && count($result)>0)
-			return $result[0];
-		else 
-			return false;
+		$result = $send_snoopy->results;
+		if (preg_match("%list : (.*).msg_item%i", $result, $match)) {
+			$tmp = json_decode(substr($match[1],1,-1));
+			if($tmp && count($tmp)>0)
+				return $tmp->msg_item[0];
+		}
+		return false;
 	}
 	
 	/**
