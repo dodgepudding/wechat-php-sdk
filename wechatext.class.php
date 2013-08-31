@@ -5,6 +5,7 @@
  *  注: 用户id为通过getMsg()方法获取的FakeId值
  *  主要实现如下功能:
  *  send($id,$content) 向某用户id发送微信文字信息
+ *  getUserlist($page,$pagesize) 获取用户信息
  *  sendNews($id,$msgid) 发送图文消息
  *  getNewsList($page,$pagesize) 获取图文信息列表
  *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
@@ -69,6 +70,27 @@ class Wechatext
 		$send_snoopy->submit($submit,$post);
 		$this->log($send_snoopy->results);
 		return $send_snoopy->results;
+	}
+	/**
+	 * 获取用户列表列表
+	 * @param $page 页码(从0开始)
+	 * @param $pagesize 每页大小
+	 * @return array
+	 */
+	function getUserlist($page=0,$pagesize=10){
+		
+		$send_snoopy = new Snoopy;
+		$t = time().strval(mt_rand(100,999));
+		$type=10;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=".$pagesize."&pageidx=".$page."&type=0&groupid=0&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=".$pagesize."&pageidx=".$page."&type=0&groupid=0&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		preg_match("/friendsList : \((.*)\)\.contacts/is",$result,$matches);
+		
+		$this->log('userlist:'.serialize($matches[0]));
+		return json_decode($matches[1],true);
 	}
 	
 	/**
