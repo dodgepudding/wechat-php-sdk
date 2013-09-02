@@ -333,10 +333,10 @@ class Wechatext
 		$send_snoopy->fetch($submit);
 		$this->log($send_snoopy->results);
 		$result = $send_snoopy->results;
-		if (preg_match("%list : (.*).msg_item%i", $result, $match)) {
-			$tmp = json_decode(substr($match[1],1,-1));
-			if($tmp && count($tmp)>0)
-				return $tmp->msg_item[0];
+		if (preg_match("/list : \((.*)\).msg_item/i", $result, $match)) {
+			$tmp = json_decode($match[1],true);
+			if($tmp && $tmp['msg_item'])
+				return $tmp['msg_item'][0];
 		}
 		return false;
 	}
@@ -346,25 +346,27 @@ class Wechatext
 	 * @param $lastid 传入最后的消息id编号,为0则从最新一条起倒序获取
 	 * @param $offset lastid起算第一条的偏移量
 	 * @param $perpage 每页获取多少条
-	 * @param $day 最近几天消息(1:昨天,2:前天,3:五天内)
+	 * @param $day 最近几天消息(0:今天,1:昨天,2:前天,3:五天内)
 	 * @param $today 是否只显示今天的消息, 与$day参数不能同时大于0
 	 * @param $star 是否星标组信息
 	 * @return array[] 同getTopMsg()返回的字段结构相同
 	 */
-	public function getMsg($lastid=0,$offset=0,$perpage=50,$day=0,$today=0,$star=0){
+	public function getMsg($lastid=0,$offset=0,$perpage=20,$day=0,$today=0,$star=0){
 		$send_snoopy = new Snoopy; 
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&lang=zh_CN&count=50&token=".$this->_token;
 		$lastid = $lastid===0 ? '':$lastid;
-		$submit = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=ajax-message&lang=zh_CN&count=$perpage&timeline=$today&day=$day&star=$star&frommsgid=$lastid&cgi=getmessage&offset=$offset";
-		$post = array('ajax'=>1,'token'=>$this->_token);
-		$send_snoopy->submit($submit,$post);
+		$addstar = $star?'&action=star':'';
+		$submit = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&lang=zh_CN{$addstar}&count=$perpage&timeline=$today&day=$day&frommsgid=$lastid&offset=$offset";
+		$send_snoopy->fetch($submit);
 		$this->log($send_snoopy->results);
-		$result = json_decode($send_snoopy->results,1);
-		if(!$result){
-			return false;
+		$result = $send_snoopy->results;
+		if (preg_match("/list : \((.*)\).msg_item/i", $result, $match)) {
+			$tmp = json_decode($match[1],true);
+			if($tmp && $tmp['msg_item'])
+				return $tmp['msg_item'];
 		}
-		return $result;
+		return false;
 	}
 	
 	/**
