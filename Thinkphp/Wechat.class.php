@@ -3,10 +3,12 @@
  *	微信公众平台PHP-SDK
  *  @author dodgepudding@gmail.com
  *  @link https://github.com/dodgepudding/wechat-php-sdk
- *  @version 1.0
+ *  @version 1.1
  *  usage:
  *   $options = array(
- *			'token'=>'tokenaccesskey' //填写你设定的key
+ *			'token'=>'tokenaccesskey', //填写你设定的key
+ *			'appid'=>'wxdk1234567890', //填写用于菜单等验证的app id
+ *			'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写对应密钥
  *		);
  *	 $weObj = new Wechat($options);
  *   $weObj->valid();
@@ -25,6 +27,18 @@
  *   		default:
  *   			$weObj->text("help info")->reply();
  *   }
+ *   
+ *   //获取菜单操作:
+ *   $menu = $weObj->getMenu();
+ *   //设置菜单
+ *   $newmenu =  array(
+ *   		"button"=>
+ *   			array(
+ *   				array('type'=>'click','name'=>'最新消息','key'=>'MENU_KEY_NEWS'),
+ *   				array('type'=>'view','name'=>'我要搜索','url'=>'http://www.baidu.com'),
+ *   				)
+  *  		);
+ *   $result = $weObj->createMenu($newmenu);
  */
 class Wechat
 {
@@ -36,16 +50,28 @@ class Wechat
 	const MSGTYPE_MUSIC = 'music';
 	const MSGTYPE_NEWS = 'news';
 	const MSGTYPE_VOICE = 'voice';
+	const AUTH_URL = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&';
+	const MENU_CREATE_URL = 'https://api.weixin.qq.com/cgi-bin/menu/create?';
+	const MENU_GET_URL = 'https://api.weixin.qq.com/cgi-bin/menu/get?';
+	const MENU_DELETE_URL = 'https://api.weixin.qq.com/cgi-bin/menu/delete?';
+	
 	private $token;
+	private $appid;
+	private $appsecret;
+	private $access_token;
 	private $_msg;
 	private $_funcflag = false;
 	private $_receive;
 	public $debug =  false;
+	public $errCode = 40001;
+	public $errMsg = "no access";
 	private $_logcallback;
 	
 	public function __construct($options)
 	{
 		$this->token = isset($options['token'])?$options['token']:'';
+		$this->appid = isset($options['appid'])?$options['appid']:'';
+		$this->appsecret = isset($options['appsecret'])?$options['appsecret']:'';
 		$this->debug = isset($options['debug'])?$options['debug']:false;
 		$this->_logcallback = isset($options['logcallback'])?$options['logcallback']:false;
 	}
@@ -420,6 +446,231 @@ class Wechat
 			return $xmldata;
 		else
 			echo $xmldata;
+	}
+	
+	/**
+	 * GET 请求
+	 * @param string $url
+	*/
+	private function http_get($url){
+		$oCurl = curl_init();
+		if(stripos($url,"https://")!==FALSE){
+			curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
+			curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, FALSE);
+		}
+		curl_setopt($oCurl, CURLOPT_URL, $url);
+		curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
+		$sContent = curl_exec($oCurl);
+		$aStatus = curl_getinfo($oCurl);
+		curl_close($oCurl);
+		if(intval($aStatus["http_code"])==200){
+			return $sContent;
+		}else{
+			return false;
+		}
+	}
+	
+	/**
+	 * POST 请求
+	 * @param string $url 
+	 * @param array $param 
+	 * @return string content
+	*/
+	private function http_post($url,$param){
+		$oCurl = curl_init();
+		if(stripos($url,"https://")!==FALSE){
+			curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
+			curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, false);
+		}
+		if (is_string($param)) {
+			$strPOST = $param;
+		} else {
+			$aPOST = array();
+			foreach($param as $key=>$val){
+				$aPOST[] = $key."=".urlencode($val);
+			}
+			$strPOST =  join("&", $aPOST);
+		}
+		curl_setopt($oCurl, CURLOPT_URL, $url);
+		curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt($oCurl, CURLOPT_POST,true);
+		curl_setopt($oCurl, CURLOPT_POSTFIELDS,$strPOST);
+		$sContent = curl_exec($oCurl);
+		$aStatus = curl_getinfo($oCurl);
+		curl_close($oCurl);
+		if(intval($aStatus["http_code"])==200){
+			return $sContent;
+		}else{
+			return false;
+		}
+	}
+	
+	/**
+	 * 通用auth验证方法，暂时仅用于菜单更新操作
+	 * @param string $appid
+	 * @param string $appsecret
+	 */
+	public function checkAuth($appid='',$appsecret=''){
+		if (!$appid || !$appsecret) {
+			$appid = $this->appid;
+			$appsecret = $this->appsecret;
+		}
+		$authname = 'wechat_access_token'.$appid;
+		if ($rs = S($authname))  {
+			$this->access_token = $rs;
+			return $rs;
+		}
+		$result = $this->http_get(self::AUTH_URL.'appid='.$appid.'&secret='.$appsecret);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			$this->access_token = $json['access_token'];
+			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
+			S($authname,$this->access_token,$expire);
+			return $this->access_token;
+		}
+		return false;
+	}
+	
+	/**
+	 * 微信api不支持中文转义的json结构
+	 * @param array $arr
+	 */
+	static function json_encode($arr) {
+		$parts = array ();
+		$is_list = false;
+		//Find out if the given array is a numerical array
+		$keys = array_keys ( $arr );
+		$max_length = count ( $arr ) - 1;
+		if (($keys [0] === 0) && ($keys [$max_length] === $max_length )) { //See if the first key is 0 and last key is length - 1
+			$is_list = true;
+			for($i = 0; $i < count ( $keys ); $i ++) { //See if each key correspondes to its position
+				if ($i != $keys [$i]) { //A key fails at position check.
+					$is_list = false; //It is an associative array.
+					break;
+				}
+			}
+		}
+		foreach ( $arr as $key => $value ) {
+			if (is_array ( $value )) { //Custom handling for arrays
+				if ($is_list)
+					$parts [] = my_json_encode ( $value ); /* :RECURSION: */
+				else
+					$parts [] = '"' . $key . '":' . my_json_encode ( $value ); /* :RECURSION: */
+			} else {
+				$str = '';
+				if (! $is_list)
+					$str = '"' . $key . '":';
+				//Custom handling for multiple data types
+				if (is_numeric ( $value ) && $value<2000000000)
+					$str .= $value; //Numbers
+				elseif ($value === false)
+				$str .= 'false'; //The booleans
+				elseif ($value === true)
+				$str .= 'true';
+				else
+					$str .= '"' . addslashes ( $value ) . '"'; //All other things
+				// :TODO: Is there any more datatype we should be in the lookout for? (Object?)
+				$parts [] = $str;
+			}
+		}
+		$json = implode ( ',', $parts );
+		if ($is_list)
+			return '[' . $json . ']'; //Return numerical JSON
+		return '{' . $json . '}'; //Return associative JSON
+	}
+
+	/**
+	 * 创建菜单
+	 * @param array $data 菜单数组数据
+	 * example:
+		  {
+		     "button":[
+		     {	
+		          "type":"click",
+		          "name":"今日歌曲",
+		          "key":"MENU_KEY_MUSIC"
+		      },
+		      {
+		           "type":"view",
+		           "name":"歌手简介",
+		           "url":"http://www.qq.com/"
+		      },
+		      {
+		           "name":"菜单",
+		           "sub_button":[
+		            {
+		               "type":"click",
+		               "name":"hello word",
+		               "key":"MENU_KEY_MENU"
+		            },
+		            {
+		               "type":"click",
+		               "name":"赞一下我们",
+		               "key":"MENU_KEY_GOOD"
+		            }]
+		       }]
+		 }
+	 */
+	public function createMenu($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::MENU_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取菜单
+	 * @return array('menu'=>array(....s))
+	 */
+	public function getMenu(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::MENU_GET_URL.'access_token='.$this->access_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 删除菜单
+	 * @return boolean
+	 */
+	public function deleteMenu(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::MENU_DELETE_URL.'access_token='.$this->access_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 	
 }
