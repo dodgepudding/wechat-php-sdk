@@ -357,7 +357,7 @@ class Wechatext
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&lang=zh_CN&count=50&token=".$this->_token;
 		$lastid = $lastid===0 ? '':$lastid;
 		$addstar = $star?'&action=star':'';
-		$submit = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&lang=zh_CN{$addstar}&count=$perpage&timeline=$today&day=$day&frommsgid=$lastid&offset=$offset";
+		$submit = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&lang=zh_CN{$addstar}&count=$perpage&timeline=$today&day=$day&frommsgid=$lastid&offset=$offset&token=".$this->_token;
 		$send_snoopy->fetch($submit);
 		$this->log($send_snoopy->results);
 		$result = $send_snoopy->results;
