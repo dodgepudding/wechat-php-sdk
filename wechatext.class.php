@@ -85,7 +85,7 @@ class Wechatext
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=".$pagesize."&pageidx=".$page."&type=0&groupid=0&lang=zh_CN&token=".$this->_token;
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$submit = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=".$pagesize."&pageidx=".$page."&type=0&groupid=0&lang=zh_CN&token=".$this->_token;
-		$send_snoopy->submit($submit,$post);
+		$send_snoopy->fetch($submit);
 		$result = $send_snoopy->results;
 		preg_match("/friendsList : \((.*)\)\.contacts/is",$result,$matches);
 		
