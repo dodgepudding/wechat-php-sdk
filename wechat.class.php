@@ -531,7 +531,7 @@ class Wechat
 	 * 微信api不支持中文转义的json结构
 	 * @param array $arr
 	 */
-	static function json_encode($arr) {
+static function json_encode($arr) {
 		$parts = array ();
 		$is_list = false;
 		//Find out if the given array is a numerical array
@@ -549,9 +549,9 @@ class Wechat
 		foreach ( $arr as $key => $value ) {
 			if (is_array ( $value )) { //Custom handling for arrays
 				if ($is_list)
-					$parts [] = my_json_encode ( $value ); /* :RECURSION: */
+					$parts [] = self::json_encode ( $value ); /* :RECURSION: */
 				else
-					$parts [] = '"' . $key . '":' . my_json_encode ( $value ); /* :RECURSION: */
+					$parts [] = '"' . $key . '":' . self::json_encode ( $value ); /* :RECURSION: */
 			} else {
 				$str = '';
 				if (! $is_list)
