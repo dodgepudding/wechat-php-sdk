@@ -50,10 +50,13 @@ class Wechat
 	const MSGTYPE_MUSIC = 'music';
 	const MSGTYPE_NEWS = 'news';
 	const MSGTYPE_VOICE = 'voice';
-	const AUTH_URL = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&';
-	const MENU_CREATE_URL = 'https://api.weixin.qq.com/cgi-bin/menu/create?';
-	const MENU_GET_URL = 'https://api.weixin.qq.com/cgi-bin/menu/get?';
-	const MENU_DELETE_URL = 'https://api.weixin.qq.com/cgi-bin/menu/delete?';
+	const MSGTYPE_VIDEO = 'video';
+	const API_URL_PREFIX = 'https://api.weixin.qq.com/cgi-bin';
+	const AUTH_URL = '/token?grant_type=client_credential&';
+	const MENU_CREATE_URL = '/menu/create?';
+	const MENU_GET_URL = '/menu/get?';
+	const MENU_DELETE_URL = '/menu/delete?';
+	const MEDIA_GET_URL = '/media/get?';
 	
 	private $token;
 	private $appid;
@@ -179,6 +182,14 @@ class Wechat
 	}
 	
 	/**
+	 * 获取微信服务器发来的信息
+	 */
+	public function getRevData()
+	{
+		return $this->_receive;
+	}
+	
+	/**
 	 * 获取消息发送者
 	 */
 	public function getRevFrom() {
@@ -234,7 +245,9 @@ class Wechat
 	public function getRevContent(){
 		if (isset($this->_receive['Content']))
 			return $this->_receive['Content'];
-		else 
+		else if (isset($this->_receive['Recognition'])) //获取语音识别文字内容，需申请开通
+			return $this->_receive['Recognition'];
+		else
 			return false;
 	}
 	
@@ -302,6 +315,19 @@ class Wechat
 		} else 
 			return false;
 	}	
+	
+	/**
+	 * 获取接收视频推送
+	 */
+	public function getRevVideo(){
+		if (isset($this->_receive['MediaId'])){
+			return array(
+					'mediaid'=>$this->_receive['MediaId'],
+					'thumbmediaid'=>$this->_receive['ThumbMediaId']
+			);
+		} else
+			return false;
+	}
 	
 	public static function xmlSafeStr($str)
 	{   
@@ -520,7 +546,7 @@ class Wechat
 			$this->access_token = $rs;
 			return $rs;
 		}
-		$result = $this->http_get(self::AUTH_URL.'appid='.$appid.'&secret='.$appsecret);
+		$result = $this->http_get(self::API_URL_PREFIX.self::AUTH_URL.'appid='.$appid.'&secret='.$appsecret);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -538,10 +564,21 @@ class Wechat
 	}
 	
 	/**
+	 * 删除验证数据
+	 * @param string $appid
+	 */
+	public function resetAuth($appid=''){
+		$this->access_token = '';
+		$authname = 'wechat_access_token'.$appid;
+		S($authname,null);
+		return true;
+	}
+	
+	/**
 	 * 微信api不支持中文转义的json结构
 	 * @param array $arr
 	 */
-static function json_encode($arr) {
+	static function json_encode($arr) {
 		$parts = array ();
 		$is_list = false;
 		//Find out if the given array is a numerical array
@@ -619,7 +656,7 @@ static function json_encode($arr) {
 	 */
 	public function createMenu($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::MENU_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+		$result = $this->http_post(self::API_URL_PREFIX.self::MENU_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -639,7 +676,7 @@ static function json_encode($arr) {
 	 */
 	public function getMenu(){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::MENU_GET_URL.'access_token='.$this->access_token);
+		$result = $this->http_get(self::API_URL_PREFIX.self::MENU_GET_URL.'access_token='.$this->access_token);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -659,7 +696,7 @@ static function json_encode($arr) {
 	 */
 	public function deleteMenu(){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::MENU_DELETE_URL.'access_token='.$this->access_token);
+		$result = $this->http_get(self::API_URL_PREFIX.self::MENU_DELETE_URL.'access_token='.$this->access_token);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -673,4 +710,24 @@ static function json_encode($arr) {
 		return false;
 	}
 	
+	/**
+	 * 根据媒体文件ID获取媒体文件
+	 * @param string $media_id 媒体文件id
+	 * @return raw data
+	 */
+	public function getMedia($media_id){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::MEDIA_GET_URL.'access_token='.$this->access_token).'&media_id='.$media_id;
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $result;
+		}
+		return false;
+	}
 }
