@@ -9,6 +9,7 @@
  *  sendNews($id,$msgid) 发送图文消息
  *  getNewsList($page,$pagesize) 获取图文信息列表
  *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
+ *  addPreview($title,$author,$summary,$content,$photoid,$srcurl='')   创建新的图文信息 
  *  getFileList($type,$page,$pagesize) 获取素材库文件列表
  *  sendImage($id,$fid) 发送图片消息
  *  sendAudio($id,$fid) 发送音频消息
@@ -161,6 +162,51 @@ class Wechatext
 			return $matches[1];
 		}
 		return false;
+	}
+	
+	/**
+	 * 创建图文消息
+	 * @param array $title 标题
+	 * @param array $summary 摘要
+	 * @param array $content 内容
+	 * @param array $photoid 素材库里的图片id(可通过uploadFile上传后获取)
+	 * @param array $srcurl 原文链接
+	 * @return json
+	 */
+	public function addPreview($title,$author,$summary,$content,$photoid,$srcurl='') {
+		$send_snoopy = new Snoopy;
+		$send_snoopy->referer = 'https://mp.weixin.qq.com/cgi-bin/operate_appmsg?lang=zh_CN&sub=edit&t=wxm-appmsgs-edit-new&type=10&subtype=3&token='.$this->_token;
+		
+		$submit = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?lang=zh_CN&t=ajax-response&sub=create&token=".$this->_token;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		
+		$send_snoopy->set_submit_normal();
+		$post = array(
+				'ajax'=>1,
+				'AppMsgId'=>'',				
+				'error'=>'false',
+			);
+		if (count($title)==count($author)&&count($title)==count($summary)&&count($title)==count($content)&&count($title)==count($photoid))
+		{
+			$i = 0;
+			foreach($title as $v) {
+				$post['title'.$i] = $title[$i];
+				$post['author'.$i] = $author[$i];
+				$post['digest'.$i] = $summary[$i];
+				$post['content'.$i] = $content[$i];
+				$post['fileid'.$i] = $photoid[$i];
+				if ($srcurl[$i]) $post['srcurl'.$i] = $srcurl[$i];
+				
+				$i++;
+				}
+		}
+		$post['count'] = $i;
+		$post['token'] = $this->_token;
+		$send_snoopy->submit($submit,$post);
+		$tmp = $send_snoopy->results;
+		$this->log('step2:'.$tmp);
+		$json = json_decode($tmp,true);
+		return $json;
 	}
 	
 	/**
