@@ -195,7 +195,7 @@ class Wechatext
 				$post['digest'.$i] = $summary[$i];
 				$post['content'.$i] = $content[$i];
 				$post['fileid'.$i] = $photoid[$i];
-				if ($srcurl[$i]) $post['srcurl'.$i] = $srcurl[$i];
+				if ($srcurl[$i]) $post['sourceurl'.$i] = $srcurl[$i];
 				
 				$i++;
 				}
