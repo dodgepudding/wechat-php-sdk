@@ -64,7 +64,7 @@ class Wechatext
 		$post['token'] = $this->_token;
 		$post['content'] = $content;
 		$post['ajax'] = 1;
-        $send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/singlemsgpage?fromfakeid={$id}&msgid=&source=&count=20&t=wxm-singlechat&lang=zh_CN";
+        $send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&tofakeid=$id&token={$this->_token}&lang=zh_CN";
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$submit = "http://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response";
 		$send_snoopy->submit($submit,$post);
