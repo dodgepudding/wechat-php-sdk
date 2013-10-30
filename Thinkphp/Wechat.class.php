@@ -193,7 +193,7 @@ class Wechat
 	 * 获取消息发送者
 	 */
 	public function getRevFrom() {
-		if ($this->_receive)
+		if (isset($this->_receive))
 			return $this->_receive['FromUserName'];
 		else 
 			return false;
@@ -203,7 +203,7 @@ class Wechat
 	 * 获取消息接受者
 	 */
 	public function getRevTo() {
-		if ($this->_receive)
+		if (isset($this->_receive))
 			return $this->_receive['ToUserName'];
 		else 
 			return false;
