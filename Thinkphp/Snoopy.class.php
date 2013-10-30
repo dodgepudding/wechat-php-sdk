@@ -1099,8 +1099,8 @@ class Snoopy
 		// no framed content
 		else
 			$this->results = $results;
-		if ($headerfile)
-			unlink("$headerfile");
+		if (isset($headerfile) && file_exists($headerfile))
+			unlink($headerfile);
 
 		return true;
 	}
