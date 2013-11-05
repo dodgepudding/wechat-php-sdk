@@ -3,12 +3,12 @@
  *	微信公众平台PHP-SDK
  *  @author dodgepudding@gmail.com
  *  @link https://github.com/dodgepudding/wechat-php-sdk
- *  @version 1.1
+ *  @version 1.2
  *  usage:
  *   $options = array(
  *			'token'=>'tokenaccesskey', //填写你设定的key
- *			'appid'=>'wxdk1234567890', //填写用于菜单等验证的app id
- *			'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写对应密钥
+ *			'appid'=>'wxdk1234567890', //填写高级调用功能的app id
+ *			'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写高级调用功能的密钥
  *		);
  *	 $weObj = new Wechat($options);
  *   $weObj->valid();
@@ -57,6 +57,16 @@ class Wechat
 	const MENU_GET_URL = '/menu/get?';
 	const MENU_DELETE_URL = '/menu/delete?';
 	const MEDIA_GET_URL = '/media/get?';
+	const QRCODE_CREATE_URL='/qrcode/create?';
+	const QR_SCENE = 0;
+	const QR_LIMIT_SCENE = 1;
+	const QRCODE_IMG_URL='https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=';
+	const USER_GET_URL='/user/get?';
+	const USER_INFO_URL='/user/info?';
+	const GROUP_GET_URL='/groups/get?';
+	const GROUP_CREATE_URL='/groups/create?';
+	const GROUP_UPDATE_URL='/groups/update?';
+	const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
 	
 	private $token;
 	private $appid;
@@ -717,7 +727,7 @@ class Wechat
 	 */
 	public function getMedia($media_id){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::MEDIA_GET_URL.'access_token='.$this->access_token).'&media_id='.$media_id;
+		$result = $this->http_get(self::API_URL_PREFIX.self::MEDIA_GET_URL.'access_token='.$this->access_token.'&media_id='.$media_id);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -727,6 +737,179 @@ class Wechat
 				return false;
 			}
 			return $result;
+		}
+		return false;
+	}
+
+	/**
+	 * 创建二维码ticket
+	 * @param int $scene_id 自定义追踪id
+	 * @param int $type 0:临时二维码；1:永久二维码(此时expire参数无效)
+	 * @param int $expire 临时二维码有效期，最大为1800秒
+	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>1800)
+	 */
+	public function getQRCode($scene_id,$type=0,$expire=1800){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$data = array(
+				'action_name'=>$type?"QR_LIMIT_SCENE":"QR_SCENE",
+				'expire_seconds'=>$expire,
+				'action_info'=>array('scene'=>array('scene_id'=>$scene_id))
+		);
+		$result = $this->http_post(self::API_URL_PREFIX.self::QRCODE_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取二维码图片
+	 * @param string $ticket 传入由getQRCode方法生成的ticket参数
+	 * @return string url 返回http地址
+	 */
+	public function getQRUrl($ticket) {
+		return self::QRCODE_IMG_URL.$ticket;
+	}
+	
+	/**
+	 * 批量获取关注用户列表
+	 * @param unknown $next_openid
+	 */
+	public function getUserList($next_openid=''){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::USER_GET_URL.'access_token='.$this->access_token.'&next_openid='.$next_openid);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $result;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取关注者详细信息
+	 * @param string $openid
+	 * @return array
+	 */
+	public function getUserInfo($openid){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::USER_INFO_URL.'access_token='.$this->access_token.'&openid='.$openid);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $result;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取用户分组列表
+	 * @return boolean|array
+	 */
+	public function getGroup(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::GROUP_GET_URL.'access_token='.$this->access_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $result;
+		}
+		return false;
+	}
+	
+	/**
+	 * 新增自定分组
+	 * @param string $name 分组名称
+	 * @return boolean|array
+	 */
+	public function createGroup($name){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$data = array(
+				'group'=>array('name'=>$name)
+		);
+		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 更改分组名称
+	 * @param int $groupid 分组id
+	 * @param string $name 分组名称
+	 * @return boolean|array
+	 */
+	public function updateGroup($groupid,$name){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$data = array(
+				'group'=>array('id'=>$groupid,'name'=>$name)
+		);
+		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 移动用户分组
+	 * @param int $groupid 分组id
+	 * @param string $openid 用户openid
+	 * @return boolean|array
+	 */
+	public function updateGroupMembers($groupid,$openid){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$data = array(
+				'openid'=>$openid,
+				'to_groupid'=>$groupid
+		);
+		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_MEMBER_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
 		}
 		return false;
 	}

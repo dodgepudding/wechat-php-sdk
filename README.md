@@ -7,11 +7,25 @@ weixin developer SDK.
 使用详解
 -------
 使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
-http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A3%E6%8C%87%E5%8D%97  
+http://mp.weixin.qq.com/wiki/index.php?title=%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%97
 
 1. wechat.class.php  
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
-
+新增Auth高级权限类方法:   
+ *  checkAuth($appid,$appsecret) 此处传入公众后台高级接口提供的appid和appsecret, 函数将返回access_token操作令牌
+ *  createMenu($data) 创建菜单 $data菜单结构详见 http://mp.weixin.qq.com/wiki/index.php?title=%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8F%9C%E5%8D%95%E5%88%9B%E5%BB%BA%E6%8E%A5%E5%8F%A3 
+ *  getMenu() 获取菜单 
+ *  deleteMenu() 删除菜单 
+ *  getMedia() 获取接收到的音频、视频媒体文件 
+ *  getQRCode($scene_id,$type=0,$expire=1800) 获取推广二维码ticket字串 
+ *  getQRUrl($ticket) 获取二维码图片地址
+ *  getUserList($next_openid) 批量获取关注用户列表 
+ *  getUserInfo($openid) 获取关注者详细信息 
+ *  getGroup() 获取用户分组列表 
+ *  createGroup($name) 新增自定分组 
+ *  updateGroup($groupid,$name) 更改分组名称 
+ *  updateGroupMembers($groupid,$openid) 移动用户分组 
+ 
 2. wechatext.class.php  
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
 类方法里提及的用户id在接口返回结构里表述为FakeId, 属同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  
@@ -20,6 +34,8 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A
 类主要方法:
  *  send($id,$content) 向某用户id发送微信文字信息 
  *  sendNews($id,$msgid) 发送图文消息, 可通过getNewsList获取$msgid
+ *  getUserList($page,$pagesize,$groupid) 获取用户信息
+ *  getGroupList($page,$pagesize) 获取群组信息
  *  getNewsList($page,$pagesize) 获取图文信息列表 
  *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
  *  getFileList($type,$page,$pagesize) 获取素材库文件列表
@@ -44,6 +60,25 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%B6%88%E6%81%AF%E6%8E%A5%E5%8F%A
  *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息  
  *  get_avatar($url) 获取用户头像图片数据  
  *  logout() 注销登陆  
+
+4. wechat.js
+微信内嵌网页特殊功能js调用：
+ * WeixinJS.hideOptionMenu() 隐藏右上角按钮
+ * WeixinJS.hideToolbar() 隐藏工具栏
+ * 通过定义全局变量dataForWeixin配置触发分享的内容：
+ ```javascript
+ var dataForWeixin={
+	   appId:"",
+	   MsgImg:"消息图片路径",
+	   TLImg:"时间线图路径",
+	   url:"分享url路径",
+	   title:"标题",
+	   desc:"描述",
+	   fakeid:"",
+	   callback:function(){}
+	};
+ ```
+ 
 
 官方Wechat调用示例：
 --------  
