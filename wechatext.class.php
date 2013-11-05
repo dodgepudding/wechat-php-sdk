@@ -102,18 +102,16 @@ class Wechatext
 	 */
 	public function getNewsList($page,$pagesize=10) {
 		$send_snoopy = new Snoopy;
-		$t = time().strval(mt_rand(100,999));
-		$type=10;
-		$post = array();
-		$post['token'] = $this->_token;
-		$post['ajax'] = 1;
+		$type=10;		
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-upload&lang=zh_CN&type=2&formId=1";
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$submit = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?token=".$this->_token."&lang=zh_CN&sub=list&t=ajax-appmsgs-fileselect&type=$type&r=".str_replace(' ','',microtime())."&pageIdx=$page&pagesize=$pagesize&subtype=3&formid=file_from_".$t;
-		$send_snoopy->submit($submit,$post);
-		$result = $send_snoopy->results;
-		$this->log('newslist:'.$result);
-		return json_decode($result,true);
+		$submit = "https://mp.weixin.qq.com/cgi-bin/appmsg?token=".$this->_token."&lang=zh_CN&action=list&t=media/appmsg_list&type=$type&begin=$page&count=$pagesize";
+		$send_snoopy->submit($submit);
+		$result = $send_snoopy->results;		
+		$reg = "/wx\\.cgiData = (.*?)wx\\.cgiData\\.count/siU";
+		preg_match($reg, $result, $matches);		
+		$this->log('newsList:'.$matches[1]);
+		return json_decode(trim($matches[1], " \n\r\t;"), true);
 	}
 	
 	/**
