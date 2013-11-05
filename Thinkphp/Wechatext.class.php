@@ -5,7 +5,8 @@
  *  注: 用户id为通过getMsg()方法获取的FakeId值
  *  主要实现如下功能:
  *  send($id,$content) 向某用户id发送微信文字信息
- *  getUserlist($page,$pagesize) 获取用户信息
+ *  getUserList($page,$pagesize,$groupid) 获取用户信息
+ *  getGroupList($page,$pagesize) 获取群组信息
  *  sendNews($id,$msgid) 发送图文消息
  *  getNewsList($page,$pagesize) 获取图文信息列表
  *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
@@ -76,22 +77,47 @@ class Wechatext
 	 * 获取用户列表列表
 	 * @param $page 页码(从0开始)
 	 * @param $pagesize 每页大小
-	 * @return array
+	 * @param $groupid 分组id
+	 * @return array ({contacts:[{id:12345667,nick_name:"昵称",remark_name:"备注名",group_id:0},{}....]})
 	 */
-	function getUserlist($page=0,$pagesize=10){
-	
+	function getUserList($page=0,$pagesize=10,$groupid=0){
 		$send_snoopy = new Snoopy;
 		$t = time().strval(mt_rand(100,999));
-		$type=10;
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=".$pagesize."&pageidx=".$page."&type=0&groupid=0&lang=zh_CN&token=".$this->_token;
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$submit = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=".$pagesize."&pageidx=".$page."&type=0&groupid=0&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=".$pagesize."&pageidx=".$page."&type=0&groupid=$groupid&lang=zh_CN&f=json&token=".$this->_token;
 		$send_snoopy->fetch($submit);
 		$result = $send_snoopy->results;
-		preg_match("/friendsList : \((.*)\)\.contacts/is",$result,$matches);
+		$this->log('userlist:'.$result);
+		$json = json_decode($result,true);
+		if (isset($json['contact_list'])) {
+			$json = json_decode($json['contact_list'],true);
+			if (isset($json['contacts']))
+				return $json['contacts'];
+		}
+		return false;
+	}
 	
-		$this->log('userlist:'.serialize($matches[0]));
-		return json_decode($matches[1],true);
+	/**
+	 * 获取分组列表
+	 * 
+	 */
+	function getGroupList(){
+		$send_snoopy = new Snoopy;
+		$t = time().strval(mt_rand(100,999));
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=10&pageidx=0&type=0&groupid=0&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=10&pageidx=0&type=0&groupid=0&lang=zh_CN&f=json&token=".$this->_token;
+		$send_snoopy->fetch($submit);
+		$result = $send_snoopy->results;
+		$this->log('userlist:'.$result);
+		$json = json_decode($result,true);
+		if (isset($json['group_list'])){
+			$json = json_decode($json['group_list'],true);
+			if (isset($json['groups']))
+				return $json['groups'];
+		}
+		return false;
 	}
 		
 	/**
@@ -104,16 +130,18 @@ class Wechatext
 		$send_snoopy = new Snoopy;
 		$t = time().strval(mt_rand(100,999));
 		$type=10;
-		$post = array();
-		$post['token'] = $this->_token;
-		$post['ajax'] = 1;
-		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-upload&lang=zh_CN&type=2&formId=1";
+		$begin = $page*$pagesize;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=".$this->_token."&lang=zh_CN";
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$submit = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?token=".$this->_token."&lang=zh_CN&sub=list&t=ajax-appmsgs-fileselect&type=$type&r=".str_replace(' ','',microtime())."&pageIdx=$page&pagesize=$pagesize&subtype=3&formid=file_from_".$t;
-		$send_snoopy->submit($submit,$post);
+		$submit = "https://mp.weixin.qq.com/cgi-bin/appmsg?token=".$this->_token."&lang=zh_CN&type=$type&action=list&begin=$begin&count=$pagesize&f=json&random=0.".$t;
+		$send_snoopy->fetch($submit);
 		$result = $send_snoopy->results;
 		$this->log('newslist:'.$result);
-		return json_decode($result,true);
+		$json = json_decode($result,true);
+		if (isset($json['app_msg_info'])) {
+			return $json['app_msg_info'];
+		} 
+		return false;
 	}
 	
 	/**
@@ -203,16 +231,18 @@ class Wechatext
 	public function getFileList($type,$page,$pagesize=10) {
 		$send_snoopy = new Snoopy;
 		$t = time().strval(mt_rand(100,999));
-		$post = array();
-		$post['token'] = $this->_token;
-		$post['ajax'] = 1;
-		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-upload&lang=zh_CN&type=2&formId=1";
+		$begin = $page*$pagesize;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=".$this->_token."&lang=zh_CN";
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$submit = "https://mp.weixin.qq.com/cgi-bin/filemanagepage?token=".$this->_token."&lang=zh_CN&t=ajax-fileselect&type=$type&r=".str_replace(' ','',microtime())."&pageIdx=$page&pagesize=$pagesize&formid=file_from_".$t;
-		$send_snoopy->submit($submit,$post);
+		$submit = "https://mp.weixin.qq.com/cgi-bin/filepage?token=".$this->_token."&lang=zh_CN&type=$type&random=0.".$t."&begin=$begin&count=$pagesize&f=json";
+		$send_snoopy->fetch($submit);
 		$result = $send_snoopy->results;
 		$this->log('filelist:'.$result);
-		return json_decode($result,true);
+		$json = json_decode($result,true);
+		if (isset($json['page_info']))
+			return $json['page_info'];
+		else
+			return false;
 	}
 		
 	/**
@@ -263,8 +293,12 @@ class Wechatext
 	
 		$send_snoopy->set_submit_normal();
 		$post = array(
+				'token'=>$this->_token,
+				'type'=>10,
+				'lang'=>'zh_CN',
+				'sub'=>'create',
 				'ajax'=>1,
-				'AppMsgId'=>'',
+				'AppMsgId'=>'',				
 				'error'=>'false',
 		);
 		if (count($title)==count($author)&&count($title)==count($summary)&&count($title)==count($content)&&count($title)==count($photoid))
@@ -292,7 +326,7 @@ class Wechatext
 		
 	/**
 	 * 发送预览图文消息
-	 * @param string $account 账户名称
+	 * @param string $account 账户名称(user_name)
 	 * @param string $title 标题
 	 * @param string $summary 摘要
 	 * @param string $content 内容
@@ -321,7 +355,7 @@ class Wechatext
 		$post['token'] = $this->_token;
 		$send_snoopy->submit($submit,$post);
 		$tmp = $send_snoopy->results;
-		$this->log('step2:'.$tmp);
+		$this->log('sendpreview:'.$tmp);
 		$json = json_decode($tmp,true);
 		return $json;
 	}
@@ -329,22 +363,23 @@ class Wechatext
 	/**
 	 * 获取用户的信息
 	 * @param  string $id 用户的uid(即FakeId)
-	 * @return [type]     [description]
+	 * @return array  {fake_id:100001,nick_name:'昵称',user_name:'用户名',signature:'签名档',country:'中国',province:'广东',city:'广州',gender:'1',group_id:'0'},groups:{[id:0,name:'未分组',cnt:20]}
 	 */
 	public function getInfo($id)
 	{
 		$send_snoopy = new Snoopy; 
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$send_snoopy->referer = "http://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
-		$submit = "https://mp.weixin.qq.com/cgi-bin/getcontactinfo?t=ajax-getcontactinfo&lang=zh_CN&fakeid=".$id;
-		$post = array('ajax'=>1,'token'=>$this->_token);
+		$t = time().strval(mt_rand(100,999));
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/getcontactinfo";
+		$post = array('ajax'=>1,'lang'=>'zh_CN','random'=>'0.'.$t,'token'=>$this->_token,'t'=>'ajax-getcontactinfo','fakeid'=>$id);
 		$send_snoopy->submit($submit,$post);
 		$this->log($send_snoopy->results);
-		$result = json_decode($send_snoopy->results,1);
-		if(!$result){
-			$this->login();
+		$result = json_decode($send_snoopy->results,true);
+		if(isset($result['contact_info'])){
+			return $result['contact_info'];
 		}
-		return $result;
+		return false;
 	}
 	
 	/**
@@ -375,14 +410,15 @@ class Wechatext
 		$send_snoopy = new Snoopy;
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&lang=zh_CN&token=".$this->_token;
-		$submit = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&f=json&count=20&day=7&lang=zh_CN&token=".$this->_token;
 		$send_snoopy->fetch($submit);
 		$this->log($send_snoopy->results);
 		$result = $send_snoopy->results;
-		if (preg_match("/list : \((.*)\).msg_item/i", $result, $match)) {
-			$tmp = json_decode($match[1],true);
-			if($tmp && $tmp['msg_item'])
-				return $tmp['msg_item'][0];
+		$json = json_decode($result,true);
+		if (isset($json['msg_items'])) {
+			$json = json_decode($json['msg_items'],true);
+			if(isset($json['msg_item']))
+				return array_shift($json['msg_item']);
 		}
 		return false;
 	}
@@ -392,25 +428,26 @@ class Wechatext
 	 * @param $lastid 传入最后的消息id编号,为0则从最新一条起倒序获取
 	 * @param $offset lastid起算第一条的偏移量
 	 * @param $perpage 每页获取多少条
-	 * @param $day 最近几天消息(0:今天,1:昨天,2:前天,3:五天内)
+	 * @param $day 最近几天消息(0:今天,1:昨天,2:前天,3:更早,7:五天内)
 	 * @param $today 是否只显示今天的消息, 与$day参数不能同时大于0
 	 * @param $star 是否星标组信息
 	 * @return array[] 同getTopMsg()返回的字段结构相同
 	 */
-	public function getMsg($lastid=0,$offset=0,$perpage=20,$day=0,$today=0,$star=0){
+	public function getMsg($lastid=0,$offset=0,$perpage=20,$day=7,$today=0,$star=0){
 		$send_snoopy = new Snoopy; 
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&lang=zh_CN&count=50&token=".$this->_token;
 		$lastid = $lastid===0 ? '':$lastid;
 		$addstar = $star?'&action=star':'';
-		$submit = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&lang=zh_CN{$addstar}&count=$perpage&timeline=$today&day=$day&frommsgid=$lastid&offset=$offset&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&f=json&lang=zh_CN{$addstar}&count=$perpage&timeline=$today&day=$day&frommsgid=$lastid&offset=$offset&token=".$this->_token;
 		$send_snoopy->fetch($submit);
 		$this->log($send_snoopy->results);
 		$result = $send_snoopy->results;
-		if (preg_match("/list : \((.*)\).msg_item/i", $result, $match)) {
-			$tmp = json_decode($match[1],true);
-			if($tmp && $tmp['msg_item'])
-				return $tmp['msg_item'];
+		$json = json_decode($result,true);
+		if (isset($json['msg_items'])) {
+			$json = json_decode($json['msg_items'],true);
+			if(isset($json['msg_item']))
+				return $json['msg_item'];
 		}
 		return false;
 	}
