@@ -132,7 +132,7 @@ switch($type) {
 		var_dump($topmsg);
 		// 主动回复消息
 		if ($topmsg && $topmsg['has_reply']==0)
-		$wechat->send($topmsg['fakeId'],'hi '.$topmsg['nick_name'].',rev:'.$topmsg['content']);	
+		$wechat->send($topmsg['fakeid'],'hi '.$topmsg['nick_name'].',rev:'.$topmsg['content']);	
 	}
 ```
 
