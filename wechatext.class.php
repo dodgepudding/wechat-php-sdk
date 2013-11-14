@@ -82,6 +82,7 @@ class Wechatext
 	 * @return array ({contacts:[{id:12345667,nick_name:"昵称",remark_name:"备注名",group_id:0},{}....]})
 	 */
 	function getUserList($page=0,$pagesize=10,$groupid=0){
+		ini_set('max_execution_time',6000); //增加个执行时间
 		$send_snoopy = new Snoopy;
 		$t = time().strval(mt_rand(100,999));
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=".$pagesize."&pageidx=".$page."&type=0&groupid=0&lang=zh_CN&token=".$this->_token;
@@ -378,6 +379,9 @@ class Wechatext
 		$this->log($send_snoopy->results);
 		$result = json_decode($send_snoopy->results,true);
 		if(isset($result['contact_info'])){
+			//增加个获得小头像
+			$himg_url = "https://mp.weixin.qq.com/cgi-bin/getheadimg?fakeid=".$id."&token=".$this->_token."&lang=zh_CN";
+                        $result['contact_info']['headimgurl'] = $himg_url;
 			return $result['contact_info'];
 		}
 		return false;
