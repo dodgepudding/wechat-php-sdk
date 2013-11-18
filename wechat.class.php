@@ -78,6 +78,7 @@ class Wechat
 	public $errCode = 40001;
 	public $errMsg = "no access";
 	private $_logcallback;
+	private $is_logged = false;
 	
 	public function __construct($options)
 	{
@@ -178,7 +179,11 @@ class Wechat
 	public function getRev()
 	{
 		$postStr = file_get_contents("php://input");
-		$this->log($postStr);
+		
+		if (!$this->is_logged) {
+			$this->log($postStr);
+			$this->is_logged = true;
+		}
 		if (!empty($postStr)) {
 			$this->_receive = (array)simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
 		}
