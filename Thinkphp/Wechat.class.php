@@ -183,6 +183,7 @@ class Wechat
      */
 	public function getRev()
 	{
+		if ($this->_receive) return $this;
 		$postStr = file_get_contents("php://input");
 		$this->log($postStr);
 		if (!empty($postStr)) {
@@ -203,7 +204,7 @@ class Wechat
 	 * 获取消息发送者
 	 */
 	public function getRevFrom() {
-		if (isset($this->_receive))
+		if (isset($this->_receive['FromUserName']))
 			return $this->_receive['FromUserName'];
 		else 
 			return false;
@@ -213,7 +214,7 @@ class Wechat
 	 * 获取消息接受者
 	 */
 	public function getRevTo() {
-		if (isset($this->_receive))
+		if (isset($this->_receive['ToUserName']))
 			return $this->_receive['ToUserName'];
 		else 
 			return false;
