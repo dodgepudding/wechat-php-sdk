@@ -67,11 +67,18 @@ class Wechat
 	const GROUP_CREATE_URL='/groups/create?';
 	const GROUP_UPDATE_URL='/groups/update?';
 	const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
+	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
+	const OAUTH_AUTHORIZE_URL = '/authorize?';
+	const OAUTH_TOKEN_PREFIX = 'https://api.weixin.qq.com/sns/oauth2';
+	const OAUTH_TOKEN_URL = '/access_token?';
+	const OAUTH_REFRESH_URL = '/refresh_token?';
+	const OAUTH_USERINFO_URL = '/userinfo?';
 	
 	private $token;
 	private $appid;
 	private $appsecret;
 	private $access_token;
+	private $user_token;
 	private $_msg;
 	private $_funcflag = false;
 	private $_receive;
@@ -902,6 +909,79 @@ class Wechat
 				'to_groupid'=>$groupid
 		);
 		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_MEMBER_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * oauth 授权跳转接口
+	 * @param string $callback 回调URI
+	 * @return string
+	 */
+	public function getOauthRedirect($callback,$state='',$scope='snsapi_userinfo'){
+		return self::OAUTH_PREFIX.self::OAUTH_AUTHORIZE_URL.'appid='.$this->appid.'&redirect_uri='.urlencode($callback).'&response_type=code&scope='.$scope.'&state='.$state.'#wechat_redirect';
+	}
+	
+	/*
+	 * 通过code获取Access Token
+	* @return array {access_token,expires_in,refresh_token,openid,scope}
+	*/
+	public function getOauthAccessToken(){
+		$code = isset($_GET['code'])?$_GET['code']:'';
+		if (!$code) return false;
+		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_TOKEN_URL.'appid='.$this->appid.'&secret='.$this->appsecret.'&code='.$code.'&grant_type=authorization_code');
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			$this->user_token = $json['access_token'];
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 刷新access token并续期
+	 * @param string $refresh_token
+	 * @return boolean|mixed
+	 */
+	public function getOauthRefreshToken($refresh_token){
+		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_REFRESH_URL.'appid='.$this->appid.'&grant_type=refresh_token&refresh_token='.$refresh_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			$this->user_token = $json['access_token'];
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取授权后的用户资料
+	 * @param string $access_token
+	 * @param string $openid
+	 * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege}
+	 */
+	public function getOauthUserinfo($access_token,$openid){
+		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
 		if ($result)
 		{
 			$json = json_decode($result,true);
