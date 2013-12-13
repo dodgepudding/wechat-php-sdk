@@ -734,7 +734,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $result;
+			return $json;
 		}
 		return false;
 	}	
@@ -791,7 +791,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $result;
+			return $json;
 		}
 		return false;
 	}
@@ -812,7 +812,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $result;
+			return $json;
 		}
 		return false;
 	}
@@ -832,7 +832,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $result;
+			return $json;
 		}
 		return false;
 	}
