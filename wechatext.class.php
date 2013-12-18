@@ -146,6 +146,28 @@ class Wechatext
 	}
 	
 	/**
+	 * 获取与指定用户的对话内容
+	 * @param  $fakeid
+	 * @return array
+	 */
+	public function getDialogMsg($fakeid) {
+		$send_snoopy = new Snoopy;
+		$t = time().strval(mt_rand(100,999));
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=".$this->_token."&lang=zh_CN";
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&tofakeid=".$fakeid."&token=".$this->_token."&lang=zh_CN&f=json&random=".$t;
+		$send_snoopy->fetch($submit);
+		$result = $send_snoopy->results;
+		$this->log('DialogMsg:'.$result);
+		$json = json_decode($result,true);
+		if (isset($json['page_info'])) {
+			return $json['page_info'];
+		}
+		return false;
+	}
+	
+	
+	/**
 	 * 发送图文信息,必须从图文库里选取消息ID发送
 	 * @param  string $id      用户的uid(即FakeId)
 	 * @param  string $msgid 图文消息id
