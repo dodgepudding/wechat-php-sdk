@@ -341,6 +341,16 @@ class Wechat
 			return false;
 	}
 	
+	/**
+	 * 获取接收TICKET
+	 */
+	public function getRevTicket(){
+		if (isset($this->_receive['Ticket'])){
+			return $this->_receive['Ticket'];
+		} else
+			return false;
+    	}
+	
 	public static function xmlSafeStr($str)
 	{   
 		return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';   
