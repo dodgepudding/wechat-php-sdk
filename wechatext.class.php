@@ -148,7 +148,7 @@ class Wechatext
 	/**
 	 * 获取与指定用户的对话内容
 	 * @param  $fakeid
-	 * @return array
+	 * @return  array
 	 */
 	public function getDialogMsg($fakeid) {
 		$send_snoopy = new Snoopy;
