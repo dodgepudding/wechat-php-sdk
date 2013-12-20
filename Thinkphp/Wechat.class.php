@@ -73,7 +73,7 @@ class Wechat
 	const OAUTH_TOKEN_PREFIX = 'https://api.weixin.qq.com/sns/oauth2';
 	const OAUTH_TOKEN_URL = '/access_token?';
 	const OAUTH_REFRESH_URL = '/refresh_token?';
-	const OAUTH_USERINFO_URL = '/userinfo?';
+	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
 	
 	private $token;
 	private $appid;
@@ -1013,7 +1013,7 @@ class Wechat
 	 * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege}
 	 */
 	public function getOauthUserinfo($access_token,$openid){
-		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
+		$result = $this->http_get(self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
 		if ($result)
 		{
 			$json = json_decode($result,true);
