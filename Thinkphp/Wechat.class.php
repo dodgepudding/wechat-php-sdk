@@ -689,7 +689,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -729,7 +729,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -778,7 +778,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -872,7 +872,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -897,7 +897,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -923,7 +923,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -944,7 +944,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -974,7 +974,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -995,7 +995,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -1017,7 +1017,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
