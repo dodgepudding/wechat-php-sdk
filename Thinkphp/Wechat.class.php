@@ -67,6 +67,7 @@ class Wechat
 	const GROUP_CREATE_URL='/groups/create?';
 	const GROUP_UPDATE_URL='/groups/update?';
 	const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
+	const CUSTOM_SEND_URL='/message/custom/send?';
 	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
 	const OAUTH_AUTHORIZE_URL = '/authorize?';
 	const OAUTH_TOKEN_PREFIX = 'https://api.weixin.qq.com/sns/oauth2';
@@ -343,6 +344,16 @@ class Wechat
 					'mediaid'=>$this->_receive['MediaId'],
 					'thumbmediaid'=>$this->_receive['ThumbMediaId']
 			);
+		} else
+			return false;
+	}
+	
+	/**
+	 * 获取接收TICKET
+	 */
+	public function getRevTicket(){
+		if (isset($this->_receive['Ticket'])){
+			return $this->_receive['Ticket'];
 		} else
 			return false;
 	}
@@ -909,6 +920,27 @@ class Wechat
 				'to_groupid'=>$groupid
 		);
 		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_MEMBER_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || $json['errcode']>0) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 发送客服消息
+	 * @param array $data 消息结构{"touser":"OPENID","msgtype":"news","news":{...}}
+	 * @return boolean|array
+	 */
+	public function sendCustomMessage($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
 		if ($result)
 		{
 			$json = json_decode($result,true);
