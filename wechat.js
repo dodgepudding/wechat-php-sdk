@@ -23,15 +23,13 @@
 
 WeixinJS = typeof WeixinJS!='undefined' || {};
 WeixinJS.hideOptionMenu = function() {
-	if (typeof WeixinJSBridge!='undefined')
 	document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-		WeixinJSBridge.call('hideOptionMenu');
+		if (typeof WeixinJSBridge!='undefined')	WeixinJSBridge.call('hideOptionMenu');
 	});
 };
 WeixinJS.hideToolbar = function() {
-	if (typeof WeixinJSBridge!='undefined')
 	document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-		WeixinJSBridge.call('hideToolbar');
+		if (typeof WeixinJSBridge!='undefined') WeixinJSBridge.call('hideToolbar');
 	});
 };
 
