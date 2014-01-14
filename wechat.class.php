@@ -350,6 +350,19 @@ class Wechat
 		} else
 			return false;
     	}
+    	
+     
+   	 /**
+     * 获取二维码的场景值
+     */
+    public function getSceneId (){
+		if (isset($this->_receive['EventKey'])){
+			return str_replace('qrscene_','',$this->_receive['EventKey']);
+		} else{
+			return false;
+	    }
+    }
+    	
 	
 	public static function xmlSafeStr($str)
 	{   
