@@ -764,6 +764,9 @@ class Wechat
 			'expire_seconds'=>$expire,
 			'action_info'=>array('scene'=>array('scene_id'=>$scene_id))
 		);
+		if ($type == 1) {
+			unset($data['expire_seconds']);
+		}
 		$result = $this->http_post(self::API_URL_PREFIX.self::QRCODE_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
 		if ($result)
 		{
