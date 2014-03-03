@@ -66,11 +66,19 @@ class Wechat
 	const GROUP_CREATE_URL='/groups/create?';
 	const GROUP_UPDATE_URL='/groups/update?';
 	const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
+	const CUSTOM_SEND_URL='/message/custom/send?';
+	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
+	const OAUTH_AUTHORIZE_URL = '/authorize?';
+	const OAUTH_TOKEN_PREFIX = 'https://api.weixin.qq.com/sns/oauth2';
+	const OAUTH_TOKEN_URL = '/access_token?';
+	const OAUTH_REFRESH_URL = '/refresh_token?';
+	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
 	
 	private $token;
 	private $appid;
 	private $appsecret;
 	private $access_token;
+	private $user_token;
 	private $_msg;
 	private $_funcflag = false;
 	private $_receive;
@@ -177,6 +185,7 @@ class Wechat
      */
 	public function getRev()
 	{
+		if ($this->_receive) return $this;
 		$postStr = file_get_contents("php://input");
 		$this->log($postStr);
 		if (!empty($postStr)) {
@@ -197,7 +206,7 @@ class Wechat
 	 * 获取消息发送者
 	 */
 	public function getRevFrom() {
-		if ($this->_receive)
+		if (isset($this->_receive['FromUserName']))
 			return $this->_receive['FromUserName'];
 		else 
 			return false;
@@ -207,7 +216,7 @@ class Wechat
 	 * 获取消息接受者
 	 */
 	public function getRevTo() {
-		if ($this->_receive)
+		if (isset($this->_receive['ToUserName']))
 			return $this->_receive['ToUserName'];
 		else 
 			return false;
@@ -332,6 +341,16 @@ class Wechat
 		} else
 			return false;
 	}
+	
+	/**
+	 * 获取接收TICKET
+	 */
+	public function getRevTicket(){
+	if (isset($this->_receive['Ticket'])){
+		return $this->_receive['Ticket'];
+	} else
+		return false;
+    }
 	
 	public static function xmlSafeStr($str)
 	{   
@@ -660,7 +679,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -700,7 +719,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -726,7 +745,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $result;
+			return $json;
 		}
 		return false;
 	}	
@@ -745,11 +764,14 @@ class Wechat
 			'expire_seconds'=>$expire,
 			'action_info'=>array('scene'=>array('scene_id'=>$scene_id))
 		);
+		if ($type == 1) {
+			unset($data['expire_seconds']);
+		}
 		$result = $this->http_post(self::API_URL_PREFIX.self::QRCODE_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -783,7 +805,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $result;
+			return $json;
 		}
 		return false;
 	}
@@ -804,7 +826,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $result;
+			return $json;
 		}
 		return false;
 	}
@@ -824,7 +846,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $result;
+			return $json;
 		}
 		return false;
 	}
@@ -843,7 +865,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -868,7 +890,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -894,7 +916,101 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || $json['errcode']>0) {
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 发送客服消息
+	 * @param array $data 消息结构{"touser":"OPENID","msgtype":"news","news":{...}}
+	 * @return boolean|array
+	 */
+	public function sendCustomMessage($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * oauth 授权跳转接口
+	 * @param string $callback 回调URI
+	 * @return string
+	 */
+	public function getOauthRedirect($callback,$state='',$scope='snsapi_userinfo'){
+		return self::OAUTH_PREFIX.self::OAUTH_AUTHORIZE_URL.'appid='.$this->appid.'&redirect_uri='.urlencode($callback).'&response_type=code&scope='.$scope.'&state='.$state.'#wechat_redirect';
+	}
+	
+	/*
+	 * 通过code获取Access Token
+	 * @return array {access_token,expires_in,refresh_token,openid,scope}
+	 */
+	public function getOauthAccessToken(){
+		$code = isset($_GET['code'])?$_GET['code']:'';
+		if (!$code) return false;
+		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_TOKEN_URL.'appid='.$this->appid.'&secret='.$this->appsecret.'&code='.$code.'&grant_type=authorization_code');
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			$this->user_token = $json['access_token'];
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 刷新access token并续期
+	 * @param string $refresh_token
+	 * @return boolean|mixed
+	 */
+	public function getOauthRefreshToken($refresh_token){
+		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_REFRESH_URL.'appid='.$this->appid.'&grant_type=refresh_token&refresh_token='.$refresh_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			$this->user_token = $json['access_token'];
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取授权后的用户资料
+	 * @param string $access_token
+	 * @param string $openid
+	 * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege}
+	 */
+	public function getOauthUserinfo($access_token,$openid){
+		$result = $this->http_get(self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;

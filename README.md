@@ -24,7 +24,12 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%9
  *  getGroup() 获取用户分组列表 
  *  createGroup($name) 新增自定分组 
  *  updateGroup($groupid,$name) 更改分组名称 
- *  updateGroupMembers($groupid,$openid) 移动用户分组 
+ *  updateGroupMembers($groupid,$openid) 移动用户分组  
+ *  sendCustomMessage($data) 发送客服消息  
+ *  getOauthRedirect($callback,$state,$scope) 获取网页授权oAuth跳转地址  
+ *  getOauthAccessToken() 通过回调的code获取网页授权access_token  
+ *  getOauthRefreshToken($refresh_token) 通过refresh_token对access_token续期
+ *  getOauthUserinfo($access_token,$openid) 通过网页授权的access_token获取用户资料
  
 2. wechatext.class.php  
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
@@ -131,8 +136,8 @@ switch($type) {
 		$topmsg = $wechat->getTopMsg();
 		var_dump($topmsg);
 		// 主动回复消息
-		if ($topmsg && $topmsg['hasReply']==0)
-		$wechat->send($topmsg['fakeId'],'hi '.$topmsg['nickName'].',rev:'.$topmsg['content']);	
+		if ($topmsg && $topmsg['has_reply']==0)
+		$wechat->send($topmsg['fakeid'],'hi '.$topmsg['nick_name'].',rev:'.$topmsg['content']);	
 	}
 ```
 
