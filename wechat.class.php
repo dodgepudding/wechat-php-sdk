@@ -107,7 +107,7 @@ class Wechat
         		
 		$token = $this->token;
 		$tmpArr = array($token, $timestamp, $nonce);
-		sort($tmpArr);
+		sort($tmpArr, SORT_STRING);
 		$tmpStr = implode( $tmpArr );
 		$tmpStr = sha1( $tmpStr );
 		
@@ -352,6 +352,17 @@ class Wechat
 		return false;
     }
 	
+    /**
+     * 获取二维码的场景值
+     */
+    public function getRevSceneId (){
+    	if (isset($this->_receive['EventKey'])){
+    		return str_replace('qrscene_','',$this->_receive['EventKey']);
+    	} else{
+    		return false;
+    	}
+    }
+    
 	public static function xmlSafeStr($str)
 	{   
 		return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';   

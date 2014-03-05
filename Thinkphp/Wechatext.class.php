@@ -404,6 +404,26 @@ class Wechatext
 	}
 	
 	/**
+	 * 获得头像数据
+	 *
+	 * @param FakeId $fakeid
+	 * @return JPG二进制数据
+	 */
+	public function getHeadImg($fakeid){
+		$send_snoopy = new Snoopy;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/cgi-bin/getheadimg?fakeid=$fakeid&token=".$this->_token."&lang=zh_CN";
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+		$this->log('Head image:'.$fakeid.'; length:'.strlen($result));
+		if(!$result){
+			return false;
+		}
+		return $result;
+	}
+	
+	/**
 	 * 获取消息更新数目
 	 * @param int $lastid 最近获取的消息ID,为0时获取总消息数目
 	 * @return int 数目
