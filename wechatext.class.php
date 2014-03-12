@@ -73,7 +73,71 @@ class Wechatext
 		$this->log($send_snoopy->results);
 		return $send_snoopy->results;
 	}
-	
+          
+    /**
+     * 群发功能 纯文本
+     * @param string $content
+     * @return type 
+     */
+    public function mass($content) {
+        $send_snoopy = new Snoopy; 
+		$post = array();
+		$post['type'] = 1;
+		$post['token'] = $this->_token;
+		$post['content'] = $content;
+		$post['ajax'] = 1;
+        $post['city']='';
+        $post['country']='';
+        $post['f']='json';
+        $post['groupid']='-1';
+        $post['imgcode']='';
+        $post['lang']='zh_CN';
+        $post['province']='';
+        $post['random']=  rand(0, 1);
+        $post['sex']=0;
+        $post['synctxnews']=0;
+        $post['synctxweibo']=0;
+        $post['t']='ajax-response';
+        $send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token={$this->_token}&lang=zh_CN";
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/masssend";
+		$send_snoopy->submit($submit,$post);
+		$this->log($send_snoopy->results);
+		return $send_snoopy->results;
+    }
+
+    /**
+     * 群发功能 图文素材
+     * @param type $appmsgid 图文素材ID
+     * @return type
+     */
+    function massNews($appmsgid){
+        $send_snoopy = new Snoopy; 
+		$post = array();
+		$post['type'] = 10;
+		$post['token'] = $this->_token;
+		$post['appmsgid'] = $appmsgid;
+		$post['ajax'] = 1;
+        $post['city']='';
+        $post['country']='';
+        $post['f']='json';
+        $post['groupid']='-1';
+        $post['imgcode']='';
+        $post['lang']='zh_CN';
+        $post['province']='';
+        $post['random']=  rand(0, 1);
+        $post['sex']=0;
+        $post['synctxnews']=0;
+        $post['synctxweibo']=0;
+        $post['t']='ajax-response';
+        $send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token={$this->_token}&lang=zh_CN";
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$submit = "https://mp.weixin.qq.com/cgi-bin/masssend";
+		$send_snoopy->submit($submit,$post);
+		$this->log($send_snoopy->results);
+		return $send_snoopy->results;
+    }
+    
 	/**
 	 * 获取用户列表列表
 	 * @param $page 页码(从0开始)
