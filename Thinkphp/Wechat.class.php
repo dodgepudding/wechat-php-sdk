@@ -470,13 +470,13 @@ class Wechat
 	 * @param array $newsData 
 	 * 数组结构:
 	 *  array(
-	 *  	[0]=>array(
+	 *  	"0"=>array(
 	 *  		'Title'=>'msg title',
 	 *  		'Description'=>'summary text',
 	 *  		'PicUrl'=>'http://www.domain.com/1.jpg',
 	 *  		'Url'=>'http://www.domain.com/1.html'
 	 *  	),
-	 *  	[1]=>....
+	 *  	"1"=>....
 	 *  )
 	 */
 	public function news($newsData=array())
