@@ -11,6 +11,39 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%9
 
 1. wechat.class.php  
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
+
+### 主要功能 
+- 接入验证 （初级权限）
+- 自动回复（文本、图片、语音、视频、音乐、图文）（初级权限）
+- 菜单操作（查询、创建、删除）（菜单权限）
+- 客服消息（文本、图片、语音、视频、音乐、图文）（认证权限）
+- 二维码（创建临时、永久二维码，获取二维码URL）（认证权限）
+- 分组操作（查询、创建、修改、移动用户到分组）（认证权限）
+- 网页授权（基本授权，用户信息授权）（认证权限）
+- 用户信息（查询用户基本信息、获取关注者列表）（认证权限）
+- 媒体文件（上传、获取）（认证权限） 
+- 调用地址组件 （支付权限） 
+- 生成订单签名数据 （支付权限） 
+- 订单成功回调 （支付权限） 
+- 发货通知 （支付权限） 
+- 支付订单查询 （支付权限） 
+
+
+### 初始化动作 
+```php
+ $options = array(
+	'token'=>'tokenaccesskey', //填写你设定的key
+	'appid'=>'wxdk1234567890', //填写高级调用功能的app id, 请在微信开发模式后台查询
+	'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写高级调用功能的密钥
+	'partnerid'=>'88888888', //财付通商户身份标识，支付权限专用，没有可不填
+	'partnerkey'=>'', //财付通商户权限密钥Key，支付权限专用
+	'paysignkey'=>'' //商户签名密钥Key，支付权限专用
+	);
+ $weObj = new Wechat($options); //创建实例对象
+ //TODO：调用$weObj各实例方法
+
+```
+
 新增Auth高级权限类方法:   
  *  checkAuth($appid,$appsecret) 此处传入公众后台高级接口提供的appid和appsecret, 函数将返回access_token操作令牌
  *  createMenu($data) 创建菜单 $data菜单结构详见 http://mp.weixin.qq.com/wiki/index.php?title=%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8F%9C%E5%8D%95%E5%88%9B%E5%BB%BA%E6%8E%A5%E5%8F%A3 
@@ -28,9 +61,18 @@ http://mp.weixin.qq.com/wiki/index.php?title=%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%9
  *  sendCustomMessage($data) 发送客服消息  
  *  getOauthRedirect($callback,$state,$scope) 获取网页授权oAuth跳转地址  
  *  getOauthAccessToken() 通过回调的code获取网页授权access_token  
- *  getOauthRefreshToken($refresh_token) 通过refresh_token对access_token续期
- *  getOauthUserinfo($access_token,$openid) 通过网页授权的access_token获取用户资料
+ *  getOauthRefreshToken($refresh_token) 通过refresh_token对access_token续期  
+ *  getOauthUserinfo($access_token,$openid) 通过网页授权的access_token获取用户资料  
+ *  getSignature($arrdata,'sha1') 生成签名字串  
+ *  generateNonceStr($length) 获取随机字串  
+ *  createPackage($out_trade_no,$body,$total_fee,$notify_url,$spbill_create_ip,$fee_type=1,$bank_type="WX",$input_charset="UTF-8",$time_start="",$time_expire="",$transport_fee="",$product_fee="",$goods_tag="",$attach="") 生成订单package字符串  
+ *  getPaySign($package, $timeStamp, $nonceStr) 支付签名(paySign)生成方法  
+ *  checkOrderSignature($orderxml='') 回调通知签名验证  
+ *  sendPayDeliverNotify($openid,$transid,$out_trade_no,$status=1,$msg='ok') 发货通知  
+ *  getPayOrder($out_trade_no) 查询订单信息  
+ *  getAddrSign($url, $timeStamp, $nonceStr, $user_token='') 获取收货地址JS的签名  
  
+  
 2. wechatext.class.php  
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
 类方法里提及的用户id在接口返回结构里表述为FakeId, 属同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  

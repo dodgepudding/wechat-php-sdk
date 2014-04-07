@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="../wechat.js" type="text/javascript"></script>
+<script>
+var dataForWeixin={
+	   appId:"",
+	   MsgImg:"https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon_res_download_wxlogo.png",
+	   TLImg:"https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon_res_download_wxlogo.png",
+	   url:"https://raw.githubusercontent.com/dodgepudding/wechat-php-sdk/master/test/weshare.html",
+	   title:"微信分享测试文件",
+	   desc:"这里演示了微信分享前调和回调方法",
+	   fakeid:"",
+	   prepare:function(e){
+		   var log = '';
+			for (var i in e) {
+				log+= i+':'+e[i]+';';
+			}
+			alert(log);
+	   },
+	   callback:function(e){
+		   var log = '';
+			for (var i in e) {
+				log+= i+':'+e[i]+';';
+			}
+			alert(log);
+	   }
+	};
+WeixinJS.hideToolbar();
+WeixinJS.getNetworkType(
+	function(e){
+		alert(e);
+	});
+</script>
+<title>weshare</title>
+</head>
+
+<body>
+<h3>这里演示了微信分享前调和回调方法，点击微信右上角分享相关的功能，即可看到各类返回的alert信息</h3>
+</body>
+</html>
