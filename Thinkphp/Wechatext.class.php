@@ -612,7 +612,7 @@ class Wechatext
 		$cookie = '';
 		$this->log($snoopy->results);
 		$result = json_decode($snoopy->results,true);
-		if ($result['ErrCode']!=0) return false;
+		if ($result['base_resp']['err_msg']!='ok') return false;
 		foreach ($snoopy->headers as $key => $value) {
 			$value = trim($value);
 			if(preg_match('/^set-cookie:[\s]+([^=]+)=([^;]+)/i', $value,$match))
