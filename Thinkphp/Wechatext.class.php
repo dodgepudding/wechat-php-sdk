@@ -619,7 +619,7 @@ class Wechatext
 				$cookie .=$match[1].'='.$match[2].'; ';
 		}
 		
-		preg_match("/token=(\d+)/i",$result['ErrMsg'],$matches);
+		preg_match("/token=(\d+)/i",$result['redirect_url'],$matches);
 		if($matches){
 			$this->_token = $matches[1];
 			$this->log('token:'.$this->_token);
