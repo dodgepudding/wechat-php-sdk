@@ -7,7 +7,10 @@ weixin developer SDK.
 使用详解
 -------
 使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
-http://mp.weixin.qq.com/wiki/index.php?title=%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%97
+http://mp.weixin.qq.com/wiki/
+
+微信支付接入文档：
+https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 1. wechat.class.php  
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 

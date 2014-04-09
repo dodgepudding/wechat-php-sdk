@@ -608,7 +608,7 @@ class Wechatext
 	 */
 	public function login(){
 		$snoopy = new Snoopy; 
-		$submit = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
+		$submit = "https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 		$post["username"] = $this->_account;
 		$post["pwd"] = md5($this->_password);
 		$post["f"] = "json";
@@ -619,11 +619,7 @@ class Wechatext
 		$this->log($snoopy->results);
 		$result = json_decode($snoopy->results,true);
 		
-		if (!isset($result['base_resp'])) {
-			return false;
-		}
-
-		if ($result['base_resp']['ret'] != 0) {
+		if (!isset($result['base_resp']) || $result['base_resp']['ret'] != 0) {
 			return false;
 		}
         
