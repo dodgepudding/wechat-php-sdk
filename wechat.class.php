@@ -313,7 +313,19 @@ class Wechat
 		} else 
 			return false;
 	}
-	
+	/**
+	 * 获取上报地理位置事件
+	 */
+	public function getRevEventGeo(){
+        	if (isset($this->_receive['Latitude'])){
+        		 return array(
+				'x'=>$this->_receive['Latitude'],
+				'y'=>$this->_receive['Longitude'],
+				'precision'=>$this->_receive['Precision'],
+			);
+		} else
+			return false;
+	}
 	/**
 	 * 获取接收事件推送
 	 */
