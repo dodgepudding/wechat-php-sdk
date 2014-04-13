@@ -313,6 +313,7 @@ class Wechat
 		} else 
 			return false;
 	}
+	
 	/**
 	 * 获取上报地理位置事件
 	 */
@@ -326,6 +327,7 @@ class Wechat
 		} else
 			return false;
 	}
+	
 	/**
 	 * 获取接收事件推送
 	 */
