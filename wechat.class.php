@@ -1129,7 +1129,7 @@ class Wechat
 				else
 				$paramstring .= "&" . $key . "=" . $value;
 			}
-			$stringSignTemp = $paramstring . "&key=" . $this->paysignkey;
+			$stringSignTemp = $paramstring . "&key=" . $this->partnerkey;
 			$signValue = strtoupper(md5($stringSignTemp));
 			$package = http_build_query($arrdata) . "&sign=" . $signValue;
 			return $package;
