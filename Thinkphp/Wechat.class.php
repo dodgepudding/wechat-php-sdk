@@ -793,7 +793,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $json;
+			return $result;
 		}
 		return false;
 	}
