@@ -78,6 +78,7 @@ class Wechat
 	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
 	const PAY_DELIVERNOTIFY = 'https://api.weixin.qq.com/pay/delivernotify?';
 	const PAY_ORDERQUERY = 'https://api.weixin.qq.com/pay/orderquery?';
+	const CUSTOM_SERVICE = '/customservice/getrecord?';
 	
 	private $token;
 	private $appid;
@@ -1260,4 +1261,26 @@ class Wechat
 		);
 		return $this->getSignature($arrdata);
 	}
+	
+	/**
+	 * 获取多客服获取会话记录
+	 * @param array $data 数据结构{"starttime":123456789,"endtime":987654321,"openid":"OPENID","pagesize":10,"pageindex":1,}
+	 * @return boolean|array
+	 */
+	public function getCustomServiceMessage($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SERVICE.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+
 }
