@@ -78,7 +78,9 @@ class Wechat
 	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
 	const PAY_DELIVERNOTIFY = 'https://api.weixin.qq.com/pay/delivernotify?';
 	const PAY_ORDERQUERY = 'https://api.weixin.qq.com/pay/orderquery?';
-	const CUSTOM_SERVICE = '/customservice/getrecord?';
+	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
+	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
+	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getkflist?';
 	
 	private $token;
 	private $appid;
@@ -1263,13 +1265,85 @@ class Wechat
 	}
 	
 	/**
-	 * 获取多客服获取会话记录
+	 * 获取多客服会话记录
 	 * @param array $data 数据结构{"starttime":123456789,"endtime":987654321,"openid":"OPENID","pagesize":10,"pageindex":1,}
 	 * @return boolean|array
 	 */
 	public function getCustomServiceMessage($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SERVICE.'access_token='.$this->access_token,self::json_encode($data));
+		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_RECORD.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+
+	/**
+	 * 转发多客服消息
+	 * Examle: $obj->transfer_customer_service($customer_account)->reply();
+	 * @param string $customer_account 转发到指定客服帐号：test1@test
+	 */
+	public function transfer_customer_service($customer_account = '')
+	{
+		$msg = array(
+			'ToUserName' => $this->getRevFrom(),
+			'FromUserName'=>$this->getRevTo(),
+			'CreateTime'=>time(),
+			'MsgType'=>'transfer_customer_service',
+		);
+		if (!$customer_account) {
+			$msg['TransInfo'] = array('KfAccount'=>$customer_account);
+		}
+		$this->Message($msg);
+		return $this;
+	}
+	
+	/**
+	 * 获取多客服客服基本信息
+	 * @param 
+	 * @return array
+	 */
+	public function getCustomServiceKFlist(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_KFLIST.'access_token='.$this->access_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取多客服在线客服接待信息
+	 * @param 
+	 * @return array {
+    "kf_online_list": [
+        {
+            "kf_account": "test1@test", //客服账号@微信别名
+            "status": 1,				//客服在线状态 1：pc在线，2：手机在线,若pc和手机同时在线则为 1+2=3
+            "kf_id": "1001",			//客服工号
+            "auto_accept": 0,			//客服设置的最大自动接入数
+            "accepted_case": 1 			//客服当前正在接待的会话数
+        }
+    ]
+}
+	 */
+	public function getCustomServiceOnlineKFlist(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
 		if ($result)
 		{
 			$json = json_decode($result,true);
