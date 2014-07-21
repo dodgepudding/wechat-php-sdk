@@ -479,7 +479,7 @@ class Wechatext
 		$send_snoopy = new Snoopy;
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
-		$url = "https://mp.weixin.qq.com/cgi-bin/getheadimg?fakeid=$fakeid&token=".$this->_token."&lang=zh_CN";
+		$url = "https://mp.weixin.qq.com/misc/getheadimg?fakeid=$fakeid&token=".$this->_token."&lang=zh_CN";
 		$send_snoopy->fetch($url);
 		$result = $send_snoopy->results;
 		$this->log('Head image:'.$fakeid.'; length:'.strlen($result));
@@ -608,7 +608,7 @@ class Wechatext
 	 */
 	public function login(){
 		$snoopy = new Snoopy; 
-		$submit = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
+		$submit = "https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 		$post["username"] = $this->_account;
 		$post["pwd"] = md5($this->_password);
 		$post["f"] = "json";
@@ -618,14 +618,18 @@ class Wechatext
 		$cookie = '';
 		$this->log($snoopy->results);
 		$result = json_decode($snoopy->results,true);
-		if ($result['ErrCode']!=0) return false;
+		
+		if (!isset($result['base_resp']) || $result['base_resp']['ret'] != 0) {
+			return false;
+		}
+        
 		foreach ($snoopy->headers as $key => $value) {
 			$value = trim($value);
 			if(preg_match('/^set-cookie:[\s]+([^=]+)=([^;]+)/i', $value,$match))
 				$cookie .=$match[1].'='.$match[2].'; ';
 		}
 		
-		preg_match("/token=(\d+)/i",$result['ErrMsg'],$matches);
+		preg_match("/token=(\d+)/i",$result['redirect_url'],$matches);
 		if($matches){
 			$this->_token = $matches[1];
 			$this->log('token:'.$this->_token);

@@ -1002,6 +1002,7 @@ class Snoopy
 			curl_setopt($ch, CURLOPT_HEADER, true); 
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+			curl_setopt($ch, CURLOPT_SSLVERSION,3); 
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); 
 			curl_setopt($ch, CURLOPT_TIMEOUT, $this->read_timeout);

@@ -9,6 +9,9 @@
  *			'token'=>'tokenaccesskey', //填写你设定的key
  *			'appid'=>'wxdk1234567890', //填写高级调用功能的app id
  *			'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写高级调用功能的密钥
+ *			'partnerid'=>'88888888', //财付通商户身份标识
+ *			'partnerkey'=>'', //财付通商户权限密钥Key
+ *			'paysignkey'=>'' //商户签名密钥Key
  *		);
  *	 $weObj = new Wechat($options);
  *   $weObj->valid();
@@ -73,12 +76,20 @@ class Wechat
 	const OAUTH_TOKEN_URL = '/access_token?';
 	const OAUTH_REFRESH_URL = '/refresh_token?';
 	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
+	const PAY_DELIVERNOTIFY = 'https://api.weixin.qq.com/pay/delivernotify?';
+	const PAY_ORDERQUERY = 'https://api.weixin.qq.com/pay/orderquery?';
+	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
+	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
+	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getkflist?';
 	
 	private $token;
 	private $appid;
 	private $appsecret;
 	private $access_token;
 	private $user_token;
+	private $partnerid;
+	private $partnerkey;
+	private $paysignkey;
 	private $_msg;
 	private $_funcflag = false;
 	private $_receive;
@@ -92,6 +103,9 @@ class Wechat
 		$this->token = isset($options['token'])?$options['token']:'';
 		$this->appid = isset($options['appid'])?$options['appid']:'';
 		$this->appsecret = isset($options['appsecret'])?$options['appsecret']:'';
+		$this->partnerid = isset($options['partnerid'])?$options['partnerid']:'';
+		$this->partnerkey = isset($options['partnerkey'])?$options['partnerkey']:'';
+		$this->paysignkey = isset($options['paysignkey'])?$options['paysignkey']:'';
 		$this->debug = isset($options['debug'])?$options['debug']:false;
 		$this->_logcallback = isset($options['logcallback'])?$options['logcallback']:false;
 	}
@@ -300,6 +314,20 @@ class Wechat
 				'label'=>$this->_receive['Label']
 			);
 		} else 
+			return false;
+	}
+	
+	/**
+	 * 获取上报地理位置事件
+	 */
+	public function getRevEventGeo(){
+        	if (isset($this->_receive['Latitude'])){
+        		 return array(
+				'x'=>$this->_receive['Latitude'],
+				'y'=>$this->_receive['Longitude'],
+				'precision'=>$this->_receive['Precision'],
+			);
+		} else
 			return false;
 	}
 	
@@ -1032,4 +1060,301 @@ class Wechat
 	}
 	
 	
+	/**
+	 * 获取签名
+	 * @param array $arrdata 签名数组
+	 * @param string $method 签名方法
+	 * @return boolean|string 签名值
+	 */
+	public function getSignature($arrdata,$method="sha1") {
+		if (!function_exists($method)) return false;
+		ksort($arrdata);
+		$paramstring = "";
+		foreach($arrdata as $key => $value)
+		{
+			if(strlen($paramstring) == 0)
+				$paramstring .= $key . "=" . $value;
+			else
+				$paramstring .= "&" . $key . "=" . $value;
+		}
+		$paySign = $method($paramstring);
+		return $paySign;
+	}
+	
+	/**
+	 * 生成随机字串
+	 * @param number $length 长度，默认为16，最长为32字节
+	 * @return string
+	 */
+	public function generateNonceStr($length=16){
+		// 密码字符集，可任意添加你需要的字符
+		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		$str = "";
+		for($i = 0; $i < $length; $i++)
+		{
+			$str .= $chars[mt_rand(0, strlen($chars) - 1)];
+		}
+		return $str;
+	}
+	
+	/**
+	 * 生成订单package字符串
+	 * @param string $out_trade_no 必填，商户系统内部的订单号,32个字符内,确保在商户系统唯一
+	 * @param string $body 必填，商品描述,128 字节以下
+	 * @param int $total_fee 必填，订单总金额,单位为分
+	 * @param string $notify_url 必填，支付完成通知回调接口，255 字节以内
+	 * @param string $spbill_create_ip 必填，用户终端IP，IPV4字串，15字节内
+	 * @param int $fee_type 必填，现金支付币种，默认1:人民币
+	 * @param string $bank_type 必填，银行通道类型,默认WX
+	 * @param string $input_charset 必填，传入参数字符编码，默认UTF-8，取值有UTF-8和GBK
+	 * @param string $time_start 交易起始时间,订单生成时间,格式yyyyMMddHHmmss
+	 * @param string $time_expire 交易结束时间,也是订单失效时间
+	 * @param int $transport_fee 物流费用,单位为分
+	 * @param int $product_fee 商品费用,单位为分,必须保证 transport_fee + product_fee=total_fee 
+	 * @param string $goods_tag 商品标记,优惠券时可能用到
+	 * @param string $attach 附加数据，notify接口原样返回
+	 * @return string
+	 */
+	public function createPackage($out_trade_no,$body,$total_fee,$notify_url,$spbill_create_ip,$fee_type=1,$bank_type="WX",$input_charset="UTF-8",$time_start="",$time_expire="",$transport_fee="",$product_fee="",$goods_tag="",$attach=""){
+			$arrdata = array("bank_type" => $bank_type, "body" => $body, "partner" => $this->partnerid, "out_trade_no" => $out_trade_no, "total_fee" => $total_fee, "fee_type" => $fee_type, "notify_url" => $notify_url, "spbill_create_ip" => $spbill_create_ip, "input_charset" => $input_charset);
+			if ($time_start)  $arrdata['time_start'] = $time_start;
+			if ($time_expire)  $arrdata['time_expire'] = $time_expire;
+			if ($transport_fee)  $arrdata['transport_fee'] = $transport_fee;
+			if ($product_fee)  $arrdata['product_fee'] = $product_fee;
+			if ($goods_tag)  $arrdata['goods_tag'] = $goods_tag;
+			if ($attach)  $arrdata['attach'] = $attach;
+			ksort($arrdata);
+			$paramstring = "";
+			foreach($arrdata as $key => $value)
+			{
+			if(strlen($paramstring) == 0)
+				$paramstring .= $key . "=" . $value;
+				else
+				$paramstring .= "&" . $key . "=" . $value;
+			}
+			$stringSignTemp = $paramstring . "&key=" . $this->partnerkey;
+			$signValue = strtoupper(md5($stringSignTemp));
+			$package = http_build_query($arrdata) . "&sign=" . $signValue;
+			return $package;
+	}
+	
+	/**
+	 * 支付签名(paySign)生成方法
+	 * @param string $package 订单详情字串
+	 * @param string $timeStamp 当前时间戳（需与JS输出的一致）
+	 * @param string $nonceStr 随机串（需与JS输出的一致）
+	 * @return string 返回签名字串
+	 */
+	public function getPaySign($package, $timeStamp, $nonceStr){
+		$arrdata = array("appid" => $this->appid, "timestamp" => $timeStamp, "noncestr" => $nonceStr, "package" => $package, "appkey" => $this->paysignkey);
+		$paySign = $this->getSignature($arrdata);
+		return $paySign;
+	}
+	
+	/**
+	 * 回调通知签名验证
+	 * @param array $orderxml 返回的orderXml的数组表示，留空则自动从post数据获取
+	 * @return boolean
+	 */
+	public function checkOrderSignature($orderxml=''){
+		if (!$orderxml) {
+			$postStr = file_get_contents("php://input");
+			if (!empty($postStr)) {
+				$orderxml = (array)simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
+			} else return false;
+		}
+		$arrdata = array('appid'=>$orderxml['AppId'],'appkey'=>$this->paysignkey,'timestamp'=>$orderxml['TimeStamp'],'noncestr'=>$orderxml['NonceStr'],'openid'=>$orderxml['OpenId'],'issubscribe'=>$orderxml['IsSubscribe']);
+		$paySign = $this->getSignature($arrdata);
+		if ($paySign!=$orderxml['AppSignature']) return false;
+		return true;
+	}
+	
+	/**
+	 * 发货通知
+	 * @param string $openid 用户open_id
+	 * @param string $transid 交易单号
+	 * @param string $out_trade_no 第三方订单号
+	 * @param int $status 0:发货失败；1:已发货
+	 * @param string $msg 失败原因
+	 * @return boolean|array
+	 */
+	public function sendPayDeliverNotify($openid,$transid,$out_trade_no,$status=1,$msg='ok'){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$postdata = array(
+				"appid"=>$this->appid,
+				"appkey"=>$this->paysignkey,
+				"openid"=>$openid,
+				"transid"=>strval($transid),
+				"out_trade_no"=>strval($out_trade_no),
+				"deliver_timestamp"=>strval(time()),
+				"deliver_status"=>strval($status),
+				"deliver_msg"=>$msg,
+		);
+		$postdata['app_signature'] = $this->getSignature($postdata);
+		$postdata['sign_method'] = 'sha1';
+		unset($postdata['appkey']);
+		$result = $this->http_post(self::PAY_DELIVERNOTIFY.'access_token='.$this->access_token,self::json_encode($postdata));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/*
+	 * 查询订单信息
+	 * @param string $out_trade_no 订单号
+	 * @return boolean|array
+	 */
+	public function getPayOrder($out_trade_no) {
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$sign = strtoupper(md5("out_trade_no=$out_trade_no&partner={$this->partnerid}&key={$this->partnerkey}"));
+		$postdata = array(
+				"appid"=>$this->appid,
+				"appkey"=>$this->paysignkey,
+				"package"=>"out_trade_no=$out_trade_no&partner={$this->partnerid}&sign=$sign",
+				"timestamp"=>strval(time()),
+		);
+		$postdata['app_signature'] = $this->getSignature($postdata);
+		$postdata['sign_method'] = 'sha1';
+		unset($postdata['appkey']);
+		$result = $this->http_post(self::PAY_ORDERQUERY.'access_token='.$this->access_token,self::json_encode($postdata));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'].json_encode($postdata);
+				return false;
+			}
+			return $json["order_info"];
+		}
+		return false;
+	}	
+	
+	/**
+	 * 获取收货地址JS的签名
+	 * @param string $appId
+	 * @param string $url
+	 * @param int $timeStamp
+	 * @param string $nonceStr
+	 * @param string $user_token
+	 * @return Ambigous <boolean, string>
+	 */
+	public function getAddrSign($url, $timeStamp, $nonceStr, $user_token=''){
+		if (!$user_token) $user_token = $this->user_token;
+		if (!$user_token) {
+			$this->errMsg = 'no user access token found!';
+			return false;
+		}
+		$url = htmlspecialchars_decode($url);
+		$arrdata = array(
+				'appid'=>$this->appid,
+				'url'=>$url,
+				'timestamp'=>strval($timeStamp),
+				'noncestr'=>$nonceStr,
+				'accesstoken'=>$user_token
+		);
+		return $this->getSignature($arrdata);
+	}
+	
+	/**
+	 * 获取多客服会话记录
+	 * @param array $data 数据结构{"starttime":123456789,"endtime":987654321,"openid":"OPENID","pagesize":10,"pageindex":1,}
+	 * @return boolean|array
+	 */
+	public function getCustomServiceMessage($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_RECORD.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+
+	/**
+	 * 转发多客服消息
+	 * Examle: $obj->transfer_customer_service($customer_account)->reply();
+	 * @param string $customer_account 转发到指定客服帐号：test1@test
+	 */
+	public function transfer_customer_service($customer_account = '')
+	{
+		$msg = array(
+			'ToUserName' => $this->getRevFrom(),
+			'FromUserName'=>$this->getRevTo(),
+			'CreateTime'=>time(),
+			'MsgType'=>'transfer_customer_service',
+		);
+		if (!$customer_account) {
+			$msg['TransInfo'] = array('KfAccount'=>$customer_account);
+		}
+		$this->Message($msg);
+		return $this;
+	}
+	
+	/**
+	 * 获取多客服客服基本信息
+	 * @param 
+	 * @return array
+	 */
+	public function getCustomServiceKFlist(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_KFLIST.'access_token='.$this->access_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取多客服在线客服接待信息
+	 * @param 
+	 * @return array {
+    "kf_online_list": [
+        {
+            "kf_account": "test1@test", //客服账号@微信别名
+            "status": 1,				//客服在线状态 1：pc在线，2：手机在线,若pc和手机同时在线则为 1+2=3
+            "kf_id": "1001",			//客服工号
+            "auto_accept": 0,			//客服设置的最大自动接入数
+            "accepted_case": 1 			//客服当前正在接待的会话数
+        }
+    ]
+}
+	 */
+	public function getCustomServiceOnlineKFlist(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+
 }
