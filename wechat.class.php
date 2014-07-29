@@ -70,6 +70,12 @@ class Wechat
 	const GROUP_UPDATE_URL='/groups/update?';
 	const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
 	const CUSTOM_SEND_URL='/message/custom/send?';
+	const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
+	const MASS_SEND_URL = '/message/mass/send?';
+	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
+	const MASS_DELETE_URL = '/message/mass/delete?';
+	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
+	const MEDIA_UPLOAD = '/media/upload?';
 	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
 	const OAUTH_AUTHORIZE_URL = '/authorize?';
 	const OAUTH_TOKEN_PREFIX = 'https://api.weixin.qq.com/sns/oauth2';
@@ -627,6 +633,7 @@ class Wechat
 	 * @param string $appid
 	 */
 	public function resetAuth($appid=''){
+		if (!$appid) $appid = $this->appid;
 		$this->access_token = '';
 		//TODO: remove cache
 		return true;
@@ -769,13 +776,34 @@ class Wechat
 	}
 
 	/**
+	 * 上传多媒体文件
+	 * @param array $data 消息结构{ "touser":[ "OPENID1", "OPENID2" ], "mpnews":{ "media_id":"123dsdajkasd231jhksad" }, "msgtype":"mpnews" }
+	 * @return raw data
+	 */
+	public function uploadMedia($data, $type){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::UPLOAD_MEDIA_URL.self::MEDIA_UPLOAD.'access_token='.$this->access_token.'&type='.$type,$data);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
 	 * 根据媒体文件ID获取媒体文件
 	 * @param string $media_id 媒体文件id
 	 * @return raw data
 	 */
 	public function getMedia($media_id){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::MEDIA_GET_URL.'access_token='.$this->access_token.'&media_id='.$media_id);
+		$result = $this->http_get(self::UPLOAD_MEDIA_URL.self::MEDIA_GET_URL.'access_token='.$this->access_token.'&media_id='.$media_id);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -787,7 +815,91 @@ class Wechat
 			return $json;
 		}
 		return false;
-	}	
+	}
+
+	/**
+	 * 上传图文消息素材
+	 * @param array $data 消息结构{"articles":[{...}]}
+	 * @return boolean|array
+	 */
+	public function uploadArticles($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_UPLOADNEWS_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 高级群发消息, 根据OpenID列表群发图文消息
+	 * @param array $data 消息结构{ "touser":[ "OPENID1", "OPENID2" ], "mpnews":{ "media_id":"123dsdajkasd231jhksad" }, "msgtype":"mpnews" }
+	 * @return boolean|array
+	 */
+	public function sendMassMessage($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 高级群发消息, 根据群组id群发图文消息
+	 * @param array $data 消息结构{ "filter":[ "group_id": "2" ], "mpnews":{ "media_id":"123dsdajkasd231jhksad" }, "msgtype":"mpnews" }
+	 * @return boolean|array
+	 */
+	public function sendGroupMassMessage($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_SEND_GROUP_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 高级群发消息, 删除群发图文消息
+	 * @param int $msg_id 消息id
+	 * @return boolean|array
+	 */
+	public function deleteMassMessage($msg_id){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_DELETE_URL.'access_token='.$this->access_token,self::json_encode(array('msg_id'=>$msg_id)));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * 创建二维码ticket
