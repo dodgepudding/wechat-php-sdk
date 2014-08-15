@@ -104,6 +104,19 @@ WeixinJS.closeWindow = function() {
 	if (typeof WeixinJSBridge!='undefined') WeixinJSBridge.invoke("closeWindow", {});
 };
 
+/**
+ * 调出微信内图片预览scrollview
+ * @param array urls 图片url数组
+ * @param string current 当前图片url
+ */
+WeixinJS.imagePreview = function(urls,current) {
+	if (typeof WeixinJSBridge!='undefined') 
+		WeixinJSBridge.invoke("imagePreview", {
+			current: current,
+			urls: urls
+		});
+};
+
 WeixinJS.payCallback = function(appId,package,timeStamp,nonceStr,signType,paySign,callback){
 	if (typeof WeixinJSBridge!='undefined')
 	WeixinJSBridge.invoke('getBrandWCPayRequest',{
@@ -139,6 +152,7 @@ WeixinJS.editAddress = function(appId,addrSign,timeStamp,nonceStr,callback){
 };
 
 (function(){
+   if (typeof dataForWeixin=="undefined") return;
    var onBridgeReady=function(){
    WeixinJSBridge.on('menu:share:appmessage', function(argv){
 	  (dataForWeixin.prepare)(argv);
