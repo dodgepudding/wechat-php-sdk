@@ -89,6 +89,7 @@ class Wechat
 	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
 	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
 	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getkflist?';
+	const Templat_SEND_URL = '/message/template/send?';
 	
 	private $token;
 	private $appid;
@@ -1089,6 +1090,48 @@ class Wechat
 		}
 		return false;
 	}
+	
+	/**
+	 * 发送模板消息
+	 * @param array $data 消息结构
+	 * ｛
+			"touser":"OPENID",
+			"template_id":"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY",
+			"url":"http://weixin.qq.com/download",
+			"topcolor":"#FF0000",
+			"data":{
+				"参数名1": {
+					"value":"参数",
+					"color":"#173177"	 //参数颜色
+					},
+				"Date":{
+					"value":"06月07日 19时24分",
+					"color":"#173177"
+					},
+				"CardNumber":{
+					"value":"0426",
+					"color":"#173177"
+					},
+				"Type":{
+					"value":"消费",
+					"color":"#173177"
+					}
+			}
+		}
+	 * @return boolean|array
+	 */
+	public function sendTemplateMessage($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::Templat_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
+		
+		if($result){
+			$json = json_decode($result,true);
+			
+			return $json;
+		}
+		return false;
+	}
+	
 	
 	/**
 	 * 发送客服消息
