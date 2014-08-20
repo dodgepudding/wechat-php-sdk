@@ -24,12 +24,14 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 分组操作（查询、创建、修改、移动用户到分组）（认证权限）
 - 网页授权（基本授权，用户信息授权）（认证权限）
 - 用户信息（查询用户基本信息、获取关注者列表）（认证权限）
+- 多客服功能（认证权限）
 - 媒体文件（上传、获取）（认证权限） 
 - 调用地址组件 （支付权限） 
 - 生成订单签名数据 （支付权限） 
 - 订单成功回调 （支付权限） 
 - 发货通知 （支付权限） 
 - 支付订单查询 （支付权限） 
+- 模板消息（支付权限） 
 
 
 ### 初始化动作 
@@ -52,7 +54,12 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  createMenu($data) 创建菜单 $data菜单结构详见 http://mp.weixin.qq.com/wiki/index.php?title=%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8F%9C%E5%8D%95%E5%88%9B%E5%BB%BA%E6%8E%A5%E5%8F%A3 
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
+ *  uploadMedia($data, $type) 上传多媒体文件
  *  getMedia() 获取接收到的音频、视频媒体文件 
+ *  uploadArticles($data) 上传图文消息素材
+ *  sendMassMessage($data) 高级群发消息
+ *  sendGroupMassMessage($data) 高级群发消息（分组群发）
+ *  deleteMassMessage() 删除群发图文消息
  *  getQRCode($scene_id,$type=0,$expire=1800) 获取推广二维码ticket字串 
  *  getQRUrl($ticket) 获取二维码图片地址
  *  getUserList($next_openid) 批量获取关注用户列表 
@@ -73,7 +80,12 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  checkOrderSignature($orderxml='') 回调通知签名验证  
  *  sendPayDeliverNotify($openid,$transid,$out_trade_no,$status=1,$msg='ok') 发货通知  
  *  getPayOrder($out_trade_no) 查询订单信息  
- *  getAddrSign($url, $timeStamp, $nonceStr, $user_token='') 获取收货地址JS的签名  
+ *  getAddrSign($url, $timeStamp, $nonceStr, $user_token='') 获取收货地址JS的签名
+ *  sendTemplateMessage($data) 发送模板消息
+ *  getCustomServiceMessage($data) 获取多客服会话记录
+ *  transfer_customer_service($customer_account) 转发多客服消息
+ *  getCustomServiceKFlist() 获取多客服客服基本信息
+ *  getCustomServiceOnlineKFlist() 获取多客服在线客服接待信息
  
   
 2. wechatext.class.php  
@@ -87,7 +99,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getUserList($page,$pagesize,$groupid) 获取用户信息
  *  getGroupList($page,$pagesize) 获取群组信息
  *  getNewsList($page,$pagesize) 获取图文信息列表 
- *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
+ *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频/缩略图
  *  getFileList($type,$page,$pagesize) 获取素材库文件列表
  *  sendImage($id,$fid) 发送图片消息
  *  sendAudio($id,$fid) 发送音频消息
@@ -106,15 +118,26 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码  
  *  get_code_image($code='') 将上面获取的授权码转换为图片二维码  
  *  verify_code() 鉴定是否登陆成功,返回200为最终授权成功.  
- *  get_login_cookie() 鉴定成功后调用此方法即可获取用户基本信息  
- *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息  
+ *  get_login_info() 鉴定成功后调用此方法即可获取用户基本信息  
  *  get_avatar($url) 获取用户头像图片数据  
  *  logout() 注销登陆  
 
 4. wechat.js
 微信内嵌网页特殊功能js调用：
  * WeixinJS.hideOptionMenu() 隐藏右上角按钮
+ * WeixinJS.showOptionMenu() 显示右上角按钮
  * WeixinJS.hideToolbar() 隐藏工具栏
+ * WeixinJS.showToolbar() 显示工具栏
+ * WeixinJS.getNetworkType() 获取网络状态
+ * WeixinJS.closeWindow() 关闭窗口
+ * WeixinJS.scanQRCode() 扫描二维码
+ * WeixinJS.openUrlByExtBrowser(url) 使用浏览器打开网址
+ * WeixinJS.jumpToBizProfile(username) 跳转到指定公众账号页面
+ * WeixinJS.sendEmail(title,content) 发送邮件
+ * WeixinJS.openProductView(latitude,longitude,name,address,scale,infoUrl) 查看地图
+ * WeixinJS.addContact(username) 添加微信账号
+ * WeixinJS.payCallback(appId,package,timeStamp,nonceStr,signType,paySign,callback) 微信JsApi支付接口
+ * WeixinJS.editAddress(appId,addrSign,timeStamp,nonceStr,callback) 微信JsApi支付接口
  * 通过定义全局变量dataForWeixin配置触发分享的内容：
  ```javascript
  var dataForWeixin={

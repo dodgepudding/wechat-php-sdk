@@ -10,6 +10,7 @@
  *  sendNews($id,$msgid) 发送图文消息
  *  getNewsList($page,$pagesize) 获取图文信息列表
  *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
+ *  addPreview($title,$author,$summary,$content,$photoid,$srcurl='')   创建新的图文信息 
  *  getFileList($type,$page,$pagesize) 获取素材库文件列表
  *  sendImage($id,$fid) 发送图片消息
  *  sendAudio($id,$fid) 发送音频消息
@@ -39,7 +40,7 @@ class Wechatext
 	private $debug;
 	private $_logcallback;
 	private $_token;
-		
+	
 	public function __construct($options)
 	{
 		$this->_account = isset($options['account'])?$options['account']:'';
@@ -67,7 +68,7 @@ class Wechatext
 		$post['ajax'] = 1;
         $send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&tofakeid=$id&token={$this->_token}&lang=zh_CN";
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$submit = "http://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response";
+		$submit = "https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response";
 		$send_snoopy->submit($submit,$post);
 		$this->log($send_snoopy->results);
 		return $send_snoopy->results;
@@ -183,7 +184,7 @@ class Wechatext
 		}
 		return false;
 	}
-		
+	
 	/**
 	 * 获取图文信息列表
 	 * @param $page 页码(从0开始)
@@ -207,7 +208,7 @@ class Wechatext
 		} 
 		return false;
 	}
-
+	
 	/**
 	 * 获取与指定用户的对话内容
 	 * @param  $fakeid
@@ -278,6 +279,55 @@ class Wechatext
 	}
 	
 	/**
+	 * 创建图文消息
+	 * @param array $title 标题
+	 * @param array $summary 摘要
+	 * @param array $content 内容
+	 * @param array $photoid 素材库里的图片id(可通过uploadFile上传后获取)
+	 * @param array $srcurl 原文链接
+	 * @return json
+	 */
+	public function addPreview($title,$author,$summary,$content,$photoid,$srcurl='') {
+		$send_snoopy = new Snoopy;
+		$send_snoopy->referer = 'https://mp.weixin.qq.com/cgi-bin/operate_appmsg?lang=zh_CN&sub=edit&t=wxm-appmsgs-edit-new&type=10&subtype=3&token='.$this->_token;
+		
+		$submit = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?lang=zh_CN&t=ajax-response&sub=create&token=".$this->_token;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		
+		$send_snoopy->set_submit_normal();
+		$post = array(
+				'token'=>$this->_token,
+				'type'=>10,
+				'lang'=>'zh_CN',
+				'sub'=>'create',
+				'ajax'=>1,
+				'AppMsgId'=>'',				
+				'error'=>'false',
+		);
+		if (count($title)==count($author)&&count($title)==count($summary)&&count($title)==count($content)&&count($title)==count($photoid))
+		{
+			$i = 0;
+			foreach($title as $v) {
+				$post['title'.$i] = $title[$i];
+				$post['author'.$i] = $author[$i];
+				$post['digest'.$i] = $summary[$i];
+				$post['content'.$i] = $content[$i];
+				$post['fileid'.$i] = $photoid[$i];
+				if ($srcurl[$i]) $post['sourceurl'.$i] = $srcurl[$i];
+				
+				$i++;
+				}
+		}
+		$post['count'] = $i;
+		$post['token'] = $this->_token;
+		$send_snoopy->submit($submit,$post);
+		$tmp = $send_snoopy->results;
+		$this->log('step2:'.$tmp);
+		$json = json_decode($tmp,true);
+		return $json;
+	}
+	
+	/**
 	 * 发送媒体文件
 	 * @param $id 用户的uid(即FakeId)
 	 * @param $fid 文件id
@@ -305,7 +355,7 @@ class Wechatext
 		else
 			return false;
 	}
-
+	
 	/**
 	 * 获取素材库文件列表
 	 * @param $type 文件类型: 2:图片 3:音频 4:视频
@@ -329,7 +379,7 @@ class Wechatext
 		else
 			return false;
 	}
-		
+	
 	/**
 	 * 发送图文信息,必须从库里选取文件ID发送
 	 * @param  string $id      用户的uid(即FakeId)
@@ -360,55 +410,6 @@ class Wechatext
 		return $this->sendFile($id,$fid,4);
 	}
 	
-	/**
-	 * 创建图文消息
-	 * @param array $title 标题
-	 * @param array $summary 摘要
-	 * @param array $content 内容
-	 * @param array $photoid 素材库里的图片id(可通过uploadFile上传后获取)
-	 * @param array $srcurl 原文链接
-	 * @return json
-	 */
-	public function addPreview($title,$author,$summary,$content,$photoid,$srcurl='') {
-		$send_snoopy = new Snoopy;
-		$send_snoopy->referer = 'https://mp.weixin.qq.com/cgi-bin/operate_appmsg?lang=zh_CN&sub=edit&t=wxm-appmsgs-edit-new&type=10&subtype=3&token='.$this->_token;
-	
-		$submit = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?lang=zh_CN&t=ajax-response&sub=create&token=".$this->_token;
-		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-	
-		$send_snoopy->set_submit_normal();
-		$post = array(
-				'token'=>$this->_token,
-				'type'=>10,
-				'lang'=>'zh_CN',
-				'sub'=>'create',
-				'ajax'=>1,
-				'AppMsgId'=>'',				
-				'error'=>'false',
-		);
-		if (count($title)==count($author)&&count($title)==count($summary)&&count($title)==count($content)&&count($title)==count($photoid))
-		{
-			$i = 0;
-			foreach($title as $v) {
-				$post['title'.$i] = $title[$i];
-				$post['author'.$i] = $author[$i];
-				$post['digest'.$i] = $summary[$i];
-				$post['content'.$i] = $content[$i];
-				$post['fileid'.$i] = $photoid[$i];
-				if ($srcurl[$i]) $post['sourceurl'.$i] = $srcurl[$i];
-	
-				$i++;
-			}
-		}
-		$post['count'] = $i;
-		$post['token'] = $this->_token;
-		$send_snoopy->submit($submit,$post);
-		$tmp = $send_snoopy->results;
-		$this->log('step2:'.$tmp);
-		$json = json_decode($tmp,true);
-		return $json;
-	}
-		
 	/**
 	 * 发送预览图文消息
 	 * @param string $account 账户名称(user_name)
@@ -477,7 +478,7 @@ class Wechatext
 		$send_snoopy = new Snoopy;
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/getmessage?t=wxm-message&lang=zh_CN&count=50&token=".$this->_token;
-		$url = "https://mp.weixin.qq.com/cgi-bin/getheadimg?fakeid=$fakeid&token=".$this->_token."&lang=zh_CN";
+		$url = "https://mp.weixin.qq.com/misc/getheadimg?fakeid=$fakeid&token=".$this->_token."&lang=zh_CN";
 		$send_snoopy->fetch($url);
 		$result = $send_snoopy->results;
 		$this->log('Head image:'.$fakeid.'; length:'.strlen($result));
@@ -486,7 +487,7 @@ class Wechatext
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * 获取消息更新数目
 	 * @param int $lastid 最近获取的消息ID,为0时获取总消息数目
@@ -616,7 +617,7 @@ class Wechatext
 		if (!isset($result['base_resp']) || $result['base_resp']['ret'] != 0) {
 			return false;
 		}
-		
+        
 		foreach ($snoopy->headers as $key => $value) {
 			$value = trim($value);
 			if(preg_match('/^set-cookie:[\s]+([^=]+)=([^;]+)/i', $value,$match))
@@ -651,7 +652,7 @@ class Wechatext
 		$data = S($filename);
 		if($data){
 			$send_snoopy = new Snoopy; 
-			$send_snoopy->rawheaders['Cookie']= $cookie;
+			$send_snoopy->rawheaders['Cookie']= $data;
 			$send_snoopy->maxredirs = 0;
 			$url = "https://mp.weixin.qq.com/cgi-bin/indexpage?t=wxm-index&lang=zh_CN";
 			$send_snoopy->fetch($url);
@@ -671,13 +672,14 @@ class Wechatext
 
 	/**
 	 * 验证cookie的有效性
-	 * @return [type] [description]
+	 * @return bool
 	 */
 	public function checkValid()
 	{
+		if (!$this->cookie || !$this->_token) return false;
 		$send_snoopy = new Snoopy; 
 		$post = array('ajax'=>1,'token'=>$this->_token);
-		$submit = "http://mp.weixin.qq.com/cgi-bin/getregions?id=1017&t=ajax-getregions&lang=zh_CN";
+		$submit = "https://mp.weixin.qq.com/cgi-bin/getregions?id=1017&t=ajax-getregions&lang=zh_CN";
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
 		$send_snoopy->submit($submit,$post);
 		$result = $send_snoopy->results;

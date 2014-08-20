@@ -5,7 +5,7 @@
  *  注: 用户id为通过getMsg()方法获取的FakeId值
  *  主要实现如下功能:
  *  send($id,$content) 向某用户id发送微信文字信息
- *  getUserList($page,$pagesize,$group) 获取用户信息
+ *  getUserList($page,$pagesize,$groupid) 获取用户信息
  *  getGroupList($page,$pagesize) 获取群组信息
  *  sendNews($id,$msgid) 发送图文消息
  *  getNewsList($page,$pagesize) 获取图文信息列表
@@ -229,7 +229,6 @@ class Wechatext
 		}
 		return false;
 	}
-	
 	
 	/**
 	 * 发送图文信息,必须从图文库里选取消息ID发送
@@ -598,10 +597,6 @@ class Wechatext
 		return $result;
 	}
 	
-	/**
-	 * 模拟登录获取cookie
-	 * @return [type] [description]
-	 */
 	/**
 	 * 模拟登录获取cookie
 	 * @return [type] [description]
