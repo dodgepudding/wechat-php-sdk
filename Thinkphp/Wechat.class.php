@@ -73,6 +73,7 @@ class Wechat
 	const CUSTOM_SEND_URL='/message/custom/send?';
 	const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
 	const MASS_SEND_URL = '/message/mass/send?';
+	const Templat_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
@@ -1386,6 +1387,51 @@ class Wechat
 				'accesstoken'=>$user_token
 		);
 		return $this->getSignature($arrdata);
+	}
+	
+	/**
+	 * 发送模板消息
+	 * @param array $data 消息结构
+	 * ｛
+			"touser":"OPENID",
+			"template_id":"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY",
+			"url":"http://weixin.qq.com/download",
+			"topcolor":"#FF0000",
+			"data":{
+				"参数名1": {
+					"value":"参数",
+					"color":"#173177"	 //参数颜色
+					},
+				"Date":{
+					"value":"06月07日 19时24分",
+					"color":"#173177"
+					},
+				"CardNumber":{
+					"value":"0426",
+					"color":"#173177"
+					},
+				"Type":{
+					"value":"消费",
+					"color":"#173177"
+					}
+			}
+		}
+	 * @return boolean|array
+	 */
+	public function sendTemplateMessage($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::Templat_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
+		
+		if($result){
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
 	}
 	
 	/**
