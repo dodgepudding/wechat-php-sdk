@@ -66,6 +66,7 @@ class Wechat
 	const QRCODE_IMG_URL='https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=';
 	const USER_GET_URL='/user/get?';
 	const USER_INFO_URL='/user/info?';
+	const USER_UPDATEREMARK_URL='/user/info/updateremark?';	
 	const GROUP_GET_URL='/groups/get?';
 	const GROUP_CREATE_URL='/groups/create?';
 	const GROUP_UPDATE_URL='/groups/update?';
@@ -983,6 +984,32 @@ class Wechat
 			return $json;
 		}
 		return false;
+	}
+
+	/**
+	 * 设置用户备注名
+	 * @param string $openid
+	 * @param string $remark 备注名
+	 * @return boolean|array
+	 */
+	public function updateUserRemark($openid,$remark){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $data = array(
+			'openid'=>$openid,
+			'remark'=>$remark
+	    );
+	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_UPDATEREMARK_URL.'access_token='.$this->access_token,$data);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+	    }
+	    return false;
 	}
 	
 	/**
