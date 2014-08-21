@@ -409,7 +409,7 @@ class Wechat
 	* 获取模板消息ID
 	* 经过验证，这个和普通的消息MsgId不一样
 	*/
-	public function getRevTplMsgId(){
+	public function getRevTplMsgID(){
 		if (isset($this->_receive['MsgID'])){
 			return $this->_receive['MsgID'];
 		} else 
