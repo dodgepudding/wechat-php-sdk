@@ -359,7 +359,7 @@ class Wechat
 	}
 	
 	/**
-	 * 获取接收语言推送
+	 * 获取接收语音推送
 	 */
 	public function getRevVoice(){
 		if (isset($this->_receive['MediaId'])){
@@ -407,9 +407,9 @@ class Wechat
 	
 	/**
 	* 获取模板消息ID
-	* 根据官方文档说参数名ID是大写，暂未实际验证
+	* 经过验证，这个和普通的消息MsgId不一样
 	*/
-	public function getRevTemMsgId(){
+	public function getRevTplMsgId(){
 		if (isset($this->_receive['MsgID'])){
 			return $this->_receive['MsgID'];
 		} else 
@@ -419,7 +419,7 @@ class Wechat
 	/**
 	* 获取模板消息发送状态
 	*/
-	public function getRevTemStatus(){
+	public function getRevStatus(){
 		if (isset($this->_receive['Status'])){
 			return $this->_receive['Status'];
 		} else 
