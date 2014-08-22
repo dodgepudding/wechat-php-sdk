@@ -352,12 +352,17 @@ class Wechat
 	 */
 	public function getRevEvent(){
 		if (isset($this->_receive['Event'])){
-			return array(
-				'event'=>$this->_receive['Event'],
-				'key'=>$this->_receive['EventKey'],
-			);
-		} else 
+			$array['event'] = $this->_receive['Event'];
+		}
+		if (isset($this->_receive['EventKey'])){
+			$array['key'] = $this->_receive['EventKey'];
+		}
+		
+		if (isset($array) && count($array) > 0) {
+			return $array;
+		} else {
 			return false;
+		} 
 	}
 	
 	/**
