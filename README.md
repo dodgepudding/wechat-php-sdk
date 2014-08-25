@@ -68,6 +68,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getUserInfo($openid) 获取关注者详细信息 
  *  updateUserRemark($openid,$remark) 设置用户备注名
  *  getGroup() 获取用户分组列表 
+ *  getUserGroup($openid) 获取用户所在分组
  *  createGroup($name) 新增自定分组 
  *  updateGroup($groupid,$name) 更改分组名称 
  *  updateGroupMembers($groupid,$openid) 移动用户分组  

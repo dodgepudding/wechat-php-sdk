@@ -69,6 +69,7 @@ class Wechat
 	const USER_INFO_URL='/user/info?';
 	const USER_UPDATEREMARK_URL='/user/info/updateremark?';	
 	const GROUP_GET_URL='/groups/get?';
+	const USER_GROUP_URL='/groups/getid?';
 	const GROUP_CREATE_URL='/groups/create?';
 	const GROUP_UPDATE_URL='/groups/update?';
 	const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
@@ -973,6 +974,7 @@ class Wechat
 	 * @return boolean|string url 成功则返回转换后的短url
 	 */
 	public function getShortUrl($long_url){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
 	    $data = array(
             'action'=>'long2short',
             'long_url'=>$long_url
@@ -1078,6 +1080,30 @@ class Wechat
 		return false;
 	}
 	
+	/**
+	 * 获取用户所在分组
+	 * @param string $openid
+	 * @return boolean|array ('groupid'=>groupid)
+	 */
+	public function getUserGroup($openid){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $data = array(
+	            'openid'=>$openid
+	    );
+	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_GROUP_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (isset($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+    
 	/**
 	 * 新增自定分组
 	 * @param string $name 分组名称
