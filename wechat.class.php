@@ -64,6 +64,7 @@ class Wechat
 	const QR_SCENE = 0;
 	const QR_LIMIT_SCENE = 1;
 	const QRCODE_IMG_URL='https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=';
+	const SHORT_URL='/shorturl?';
 	const USER_GET_URL='/user/get?';
 	const USER_INFO_URL='/user/info?';
 	const USER_UPDATEREMARK_URL='/user/info/updateremark?';	
@@ -966,6 +967,30 @@ class Wechat
 		return self::QRCODE_IMG_URL.$ticket;
 	}
 	
+	/**
+	 * 长链接转短链接接口
+	 * @param string $long_url 传入要转换的长url
+	 * @return boolean|string url 成功则返回转换后的短url
+	 */
+	public function getShortUrl($long_url){
+	    $data = array(
+            'action'=>'long2short',
+            'long_url'=>$long_url
+	    );
+	    $result = $this->http_post(self::API_URL_PREFIX.self::SHORT_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json['short_url'];
+	    }
+	    return false;
+	}
+
 	/**
 	 * 批量获取关注用户列表
 	 * @param unknown $next_openid

@@ -21,6 +21,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 菜单操作（查询、创建、删除）（菜单权限）
 - 客服消息（文本、图片、语音、视频、音乐、图文）（认证权限）
 - 二维码（创建临时、永久二维码，获取二维码URL）（认证权限）
+- 长链接转短链接接口（认证权限）
 - 分组操作（查询、创建、修改、移动用户到分组）（认证权限）
 - 网页授权（基本授权，用户信息授权）（认证权限）
 - 用户信息（查询用户基本信息、获取关注者列表）（认证权限）
@@ -62,6 +63,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  deleteMassMessage() 删除群发图文消息
  *  getQRCode($scene_id,$type=0,$expire=1800) 获取推广二维码ticket字串 
  *  getQRUrl($ticket) 获取二维码图片地址
+ *  getShortUrl($long_url) 长链接转短链接接口
  *  getUserList($next_openid) 批量获取关注用户列表 
  *  getUserInfo($openid) 获取关注者详细信息 
  *  updateUserRemark($openid,$remark) 设置用户备注名
