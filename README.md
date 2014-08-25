@@ -77,6 +77,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getOauthAccessToken() 通过回调的code获取网页授权access_token  
  *  getOauthRefreshToken($refresh_token) 通过refresh_token对access_token续期  
  *  getOauthUserinfo($access_token,$openid) 通过网页授权的access_token获取用户资料  
+ *  getOauthAuth($access_token,$openid)  检验授权凭证access_token是否有效
  *  getSignature($arrdata,'sha1') 生成签名字串  
  *  generateNonceStr($length) 获取随机字串  
  *  createPackage($out_trade_no,$body,$total_fee,$notify_url,$spbill_create_ip,$fee_type=1,$bank_type="WX",$input_charset="UTF-8",$time_start="",$time_expire="",$transport_fee="",$product_fee="",$goods_tag="",$attach="") 生成订单package字符串  

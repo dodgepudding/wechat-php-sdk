@@ -87,6 +87,7 @@ class Wechat
 	const OAUTH_TOKEN_URL = '/access_token?';
 	const OAUTH_REFRESH_URL = '/refresh_token?';
 	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
+	const OAUTH_AUTH_URL = 'https://api.weixin.qq.com/sns/auth?';
 	const PAY_DELIVERNOTIFY = 'https://api.weixin.qq.com/pay/delivernotify?';
 	const PAY_ORDERQUERY = 'https://api.weixin.qq.com/pay/orderquery?';
 	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
@@ -933,7 +934,7 @@ class Wechat
 	 * @param int $scene_id 自定义追踪id
 	 * @param int $type 0:临时二维码；1:永久二维码(此时expire参数无效)
 	 * @param int $expire 临时二维码有效期，最大为1800秒
-	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>1800)
+	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>1800,'url'=>'二维码图片解析后的地址')
 	 */
 	public function getQRCode($scene_id,$type=0,$expire=1800){
 		if (!$this->access_token && !$this->checkAuth()) return false;
@@ -1083,7 +1084,7 @@ class Wechat
 	/**
 	 * 获取用户所在分组
 	 * @param string $openid
-	 * @return boolean|array ('groupid'=>groupid)
+	 * @return boolean|int 成功则返回用户分组id
 	 */
 	public function getUserGroup($openid){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
@@ -1094,12 +1095,12 @@ class Wechat
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
-	        if (isset($json['errcode'])) {
+	        if (!$json || !empty($json['errcode'])) {
 	            $this->errCode = $json['errcode'];
 	            $this->errMsg = $json['errmsg'];
 	            return false;
-	        }
-	        return $json;
+	        } else 
+                if (isset($json['groupid'])) return $json['groupid'];
 	    }
 	    return false;
 	}
@@ -1271,6 +1272,27 @@ class Wechat
 			return $json;
 		}
 		return false;
+	}
+
+	/**
+	 * 检验授权凭证是否有效
+	 * @param string $access_token
+	 * @param string $openid
+	 * @return boolean 是否有效
+	 */
+	public function getOauthAuth($access_token,$openid){
+	    $result = $this->http_get(self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        } else
+	          if ($json['errcode'==0) return true;
+	    }
+	    return false;
 	}
 	
 	/**
