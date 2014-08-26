@@ -358,12 +358,11 @@ class Wechat
 		if (isset($this->_receive['EventKey'])){
 			$array['key'] = $this->_receive['EventKey'];
 		}
-		
 		if (isset($array) && count($array) > 0) {
 			return $array;
 		} else {
 			return false;
-		} 
+		}
 	}
 	
 	/**
@@ -949,7 +948,7 @@ class Wechat
 	 * @param int $scene_id 自定义追踪id
 	 * @param int $type 0:临时二维码；1:永久二维码(此时expire参数无效)
 	 * @param int $expire 临时二维码有效期，最大为1800秒
-	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>1800)
+	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>1800,'url'=>'二维码图片解析后的地址')
 	 */
 	public function getQRCode($scene_id,$type=0,$expire=1800){
 		if (!$this->access_token && !$this->checkAuth()) return false;
@@ -990,25 +989,25 @@ class Wechat
 	 * @return boolean|string url 成功则返回转换后的短url
 	 */
 	public function getShortUrl($long_url){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$data = array(
-				'action'=>'long2short',
-				'long_url'=>$long_url
-		);
-		$result = $this->http_post(self::API_URL_PREFIX.self::SHORT_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json['short_url'];
-		}
-		return false;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $data = array(
+            'action'=>'long2short',
+            'long_url'=>$long_url
+	    );
+	    $result = $this->http_post(self::API_URL_PREFIX.self::SHORT_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json['short_url'];
+	    }
+	    return false;
 	}
-	
+
 	/**
 	 * 批量获取关注用户列表
 	 * @param unknown $next_openid
@@ -1102,24 +1101,24 @@ class Wechat
 	 * @return boolean|int 成功则返回用户分组id
 	 */
 	public function getUserGroup($openid){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$data = array(
-				'openid'=>$openid
-		);
-		$result = $this->http_post(self::API_URL_PREFIX.self::USER_GROUP_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			} else
-				if (isset($json['groupid'])) return $json['groupid'];
-		}
-		return false;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $data = array(
+	            'openid'=>$openid
+	    );
+	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_GROUP_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        } else 
+                if (isset($json['groupid'])) return $json['groupid'];
+	    }
+	    return false;
 	}
-	
+    
 	/**
 	 * 新增自定分组
 	 * @param string $name 分组名称
@@ -1288,7 +1287,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 检验授权凭证是否有效
 	 * @param string $access_token
@@ -1296,18 +1295,18 @@ class Wechat
 	 * @return boolean 是否有效
 	 */
 	public function getOauthAuth($access_token,$openid){
-		$result = $this->http_get(self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			} else
-				if ($json['errcode']==0) return true;
-		}
-		return false;
+	    $result = $this->http_get(self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        } else
+	          if ($json['errcode']==0) return true;
+	    }
+	    return false;
 	}
 	
 	/**
@@ -1547,7 +1546,6 @@ class Wechat
 	public function sendTemplateMessage($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
 		$result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
-		
 		if($result){
 			$json = json_decode($result,true);
 			if (!$json || !empty($json['errcode'])) {
