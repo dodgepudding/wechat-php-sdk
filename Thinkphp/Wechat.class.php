@@ -64,17 +64,19 @@ class Wechat
 	const QR_SCENE = 0;
 	const QR_LIMIT_SCENE = 1;
 	const QRCODE_IMG_URL='https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=';
+	const SHORT_URL='/shorturl?';
 	const USER_GET_URL='/user/get?';
 	const USER_INFO_URL='/user/info?';
 	const USER_UPDATEREMARK_URL='/user/info/updateremark?';	
 	const GROUP_GET_URL='/groups/get?';
+	const USER_GROUP_URL='/groups/getid?';
 	const GROUP_CREATE_URL='/groups/create?';
 	const GROUP_UPDATE_URL='/groups/update?';
 	const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
 	const CUSTOM_SEND_URL='/message/custom/send?';
 	const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
 	const MASS_SEND_URL = '/message/mass/send?';
-	const Templat_SEND_URL = '/message/template/send?';
+	const TEMPLATE_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
@@ -85,6 +87,7 @@ class Wechat
 	const OAUTH_TOKEN_URL = '/access_token?';
 	const OAUTH_REFRESH_URL = '/refresh_token?';
 	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
+	const OAUTH_AUTH_URL = 'https://api.weixin.qq.com/sns/auth?';
 	const PAY_DELIVERNOTIFY = 'https://api.weixin.qq.com/pay/delivernotify?';
 	const PAY_ORDERQUERY = 'https://api.weixin.qq.com/pay/orderquery?';
 	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
@@ -982,6 +985,31 @@ class Wechat
 	}
 	
 	/**
+	 * 长链接转短链接接口
+	 * @param string $long_url 传入要转换的长url
+	 * @return boolean|string url 成功则返回转换后的短url
+	 */
+	public function getShortUrl($long_url){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$data = array(
+				'action'=>'long2short',
+				'long_url'=>$long_url
+		);
+		$result = $this->http_post(self::API_URL_PREFIX.self::SHORT_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json['short_url'];
+		}
+		return false;
+	}
+	
+	/**
 	 * 批量获取关注用户列表
 	 * @param unknown $next_openid
 	 */
@@ -1064,6 +1092,30 @@ class Wechat
 				return false;
 			}
 			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取用户所在分组
+	 * @param string $openid
+	 * @return boolean|int 成功则返回用户分组id
+	 */
+	public function getUserGroup($openid){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$data = array(
+				'openid'=>$openid
+		);
+		$result = $this->http_post(self::API_URL_PREFIX.self::USER_GROUP_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			} else
+				if (isset($json['groupid'])) return $json['groupid'];
 		}
 		return false;
 	}
@@ -1233,6 +1285,27 @@ class Wechat
 				return false;
 			}
 			return $json;
+		}
+		return false;
+	}
+	
+	/**
+	 * 检验授权凭证是否有效
+	 * @param string $access_token
+	 * @param string $openid
+	 * @return boolean 是否有效
+	 */
+	public function getOauthAuth($access_token,$openid){
+		$result = $this->http_get(self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			} else
+				if ($json['errcode']==0) return true;
 		}
 		return false;
 	}
@@ -1473,7 +1546,7 @@ class Wechat
 	 */
 	public function sendTemplateMessage($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::Templat_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
+		$result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
 		
 		if($result){
 			$json = json_decode($result,true);

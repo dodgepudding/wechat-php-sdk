@@ -76,7 +76,7 @@ class Wechat
 	const CUSTOM_SEND_URL='/message/custom/send?';
 	const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
 	const MASS_SEND_URL = '/message/mass/send?';
-	const Templat_SEND_URL = '/message/template/send?';
+	const TEMPLATE_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
@@ -348,12 +348,17 @@ class Wechat
 	 */
 	public function getRevEvent(){
 		if (isset($this->_receive['Event'])){
-			return array(
-				'event'=>$this->_receive['Event'],
-				'key'=>$this->_receive['EventKey'],
-			);
-		} else 
+			$array['event'] = $this->_receive['Event'];
+		}
+		if (isset($this->_receive['EventKey'])){
+			$array['key'] = $this->_receive['EventKey'];
+		}
+		
+		if (isset($array) && count($array) > 0) {
+			return $array;
+		} else {
 			return false;
+		} 
 	}
 	
 	/**
@@ -1290,7 +1295,7 @@ class Wechat
 	            $this->errMsg = $json['errmsg'];
 	            return false;
 	        } else
-	          if ($json['errcode'==0) return true;
+	          if ($json['errcode']==0) return true;
 	    }
 	    return false;
 	}
@@ -1531,7 +1536,7 @@ class Wechat
 	 */
 	public function sendTemplateMessage($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::Templat_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
+		$result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
 		
 		if($result){
 			$json = json_decode($result,true);
