@@ -5,7 +5,7 @@
  *  注: 用户id为通过getMsg()方法获取的FakeId值
  *  主要实现如下功能:
  *  send($id,$content) 向某用户id发送微信文字信息
- *  getUserList($page,$pagesize,$group) 获取用户信息
+ *  getUserList($page,$pagesize,$groupid) 获取用户信息
  *  getGroupList($page,$pagesize) 获取群组信息
  *  sendNews($id,$msgid) 发送图文消息
  *  getNewsList($page,$pagesize) 获取图文信息列表
@@ -229,7 +229,6 @@ class Wechatext
 		}
 		return false;
 	}
-	
 	
 	/**
 	 * 发送图文信息,必须从图文库里选取消息ID发送
@@ -602,10 +601,6 @@ class Wechatext
 	 * 模拟登录获取cookie
 	 * @return [type] [description]
 	 */
-	/**
-	 * 模拟登录获取cookie
-	 * @return [type] [description]
-	 */
 	public function login(){
 		$snoopy = new Snoopy; 
 		$submit = "https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
@@ -664,19 +659,20 @@ class Wechatext
 		} else
 			$data = '';
 		if($data){
-			$denglu=json_decode($data,true);
-			$send_snoopy = new Snoopy; 
-			$send_snoopy->rawheaders['Cookie']= $denglu[cookie];
+			$login=json_decode($data,true);
+			$send_snoopy = new Snoopy;
+			$send_snoopy->rawheaders['Cookie']= $login['cookie'];
 			$send_snoopy->maxredirs = 0;
-			$url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=".$denglu[token];
+			$url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=".$login['token'];
 			$send_snoopy->fetch($url);
 			$header = $send_snoopy->headers;
+			$this->log('header:'.print_r($send_snoopy->headers,true));
 			if( strstr($header[3], 'EXPIRED')){
 				return $this->login();
 			}else{
-				$this->_token =$denglu[token];
+				$this->_token =$login['token'];
 				$this->log('token:'.$this->_token);
-				return $denglu[cookie];
+				return $login['cookie'];
 			}
 		}else{
 			return $this->login();

@@ -7,8 +7,7 @@
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码
  *  get_code_image($code='') 将上面获取的授权码转换为图片二维码
  *  verify_code() 鉴定是否登陆成功,返回200为最终授权成功.
- *  get_login_cookie() 鉴定成功后调用此方法即可获取用户基本信息
- *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息
+ *  get_login_info() 鉴定成功后调用此方法即可获取用户基本信息
  *  get_avatar($url) 获取用户头像图片数据
  *  @author dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
@@ -19,6 +18,7 @@ include "Snoopy.class.php";
 class Wechatauth
 {
 	private $cookie;
+	private $skey;
 	private $_cookiename;
 	private $_cookieexpired = 3600;
 	private $_account = 'test';
@@ -93,7 +93,7 @@ class Wechatauth
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * 通过授权码获取对应的二维码图片地址
 	 * @param string $code
