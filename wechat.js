@@ -18,6 +18,7 @@
  * WeixinJS.sendEmail(title,content) 发送邮件
  * WeixinJS.openProductView(latitude,longitude,name,address,scale,infoUrl) 查看地图
  * WeixinJS.addContact(username) 添加微信账号
+ * WeixinJS.imagePreview(urls,current) 调出微信内图片预览
  * WeixinJS.payCallback(appId,package,timeStamp,nonceStr,signType,paySign,callback) 微信JsApi支付接口
  * WeixinJS.editAddress(appId,addrSign,timeStamp,nonceStr,callback) 微信JsApi支付接口
  * 自定义分享内容数据格式：
@@ -178,6 +179,19 @@ WeixinJS.addContact=function weixinAddContact(username){
     });
 };
 
+/**
+ * 调出微信内图片预览scrollview
+ * @param array urls 图片url数组
+ * @param string current 当前图片url
+ */
+WeixinJS.imagePreview = function(urls,current) {
+	if (typeof WeixinJSBridge!='undefined') 
+		WeixinJSBridge.invoke("imagePreview", {
+			current: current,
+			urls: urls
+		});
+};
+
 //微信JsApi支付接口
 WeixinJS.payCallback = function(appId,package,timeStamp,nonceStr,signType,paySign,callback){
 	if (typeof WeixinJSBridge!='undefined')
@@ -214,6 +228,7 @@ WeixinJS.editAddress = function(appId,addrSign,timeStamp,nonceStr,callback){
 };
 
 (function(){
+   if (typeof dataForWeixin=="undefined") return;
    var onBridgeReady=function(){
    WeixinJSBridge.on('menu:share:appmessage', function(argv){
 	  (dataForWeixin.prepare)(argv);

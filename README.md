@@ -141,6 +141,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  * WeixinJS.sendEmail(title,content) 发送邮件
  * WeixinJS.openProductView(latitude,longitude,name,address,scale,infoUrl) 查看地图
  * WeixinJS.addContact(username) 添加微信账号
+ * WeixinJS.imagePreview(urls,current) 调出微信内图片预览
  * WeixinJS.payCallback(appId,package,timeStamp,nonceStr,signType,paySign,callback) 微信JsApi支付接口
  * WeixinJS.editAddress(appId,addrSign,timeStamp,nonceStr,callback) 微信JsApi支付接口
  * 通过定义全局变量dataForWeixin配置触发分享的内容：
