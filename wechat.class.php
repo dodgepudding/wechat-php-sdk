@@ -105,6 +105,7 @@ class Wechat
 	private $_msg;
 	private $_funcflag = false;
 	private $_receive;
+	private $_text_filter = true;
 	public $debug =  false;
 	public $errCode = 40001;
 	public $errMsg = "no access";
@@ -477,6 +478,16 @@ class Wechat
 	}
 	
 	/**
+	 * 过滤文字回复\r\n换行符
+	 * @param string $text
+	 * @return string|mixed
+	 */
+	private function _auto_text_filter($text) {
+		if (!$this->_text_filter) return $text;
+		return str_replace("\r\n", "\n", $text);
+	}
+	
+	/**
 	 * 设置回复消息
 	 * Examle: $obj->text('hello')->reply();
 	 * @param string $text
@@ -488,7 +499,7 @@ class Wechat
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
 			'MsgType'=>self::MSGTYPE_TEXT,
-			'Content'=>$text,
+			'Content'=>$this->_auto_text_filter($text),
 			'CreateTime'=>time(),
 			'FuncFlag'=>$FuncFlag
 		);
