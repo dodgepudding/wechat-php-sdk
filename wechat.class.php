@@ -1273,7 +1273,7 @@ class Wechat
 	 * 获取授权后的用户资料
 	 * @param string $access_token
 	 * @param string $openid
-	 * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege,unionid}
+	 * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege,[unionid]}
 	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
 	 */
 	public function getOauthUserinfo($access_token,$openid){
