@@ -657,7 +657,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || isset($json['errcode'])) {
+			if (!$json && isset($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
