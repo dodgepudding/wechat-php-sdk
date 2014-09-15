@@ -1350,6 +1350,32 @@ class Wechat
 	}
 	
 	/**
+	 * 生成原生支付url
+	 * @param number $productid 商品编号，最长为32字节
+	 * @return string
+	 */
+	public function createNativeUrl($productid){
+		    $nativeObj["appid"] = $this->appid;
+		    $nativeObj["appkey"] = $this->paysignkey;
+		    $nativeObj["productid"] = urlencode($productid);
+		    $nativeObj["timestamp"] = time();
+		    $nativeObj["noncestr"] = $this->generateNonceStr();
+		    $nativeObj["sign"] = $this->getSignature($nativeObj);
+		    unset($nativeObj["appkey"]);
+		    $bizString = "";
+		    foreach($nativeObj as $key => $value)
+		    {
+			if(strlen($bizString) == 0)
+				$bizString .= $key . "=" . $value;
+			else
+				$bizString .= "&" . $key . "=" . $value;
+		    }
+		    return "weixin://wxpay/bizpayurl?".$bizString;
+		    //weixin://wxpay/bizpayurl?sign=XXXXX&appid=XXXXXX&productid=XXXXXX&timestamp=XXXXXX&noncestr=XXXXXX
+	}
+
+	
+	/**
 	 * 生成订单package字符串
 	 * @param string $out_trade_no 必填，商户系统内部的订单号,32个字符内,确保在商户系统唯一
 	 * @param string $body 必填，商品描述,128 字节以下
