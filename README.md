@@ -157,7 +157,22 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 	   callback:function(){}
 	};
  ```
- 
+ 5. errCode.php 
+当调用API接口失败时，可以用此类来换取失败原因的中文说明。
+
+使用方法：
+```php
+include "errCode.php";
+
+$ret=ErrCode::getErrText(48001);
+
+if ($ret) 
+	echo $ret;
+else 
+    echo "未找到对应的内容";
+
+```
+
 
 官方Wechat调用示例：
 --------  

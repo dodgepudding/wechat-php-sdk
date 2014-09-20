@@ -192,6 +192,7 @@ WeixinJS.imagePreview = function(urls,current) {
 		});
 };
 
+//微信JsApi支付接口
 WeixinJS.payCallback = function(appId,package,timeStamp,nonceStr,signType,paySign,callback){
 	if (typeof WeixinJSBridge!='undefined')
 	WeixinJSBridge.invoke('getBrandWCPayRequest',{

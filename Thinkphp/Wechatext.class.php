@@ -629,7 +629,8 @@ class Wechatext
 			$this->_token = $matches[1];
 			$this->log('token:'.$this->_token);
 		}
-		$this->saveCookie($this->_cookiename,$cookie);
+		$cookies='{"cookie":"'.$cookie.'","token":"'.$this->_token.'"}';
+		$this->saveCookie($this->_cookiename,$cookies);
 		return $cookie;
 	}
 
@@ -652,7 +653,7 @@ class Wechatext
 		$data = S($filename);
 		if($data){
 			$login=json_decode($data,true);
-			$send_snoopy = new Snoopy; 
+			$send_snoopy = new Snoopy;
 			$send_snoopy->rawheaders['Cookie']= $login['cookie'];
 			$send_snoopy->maxredirs = 0;
 			$url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=".$login['token'];

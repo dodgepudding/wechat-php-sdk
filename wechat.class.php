@@ -354,12 +354,130 @@ class Wechat
 		if (isset($this->_receive['EventKey'])){
 			$array['key'] = $this->_receive['EventKey'];
 		}
-		
 		if (isset($array) && count($array) > 0) {
 			return $array;
 		} else {
 			return false;
-		} 
+		}
+	}
+	
+	/**
+	 * 获取自定义菜单的扫码推事件信息
+	 * 
+	 * 事件类型为以下两种时则调用此方法有效
+	 * Event	 事件类型，scancode_push
+	 * Event	 事件类型，scancode_waitmsg
+	 * 
+	 * @return: array | false
+	 * array (
+	 *     'ScanType'=>'qrcode',
+	 *     'ScanResult'=>'123123'
+	 * )
+	 */
+	public function getRevScanInfo(){
+		if (isset($this->_receive['ScanCodeInfo'])){
+		    if (!is_array($this->_receive['SendPicsInfo'])) {
+		        $array=(array)$this->_receive['ScanCodeInfo'];
+		        $this->_receive['ScanCodeInfo']=$array;
+		    }else {
+		        $array=$this->_receive['ScanCodeInfo'];
+		    }
+		}
+		if (isset($array) && count($array) > 0) {
+			return $array;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * 获取自定义菜单的图片发送事件信息
+	 * 
+	 * 事件类型为以下三种时则调用此方法有效
+	 * Event	 事件类型，pic_sysphoto        弹出系统拍照发图的事件推送
+	 * Event	 事件类型，pic_photo_or_album  弹出拍照或者相册发图的事件推送
+	 * Event	 事件类型，pic_weixin          弹出微信相册发图器的事件推送
+	 * 
+	 * @return: array | false
+	 * array (
+	 *   'Count' => '2',
+	 *   'PicList' => 
+	 *   array (
+	 *     'item' => 
+	 *     array (
+	 *       0 => 
+	 *       array (
+	 *         'PicMd5Sum' => 'aaae42617cf2a14342d96005af53624c',
+	 *       ),
+	 *       1 => 
+	 *       array (
+	 *         'PicMd5Sum' => '149bd39e296860a2adc2f1bb81616ff8',
+	 *       ),
+	 *     ),
+	 *   ),
+	 * )
+	 * 
+	 */
+	public function getRevSendPicsInfo(){
+		if (isset($this->_receive['SendPicsInfo'])){
+		    if (!is_array($this->_receive['SendPicsInfo'])) {
+		        $array=(array)$this->_receive['SendPicsInfo'];
+		        if (isset($array['PicList'])){
+		            $array['PicList']=(array)$array['PicList'];
+		            $item=$array['PicList']['item'];
+		            $array['PicList']['item']=array();
+		            foreach ( $item as $key => $value ){
+		                $array['PicList']['item'][$key]=(array)$value;
+		            }
+		        }
+		        $this->_receive['SendPicsInfo']=$array;
+		    } else {
+		        $array=$this->_receive['SendPicsInfo'];
+		    }
+		}
+		if (isset($array) && count($array) > 0) {
+			return $array;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * 获取自定义菜单的地理位置选择器事件推送
+	 *
+	 * 事件类型为以下时则可以调用此方法有效
+	 * Event	 事件类型，location_select        弹出系统拍照发图的事件推送
+	 *
+	 * @return: array | false
+	 * array (
+	 *   'Location_X' => '33.731655000061',
+	 *   'Location_Y' => '113.29955200008047',
+	 *   'Scale' => '16',
+	 *   'Label' => '某某市某某区某某路',
+	 *   'Poiname' => '',
+	 * )
+	 * 
+	 */
+	public function getRevSendGeoInfo(){
+	    if (isset($this->_receive['SendLocationInfo'])){
+	        if (!is_array($this->_receive['SendLocationInfo'])) {
+	            $array=(array)$this->_receive['SendLocationInfo'];
+	            if (empty($array['Poiname'])) {
+	                $array['Poiname']="";
+	            }
+	            if (empty($array['Label'])) {
+	                $array['Label']="";
+	            }
+	            $this->_receive['SendLocationInfo']=$array;
+	        } else {
+	            $array=$this->_receive['SendLocationInfo'];
+	        }
+	    }
+	    if (isset($array) && count($array) > 0) {
+	        return $array;
+	    } else {
+	        return false;
+	    }
 	}
 	
 	/**
@@ -1033,7 +1151,8 @@ class Wechat
 	/**
 	 * 获取关注者详细信息
 	 * @param string $openid
-	 * @return array
+	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
+	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
 	 */
 	public function getUserInfo($openid){
 		if (!$this->access_token && !$this->checkAuth()) return false;
@@ -1273,7 +1392,8 @@ class Wechat
 	 * 获取授权后的用户资料
 	 * @param string $access_token
 	 * @param string $openid
-	 * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege}
+	 * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege,[unionid]}
+	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
 	 */
 	public function getOauthUserinfo($access_token,$openid){
 		$result = $this->http_get(self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
@@ -1574,7 +1694,6 @@ class Wechat
 	public function sendTemplateMessage($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
 		$result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
-		
 		if($result){
 			$json = json_decode($result,true);
 			if (!$json || !empty($json['errcode'])) {
