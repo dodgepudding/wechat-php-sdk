@@ -266,6 +266,9 @@ $options = array(
 * getOauthRedirect($callback,$state='STATE',$scope='snsapi_base') 组合授权跳转接口url
 
 
+
+----------
+
 官方Wechat调用示例：
 --------  
 ```php
@@ -356,6 +359,7 @@ switch($type) {
 HTML部分请看test/test3.php, 主要是定时ajax查询是否已经授权成功
 
 企业号API类库调用示例：
+-------- 
 ```php
 //test1.php
 include "wechat.class.php";
