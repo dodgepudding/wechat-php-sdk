@@ -12,7 +12,7 @@ http://mp.weixin.qq.com/wiki/
 微信支付接入文档：
 https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
-1. wechat.class.php  
+## 1. wechat.class.php 官方API类库
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
 
 ### 主要功能 
@@ -93,7 +93,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getCustomServiceOnlineKFlist() 获取多客服在线客服接待信息
  
   
-2. wechatext.class.php  
+## 2. wechatext.class.php 非官方扩展API
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
 类方法里提及的用户id在接口返回结构里表述为FakeId, 属同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  
 调用下列方法前必须经过login()方法和checkValid()验证方法才能获得调用权限. 有的账户无法通过登陆可能因为要求提供验证码, 可以手动登陆后把获取到的cookie写进程序存放cookie的文件解决.  
@@ -117,7 +117,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据  
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据  
 
-3. wechatauth.class.php  
+## 3. wechatauth.class.php 授权登陆
 通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 首先程序分别通过get_login_code和get_code_image方法获取授权二维码图片, 然后利用微信手机客户端扫描二维码图片后将自动跳出授权页面, 用户点击授权后即可获取对应的用户资料和头像信息. 详细验证步骤请看test3.php例子.   
 类主要方法:
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码  
@@ -127,7 +127,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  get_avatar($url) 获取用户头像图片数据  
  *  logout() 注销登陆  
 
-4. wechat.js
+## 4. wechat.js 内嵌JS
 微信内嵌网页特殊功能js调用：
  * WeixinJS.hideOptionMenu() 隐藏右上角按钮
  * WeixinJS.showOptionMenu() 显示右上角按钮
@@ -157,7 +157,8 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 	   callback:function(){}
 	};
  ```
- 5. errCode.php 
+
+## 5. errCode.php 全局返回码类
 当调用API接口失败时，可以用此类来换取失败原因的中文说明。
 
 使用方法：
@@ -173,9 +174,9 @@ else
 
 ```
 
- 5. qywechat.class.php
 
-## 企业号API类库
+
+## 6. qywechat.class.php 企业号API类库 
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
 
 ## 主要功能 
