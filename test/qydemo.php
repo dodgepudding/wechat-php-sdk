@@ -1,5 +1,5 @@
 <?php
-include "qywechat.class.php";
+include "../qywechat.class.php";
 
 function logg($text){
     file_put_contents('./log.txt',$text."\r\n\r\n",FILE_APPEND);
