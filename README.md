@@ -3,14 +3,18 @@ wechat-php-sdk
 
 微信公众平台php开发包,细化各项接口操作,支持链式调用,欢迎Fork此项目  
 weixin developer SDK.
+项目地址：**https://github.com/dodgepudding/wechat-php-sdk**  
+项目wiki：**http://binsee.github.io/wechat-php-sdk**  
 
-使用详解
--------
+##使用详解
 使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
-http://mp.weixin.qq.com/wiki/
+微信公众平台： http://mp.weixin.qq.com/wiki/
+微信企业平台： http://qy.weixin.qq.com/wiki/
 
 微信支付接入文档：
 https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
+
+微信多客服：http://dkf.qq.com
 
 ## 1. wechat.class.php 官方API类库
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
