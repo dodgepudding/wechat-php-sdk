@@ -301,7 +301,10 @@ class Wechat
 	 */
 	public function getRevPic(){
 		if (isset($this->_receive['PicUrl']))
-			return $this->_receive['PicUrl'];
+			return array(
+				'mediaid'=>$this->_receive['MediaId'],
+				'picurl'=>(string)$this->_receive['PicUrl'],    //防止picurl为空导致解析出错
+			);
 		else 
 			return false;
 	}
@@ -630,6 +633,67 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
+	/**
+	 * 设置回复消息
+	 * Examle: $obj->image('media_id')->reply();
+	 * @param string $mediaid
+	 */
+	public function image($mediaid='')
+	{
+		$FuncFlag = $this->_funcflag ? 1 : 0;
+		$msg = array(
+			'ToUserName' => $this->getRevFrom(),
+			'FromUserName'=>$this->getRevTo(),
+			'MsgType'=>self::MSGTYPE_IMAGE,
+			'Image'=>array('MediaId'=>$mediaid),
+			'CreateTime'=>time(),
+			'FuncFlag'=>$FuncFlag
+		);
+		$this->Message($msg);
+		return $this;
+	}
+	/**
+	 * 设置回复消息
+	 * Examle: $obj->voice('media_id')->reply();
+	 * @param string $mediaid
+	 */
+	public function voice($mediaid='')
+	{
+		$FuncFlag = $this->_funcflag ? 1 : 0;
+		$msg = array(
+			'ToUserName' => $this->getRevFrom(),
+			'FromUserName'=>$this->getRevTo(),
+			'MsgType'=>self::MSGTYPE_IMAGE,
+			'Voice'=>array('MediaId'=>$mediaid),
+			'CreateTime'=>time(),
+			'FuncFlag'=>$FuncFlag
+		);
+		$this->Message($msg);
+		return $this;
+	}
+	/**
+	 * 设置回复消息
+	 * Examle: $obj->video('media_id','title','description')->reply();
+	 * @param string $mediaid
+	 */
+	public function video($mediaid='',$title,$description)
+	{
+		$FuncFlag = $this->_funcflag ? 1 : 0;
+		$msg = array(
+			'ToUserName' => $this->getRevFrom(),
+			'FromUserName'=>$this->getRevTo(),
+			'MsgType'=>self::MSGTYPE_IMAGE,
+			'Video'=>array(
+			        'MediaId'=>$mediaid,
+			        'Title'=>$mediaid,
+			        'Description'=>$mediaid,
+			),
+			'CreateTime'=>time(),
+			'FuncFlag'=>$FuncFlag
+		);
+		$this->Message($msg);
+		return $this;
+	}
 	
 	/**
 	 * 设置回复音乐
@@ -861,33 +925,59 @@ class Wechat
 	 * 创建菜单
 	 * @param array $data 菜单数组数据
 	 * example:
-		  {
-		     "button":[
-		     {	
-		          "type":"click",
-		          "name":"今日歌曲",
-		          "key":"MENU_KEY_MUSIC"
-		      },
-		      {
-		           "type":"view",
-		           "name":"歌手简介",
-		           "url":"http://www.qq.com/"
-		      },
-		      {
-		           "name":"菜单",
-		           "sub_button":[
-		            {
-		               "type":"click",
-		               "name":"hello word",
-		               "key":"MENU_KEY_MENU"
-		            },
-		            {
-		               "type":"click",
-		               "name":"赞一下我们",
-		               "key":"MENU_KEY_GOOD"
-		            }]
-		       }]
-		 }
+     * 	array (
+     * 	    'button' => array (
+     * 	      0 => array (
+     * 	        'name' => '扫码',
+     * 	        'sub_button' => array (
+     * 	            0 => array (
+     * 	              'type' => 'scancode_waitmsg',
+     * 	              'name' => '扫码带提示',
+     * 	              'key' => 'rselfmenu_0_0',
+     * 	              'sub_button' => ''
+     * 	            ),
+     * 	            1 => array (
+     * 	              'type' => 'scancode_push',
+     * 	              'name' => '扫码推事件',
+     * 	              'key' => 'rselfmenu_0_1',
+     * 	              'sub_button' => ''
+     * 	            ),
+     * 	        ),
+     * 	      ),
+     * 	      1 => array (
+     * 	        'name' => '发图',
+     * 	        'sub_button' => array (
+     * 	            0 => array (
+     * 	              'type' => 'pic_sysphoto',
+     * 	              'name' => '系统拍照发图',
+     * 	              'key' => 'rselfmenu_1_0',
+     * 	              'sub_button' => ''
+     * 	            ),
+     * 	            1 => array (
+     * 	              'type' => 'pic_photo_or_album',
+     * 	              'name' => '拍照或者相册发图',
+     * 	              'key' => 'rselfmenu_1_1',
+     * 	              'sub_button' => ''
+     * 	            )
+     * 	        ),
+     * 	      ),
+     * 	      2 => array (
+     * 	        'type' => 'location_select',
+     * 	        'name' => '发送位置',
+     * 	        'key' => 'rselfmenu_2_0',
+     * 	        'sub_button' => ''
+     * 	      ),
+     * 	    ),
+     * 	)
+     * type可以选择为以下几种，其中5-8除了收到菜单事件以外，还会单独收到对应类型的信息。
+     * 1、click：点击推事件
+     * 2、view：跳转URL
+     * 3、scancode_push：扫码推事件
+     * 4、scancode_waitmsg：扫码推事件且弹出“消息接收中”提示框
+     * 5、pic_sysphoto：弹出系统拍照发图
+     * 6、pic_photo_or_album：弹出拍照或者相册发图
+     * 7、pic_weixin：弹出微信相册发图器
+     * 8、location_select：弹出地理位置选择器
 	 */
 	public function createMenu($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
