@@ -1,6 +1,6 @@
-#qywechat.class.php
+# qywechat.class.php
 
-##企业号API类库
+## 企业号API类库
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
 
 ## 主要功能 
@@ -86,7 +86,7 @@ $options = array(
 * addTagUser($data) 增加标签成员，参数请看php文件内方法说明
 * delTagUser($data) 删除标签成员，参数请看php文件内方法说明
 * sendMessage($data) 主动发送信息接口，参数请看php文件内方法说明
-* authSucc($code,$userid) 二次验证，参数： 员工授权获取到的code,$userid
+* authSucc($userid) 二次验证，参数： 员工UserID
 * getOauthRedirect($callback,$state='STATE',$scope='snsapi_base') 组合授权跳转接口url
 
 
@@ -95,8 +95,9 @@ $options = array(
 
 
 ## 企业号API类库调用示例：
+-------- 
+可参考**test**目录下的**qydemo.php**
 ```php
-//test1.php
 include "wechat.class.php";
 $options = array(
         'token'=>'9Ixxxxxxx',	//填写应用接口的Token

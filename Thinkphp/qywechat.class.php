@@ -1494,7 +1494,6 @@ class Wechat
 	 * 引导员工到企业的验证页面验证身份，企业在员工验证成功后，
 	 * 调用如下接口即可让员工关注成功。
 	 * 
-	 * @param $code  通过员工授权获取到的code
 	 * @param $userid
 	 * @return boolean|array 成功返回结果
 	 * {
@@ -1502,9 +1501,9 @@ class Wechat
 	 *   "errmsg": "ok"  //对返回码的文本描述内容
 	 * }
 	 */
-	public function authSucc($code,$userid){
+	public function authSucc($userid){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::AUTHSUCC_URL.'access_token='.$this->access_token.'&code='.$code.'&userid='.$userid);
+	    $result = $this->http_get(self::API_URL_PREFIX.self::AUTHSUCC_URL.'access_token='.$this->access_token.'&userid='.$userid);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);

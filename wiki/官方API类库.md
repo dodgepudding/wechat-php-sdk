@@ -1,4 +1,4 @@
-#wechat.class.php
+# wechat.class.php
 
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
 
@@ -37,7 +37,7 @@
 
 ```
 
-##新增Auth高级权限类方法:   
+## 新增Auth高级权限类方法:   
  *  checkAuth($appid,$appsecret) 此处传入公众后台高级接口提供的appid和appsecret, 函数将返回access_token操作令牌
  *  createMenu($data) 创建菜单 $data菜单结构详见 http://mp.weixin.qq.com/wiki/index.php?title=%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8F%9C%E5%8D%95%E5%88%9B%E5%BB%BA%E6%8E%A5%E5%8F%A3 
  *  getMenu() 获取菜单 
@@ -81,7 +81,7 @@
 
 
 
-##官方Wechat调用示例：
+## 官方Wechat调用示例：
 ```php
 //test1.php
 include "wechat.class.php";
