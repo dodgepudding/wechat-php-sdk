@@ -6,7 +6,7 @@ weixin developer SDK.
 项目地址：**https://github.com/dodgepudding/wechat-php-sdk**  
 项目blog：**http://binsee.github.io/wechat-php-sdk**  
 
-##使用详解
+## 使用详解
 使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
 微信公众平台： http://mp.weixin.qq.com/wiki/
 微信企业平台： http://qy.weixin.qq.com/wiki/
@@ -16,20 +16,18 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 微信多客服：http://dkf.qq.com
 
+
+## 目录 
+> **[wechat.class.php 官方API类库](#1-wechatclassphp-官方api类库)**  
+> **[wechatext.class.php 非官方扩展API](#2-wechatextclassphp-非官方扩展api)**  
+> **[wechatauth.class.php 授权登陆](#3-wechatauthclassphp-授权登陆)**  
+> **[wechat.js 内嵌JS](#4-wechatjs-内嵌js)**  
+> **[errCode.php 全局返回码类](#5-errcodephp-全局返回码类)**  
+> **[qywechat.class.php 企业号API类库](#6-qywechatclassphp-企业号api类库)**  
+> **[调用示例](#调用示例)**  
+
 ----------
 
-#目录
-- **[wechat.class.php 官方API类库](#1-wechatclassphp-企业号API类库)**
-- **[wechatext.class.php 非官方扩展API](#2-wechatextclassphp-非官方扩展API)**
-- **[wechatauth.class.php 授权登陆](#3-wechatauthclassphp-授权登陆)**
-- **[wechat.js 内嵌JS](#4-wechatjs-内嵌JS)**
-- **[errCode.php 全局返回码类]($5-errCodephp-全局返回码类)**
-- **[qywechat.class.php 企业号API类库]($6-qywechatclassphp-企业号API类库)**
-- **[调用示例](#调用示例)**
-
-----------
-
-#项目内容:
 ## 1. wechat.class.php 官方API类库
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
 
@@ -110,7 +108,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getCustomServiceKFlist() 获取多客服客服基本信息
  *  getCustomServiceOnlineKFlist() 获取多客服在线客服接待信息
  
-  
+ 
 ## 2. wechatext.class.php 非官方扩展API  
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
 类方法里提及的用户id在接口返回结构里表述为FakeId, 属同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  
@@ -147,7 +145,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  logout() 注销登陆  
 
 ## 4. wechat.js 内嵌JS
-###微信内嵌网页特殊功能js调用：
+### 微信内嵌网页特殊功能js调用：
  * WeixinJS.hideOptionMenu() 隐藏右上角按钮
  * WeixinJS.showOptionMenu() 显示右上角按钮
  * WeixinJS.hideToolbar() 隐藏工具栏
@@ -191,8 +189,6 @@ else
     echo "未找到对应的内容";
 
 ```
-
-
 
 ## 6. qywechat.class.php 企业号API类库 
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
@@ -282,13 +278,12 @@ $options = array(
 * sendMessage($data) 主动发送信息接口，参数请看php文件内方法说明
 * authSucc($userid) 二次验证，参数： 员工UserID
 * getOauthRedirect($callback,$state='STATE',$scope='snsapi_base') 组合授权跳转接口url
-
+  
+  
+# 调用示例
 ----------
 
-# 调用示例
-
 ## 官方Wechat调用示例：
---------  
 ```php
 //test1.php
 include "wechat.class.php";
@@ -313,7 +308,6 @@ switch($type) {
 ```
 
 ## 扩展包Wechatext调用示例: 
---------
 ```php
 //test2.php 
 	include "wechatext.class.php";
@@ -344,7 +338,6 @@ switch($type) {
 ```
 
 ## 微信二维码Wechatauth登陆示例: 
--------- 
 ```php
 //test3.php
 	include "../wechatauth.class.php";
@@ -377,7 +370,6 @@ switch($type) {
 HTML部分请看test/test3.php, 主要是定时ajax查询是否已经授权成功
 
 ## 企业号API类库调用示例：
--------- 
 可参考**test**目录下的**qydemo.php**
 ```php
 include "wechat.class.php";
