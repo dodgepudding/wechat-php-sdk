@@ -62,7 +62,7 @@ $options = array(
 * reply() 将已经设置好的消息，回复给微信服务器
 
 ## 主动接口方法：
-* checkAuth($appid='',$appsecret='') 通用auth验证方法,也用来换取ACCESS_TOKEN
+* checkAuth($appid='',$appsecret='',$token='') 通用auth验证方法,也用来换取ACCESS_TOKEN 。仅在需要手动指定access_token时才用`$token`
 * resetAuth($appid='') 清除记录的ACCESS_TOKEN
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id
 * getMenu($agentid='') 获取菜单内容,参数:要获取菜单内容的应用id

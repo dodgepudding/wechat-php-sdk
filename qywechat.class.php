@@ -697,11 +697,16 @@ class Wechat
 	 * 通用auth验证方法
 	 * @param string $appid
 	 * @param string $appsecret
+	 * @param string $token 手动指定access_token，非必要情况不建议用
 	 */
-	public function checkAuth($appid='',$appsecret=''){
+	public function checkAuth($appid='',$appsecret='',$token=''){
 		if (!$appid || !$appsecret) {
 			$appid = $this->appid;
 			$appsecret = $this->appsecret;
+		}
+		if ($token) { //手动指定token，优先使用
+		    $this->access_token=$token;
+		    return $this->access_token;
 		}
 		//TODO: get the cache access_token
 		$result = $this->http_get(self::API_URL_PREFIX.self::TOKEN_GET_URL.'corpid='.$appid.'&corpsecret='.$appsecret);

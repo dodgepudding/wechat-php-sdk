@@ -67,7 +67,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 ```
 
 ### 新增Auth高级权限类方法:   
- *  checkAuth($appid,$appsecret) 此处传入公众后台高级接口提供的appid和appsecret, 函数将返回access_token操作令牌
+ *  checkAuth($appid,$appsecret,$token) 此处传入公众后台高级接口提供的appid和appsecret, 或者手动指定$token为access_token。函数将返回access_token操作令牌
  *  createMenu($data) 创建菜单 $data菜单结构详见 http://mp.weixin.qq.com/wiki/index.php?title=%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8F%9C%E5%8D%95%E5%88%9B%E5%BB%BA%E6%8E%A5%E5%8F%A3 
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
@@ -252,7 +252,7 @@ $options = array(
 * reply() 将已经设置好的消息，回复给微信服务器
 
 ### 主动接口方法：
-* checkAuth($appid='',$appsecret='') 通用auth验证方法,也用来换取ACCESS_TOKEN
+* checkAuth($appid='',$appsecret='',$token='') 通用auth验证方法,也用来换取ACCESS_TOKEN 。仅在需要手动指定access_token时才用`$token`
 * resetAuth($appid='') 清除记录的ACCESS_TOKEN
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id
 * getMenu($agentid='') 获取菜单内容,参数:要获取菜单内容的应用id
