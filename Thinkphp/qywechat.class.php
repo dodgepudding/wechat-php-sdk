@@ -291,7 +291,7 @@ class Wechat
             $this->log($postStr);
             if (isset($array['Encrypt'])) {
                 $encryptStr = $array['Encrypt'];
-                $this->agentidxml = isset($array['Encrypt']) ? $array['Encrypt']: '';
+                $this->agentidxml = isset($array['AgentID']) ? $array['AgentID']: '';
             }
         } else {
             $encryptStr = isset($_GET["echostr"]) ? $_GET["echostr"]: '';
@@ -318,7 +318,7 @@ class Wechat
         }
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $this->postxml = $array[1];
-            $this->log($array[1]);
+            //$this->log($array[1]);
             return ($this->postxml!="");
         } else {
             $echoStr = $array[1];
