@@ -1572,7 +1572,7 @@ class PKCS7Encoder
     {
 
         $pad = ord(substr($text, -1));
-        if ($pad < 1 || $pad > 31) {
+        if ($pad < 1 || $pad > 32) {
             $pad = 0;
         }
         return substr($text, 0, (strlen($text) - $pad));
