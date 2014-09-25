@@ -286,7 +286,7 @@ class Wechat
             $this->log($postStr);
             if (isset($array['Encrypt'])) {
                 $encryptStr = $array['Encrypt'];
-                $this->agentidxml = isset($array['Encrypt']) ? $array['Encrypt']: '';
+                $this->agentidxml = isset($array['AgentID']) ? $array['AgentID']: '';
             }
         } else {
             $encryptStr = isset($_GET["echostr"]) ? $_GET["echostr"]: '';
@@ -313,7 +313,7 @@ class Wechat
         }
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $this->postxml = $array[1];
-            $this->log($array[1]);
+            //$this->log($array[1]);
             return ($this->postxml!="");
         } else {
             $echoStr = $array[1];
@@ -697,11 +697,16 @@ class Wechat
 	 * 通用auth验证方法
 	 * @param string $appid
 	 * @param string $appsecret
+	 * @param string $token 手动指定access_token，非必要情况不建议用
 	 */
-	public function checkAuth($appid='',$appsecret=''){
+	public function checkAuth($appid='',$appsecret='',$token=''){
 		if (!$appid || !$appsecret) {
 			$appid = $this->appid;
 			$appsecret = $this->appsecret;
+		}
+		if ($token) { //手动指定token，优先使用
+		    $this->access_token=$token;
+		    return $this->access_token;
 		}
 		//TODO: get the cache access_token
 		$result = $this->http_get(self::API_URL_PREFIX.self::TOKEN_GET_URL.'corpid='.$appid.'&corpsecret='.$appsecret);
@@ -1485,7 +1490,6 @@ class Wechat
 	 * 引导员工到企业的验证页面验证身份，企业在员工验证成功后，
 	 * 调用如下接口即可让员工关注成功。
 	 * 
-	 * @param $code  通过员工授权获取到的code
 	 * @param $userid
 	 * @return boolean|array 成功返回结果
 	 * {
@@ -1493,9 +1497,9 @@ class Wechat
 	 *   "errmsg": "ok"  //对返回码的文本描述内容
 	 * }
 	 */
-	public function authSucc($code,$userid){
+	public function authSucc($userid){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::AUTHSUCC_URL.'access_token='.$this->access_token.'&code='.$code.'&userid='.$userid);
+	    $result = $this->http_get(self::API_URL_PREFIX.self::AUTHSUCC_URL.'access_token='.$this->access_token.'&userid='.$userid);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -1564,7 +1568,7 @@ class PKCS7Encoder
     {
 
         $pad = ord(substr($text, -1));
-        if ($pad < 1 || $pad > 31) {
+        if ($pad < 1 || $pad > 32) {
             $pad = 0;
         }
         return substr($text, 0, (strlen($text) - $pad));

@@ -3,14 +3,30 @@ wechat-php-sdk
 
 微信公众平台php开发包,细化各项接口操作,支持链式调用,欢迎Fork此项目  
 weixin developer SDK.
+项目地址：**https://github.com/dodgepudding/wechat-php-sdk**  
+项目blog：**http://binsee.github.io/wechat-php-sdk**  
 
-使用详解
--------
+## 使用详解
 使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
-http://mp.weixin.qq.com/wiki/
+微信公众平台： http://mp.weixin.qq.com/wiki/
+微信企业平台： http://qy.weixin.qq.com/wiki/
 
 微信支付接入文档：
 https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
+
+微信多客服：http://dkf.qq.com
+
+
+## 目录 
+> **[wechat.class.php 官方API类库](#1-wechatclassphp-官方api类库)**  
+> **[wechatext.class.php 非官方扩展API](#2-wechatextclassphp-非官方扩展api)**  
+> **[wechatauth.class.php 授权登陆](#3-wechatauthclassphp-授权登陆)**  
+> **[wechat.js 内嵌JS](#4-wechatjs-内嵌js)**  
+> **[errCode.php 全局返回码类](#5-errcodephp-全局返回码类)**  
+> **[qywechat.class.php 企业号API类库](#6-qywechatclassphp-企业号api类库)**  
+> **[调用示例](#调用示例)**  
+
+----------
 
 ## 1. wechat.class.php 官方API类库
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
@@ -50,8 +66,8 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 ```
 
-新增Auth高级权限类方法:   
- *  checkAuth($appid,$appsecret) 此处传入公众后台高级接口提供的appid和appsecret, 函数将返回access_token操作令牌
+### 新增Auth高级权限类方法:   
+ *  checkAuth($appid,$appsecret,$token) 此处传入公众后台高级接口提供的appid和appsecret, 或者手动指定$token为access_token。函数将返回access_token操作令牌
  *  createMenu($data) 创建菜单 $data菜单结构详见 http://mp.weixin.qq.com/wiki/index.php?title=%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8F%9C%E5%8D%95%E5%88%9B%E5%BB%BA%E6%8E%A5%E5%8F%A3 
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
@@ -92,13 +108,14 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getCustomServiceKFlist() 获取多客服客服基本信息
  *  getCustomServiceOnlineKFlist() 获取多客服在线客服接待信息
  
-  
-## 2. wechatext.class.php 非官方扩展API
+ 
+## 2. wechatext.class.php 非官方扩展API  
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
 类方法里提及的用户id在接口返回结构里表述为FakeId, 属同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  
 调用下列方法前必须经过login()方法和checkValid()验证方法才能获得调用权限. 有的账户无法通过登陆可能因为要求提供验证码, 可以手动登陆后把获取到的cookie写进程序存放cookie的文件解决.  
 程序使用了经过修改的snoopy兼容式HTTP类方法, 在类似BAE/SAE云服务器上可能不能正常运行, 因为云服务的curl方法是经过重写的, 某些header参数如网站来源参数不被支持.  
-类主要方法:
+
+### 类主要方法:
  *  send($id,$content) 向某用户id发送微信文字信息 
  *  sendNews($id,$msgid) 发送图文消息, 可通过getNewsList获取$msgid
  *  getUserList($page,$pagesize,$groupid) 获取用户信息
@@ -119,7 +136,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 ## 3. wechatauth.class.php 授权登陆
 通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 首先程序分别通过get_login_code和get_code_image方法获取授权二维码图片, 然后利用微信手机客户端扫描二维码图片后将自动跳出授权页面, 用户点击授权后即可获取对应的用户资料和头像信息. 详细验证步骤请看test3.php例子.   
-类主要方法:
+### 类主要方法:
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码  
  *  get_code_image($code='') 将上面获取的授权码转换为图片二维码  
  *  verify_code() 鉴定是否登陆成功,返回200为最终授权成功.  
@@ -128,7 +145,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  logout() 注销登陆  
 
 ## 4. wechat.js 内嵌JS
-微信内嵌网页特殊功能js调用：
+### 微信内嵌网页特殊功能js调用：
  * WeixinJS.hideOptionMenu() 隐藏右上角按钮
  * WeixinJS.showOptionMenu() 显示右上角按钮
  * WeixinJS.hideToolbar() 隐藏工具栏
@@ -160,8 +177,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 ## 5. errCode.php 全局返回码类
 当调用API接口失败时，可以用此类来换取失败原因的中文说明。
-
-使用方法：
+### 使用方法：
 ```php
 include "errCode.php";
 
@@ -174,12 +190,10 @@ else
 
 ```
 
-
-
 ## 6. qywechat.class.php 企业号API类库 
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
 
-## 主要功能 
+### 主要功能 
 - 接入验证 （初级权限）
 - 自动回复（文本、图片、语音、视频、音乐、图文）
 - 菜单操作（查询、创建、删除）
@@ -191,7 +205,7 @@ else
 - OAuth2（生成授权url、获取成员信息）
 
 
-## 初始化动作 
+### 初始化动作 
 ```php
 $options = array(
   'token'=>'tokenaccesskey', //填写应用接口的Token
@@ -207,7 +221,7 @@ $options = array(
 
 ```
 
-## 被动接口方法:   
+### 被动接口方法:   
 * valid() 验证连接
 * 
 * getRev() 获取微信服务器发来信息(不返回结果)
@@ -237,8 +251,8 @@ $options = array(
 * Message($msg = '',$append = false) 设置发送的消息（一般不需要调用这个方法）
 * reply() 将已经设置好的消息，回复给微信服务器
 
-## 主动接口方法：
-* checkAuth($appid='',$appsecret='') 通用auth验证方法,也用来换取ACCESS_TOKEN
+### 主动接口方法：
+* checkAuth($appid='',$appsecret='',$token='') 通用auth验证方法,也用来换取ACCESS_TOKEN 。仅在需要手动指定access_token时才用`$token`
 * resetAuth($appid='') 清除记录的ACCESS_TOKEN
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id
 * getMenu($agentid='') 获取菜单内容,参数:要获取菜单内容的应用id
@@ -262,15 +276,14 @@ $options = array(
 * addTagUser($data) 增加标签成员，参数请看php文件内方法说明
 * delTagUser($data) 删除标签成员，参数请看php文件内方法说明
 * sendMessage($data) 主动发送信息接口，参数请看php文件内方法说明
-* authSucc($code,$userid) 二次验证，参数： 员工授权获取到的code,$userid
+* authSucc($userid) 二次验证，参数： 员工UserID
 * getOauthRedirect($callback,$state='STATE',$scope='snsapi_base') 组合授权跳转接口url
-
-
-
+  
+  
+# 调用示例
 ----------
 
-官方Wechat调用示例：
---------  
+## 官方Wechat调用示例：
 ```php
 //test1.php
 include "wechat.class.php";
@@ -294,8 +307,7 @@ switch($type) {
 }
 ```
 
-扩展包Wechatext调用示例: 
---------
+## 扩展包Wechatext调用示例: 
 ```php
 //test2.php 
 	include "wechatext.class.php";
@@ -325,8 +337,7 @@ switch($type) {
 	}
 ```
 
-微信二维码Wechatauth登陆示例: 
--------- 
+## 微信二维码Wechatauth登陆示例: 
 ```php
 //test3.php
 	include "../wechatauth.class.php";
@@ -358,10 +369,9 @@ switch($type) {
 ```
 HTML部分请看test/test3.php, 主要是定时ajax查询是否已经授权成功
 
-企业号API类库调用示例：
--------- 
+## 企业号API类库调用示例：
+可参考**test**目录下的**qydemo.php**
 ```php
-//test1.php
 include "wechat.class.php";
 $options = array(
         'token'=>'9Ixxxxxxx',	//填写应用接口的Token
