@@ -259,10 +259,10 @@ $options = array(
 * deleteMenu($agentid='') 删除菜单,参数:要删除菜单的应用id
 * uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明
 * getMedia($media_id) 根据媒体文件ID获取媒体文件,参数:媒体id
-* createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1")
-* updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组")
+* createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
+* updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * deleteDepartment($id) 删除部门,参数：要删除的部门id
-* getDepartment() 获取部门列表，返回部门数组
+* getDepartment() 获取部门列表，返回部门数组。其中department部门列表数据。以部门的order字段从小到大排列
 * createUser($data) 创建成员，参数请看php文件内方法说明
 * updateUser($data) 更新成员，参数请看php文件内方法说明
 * deleteUser($userid) 删除成员，参数：员工UserID

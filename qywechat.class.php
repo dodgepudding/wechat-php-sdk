@@ -915,6 +915,7 @@ class Wechat
 	 * array (
 	 *     "name" => "邮箱产品组",   //部门名称
 	 *     "parentid" => "1"         //父部门id
+	 *     "order" =>  "1",            //(非必须)在父部门中的次序。从1开始，数字越大排序越靠后
 	 * )
 	 * @return boolean|array
 	 * 成功返回结果
@@ -945,8 +946,10 @@ class Wechat
 	 * 更新部门
 	 * @param array $data 	结构体为:
 	 * array(
-	 *     "id" => "1"               //部门id
-	 *     "name" =>  "邮箱产品组",   //部门名称
+	 *     "id" => "1"               //(必须)部门id
+	 *     "name" =>  "邮箱产品组",   //(非必须)部门名称
+	 *     "parentid" =>  "1",         //(非必须)父亲部门id。根部门id为1
+	 *     "order" =>  "1",            //(非必须)在父部门中的次序。从1开始，数字越大排序越靠后
 	 * )
 	 * @return boolean|array 成功返回结果
 	 * {
@@ -1001,7 +1004,7 @@ class Wechat
 	 * {
 	 *    "errcode": 0,
 	 *    "errmsg": "ok",
-	 *    "department": [
+	 *    "department": [          //部门列表数据。以部门的order字段从小到大排列
 	 *        {
 	 *            "id": 1,
 	 *            "name": "广州研发中心",
@@ -1568,7 +1571,7 @@ class PKCS7Encoder
     {
 
         $pad = ord(substr($text, -1));
-        if ($pad < 1 || $pad > 32) {
+        if ($pad < 1 || $pad > PKCS7Encoder::block_size) {
             $pad = 0;
         }
         return substr($text, 0, (strlen($text) - $pad));
