@@ -37,7 +37,8 @@ class Wechat
     const DEPARTMENT_CREATE_URL = '/department/create?';
     const DEPARTMENT_UPDATE_URL = '/department/update?';
     const DEPARTMENT_DELETE_URL = '/department/delete?';
-    const DEPARTMENT_LIST_URL = '/department/LIST?';
+    const DEPARTMENT_MOVE_URL = '/department/move?';
+    const DEPARTMENT_LIST_URL = '/department/list?';
     const TAG_CREATE_URL = '/tag/create?';
     const TAG_UPDATE_URL = '/tag/update?';
     const TAG_DELETE_URL = '/tag/delete?';
@@ -985,6 +986,36 @@ class Wechat
 	public function deleteDepartment($id){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
 	    $result = $this->http_get(self::API_URL_PREFIX.self::DEPARTMENT_DELETE_URL.'access_token='.$this->access_token.'&id='.$id);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode']) || $json['errcode']!=0) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+
+	/**
+	 * 移动部门
+	 * @param $data
+	 * array(
+	 *    "department_id" => "5",	//所要移动的部门
+	 *    "to_parentid" => "2",		//想移动到的父部门节点，根部门为1
+	 *    "to_position" => "1"		//(非必须)想移动到的父部门下的位置，1表示最上方，往后位置为2，3，4，以此类推，默认为1
+	 * )
+	 * @return boolean|array 成功返回结果
+	 * {
+	 *   "errcode": 0,        //返回码
+	 *   "errmsg": "ok"  //对返回码的文本描述内容
+	 * }
+	 */
+	public function moveDepartment($data){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::DEPARTMENT_MOVE_URL.'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);

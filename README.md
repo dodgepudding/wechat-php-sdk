@@ -262,6 +262,7 @@ $options = array(
 * createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * deleteDepartment($id) 删除部门,参数：要删除的部门id
+* moveDepartment($data) 移动部门,参数：array("department_id" => "5","to_parentid" => "2","to_position" => "1")
 * getDepartment() 获取部门列表，返回部门数组。其中department部门列表数据。以部门的order字段从小到大排列
 * createUser($data) 创建成员，参数请看php文件内方法说明
 * updateUser($data) 更新成员，参数请看php文件内方法说明
