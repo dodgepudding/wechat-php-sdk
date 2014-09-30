@@ -1244,6 +1244,31 @@ class Wechat
 	}
 
 	/**
+	 * 根据code获取成员id
+	 * 通过Oauth2.0或者设置了二次验证时获取的code，用于换取成员的userid
+	 *
+	 * @param $code        Oauth2.0或者二次验证时返回的code值
+	 * @param $agentid     跳转链接时所在的企业应用ID，未填则默认为当前配置的应用id
+	 * @return boolean|string 成功返回userid
+	 */
+	public function getUserId($code,$agentid=0){
+	    if (!$agentid) $agentid=$this->agentid;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_GETINFO_URL.'access_token='.$this->access_token.'&code='.$code.'&agentid'.$agentid);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode']) || $json['errcode']!=0) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json['UserId'];
+	    }
+	    return false;
+	}
+
+	/**
 	 * 创建标签
 	 * @param array $data 	结构体为:
 	 * array(

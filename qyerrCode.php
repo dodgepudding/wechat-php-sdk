@@ -5,7 +5,7 @@
  *  @link https://github.com/binsee/wechat-php-sdk
  *  @version 1.0
  *  usage:
- *      $ret=ErrCode::getErrText(40001);
+ *      $ret=ErrCode::getErrText(40001); //错误码可以通过公众号类库的公开变量errCode得到
  *      if ($ret) 
  *      	echo $ret;
  *      else 

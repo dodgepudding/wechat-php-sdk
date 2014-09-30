@@ -10,7 +10,7 @@
 ```php
 include "errCode.php";  //或 qyerrCode.php
 
-$ret=ErrCode::getErrText(48001);
+$ret=ErrCode::getErrText(48001); //错误码可以通过公众号类库的公开变量errCode得到
 
 if ($ret) 
 	echo $ret;
