@@ -1627,7 +1627,7 @@ class PKCS7Encoder
     {
 
         $pad = ord(substr($text, -1));
-        if ($pad < 1 || $pad > PKCS7Encoder::block_size) {
+        if ($pad < 1 || $pad > PKCS7Encoder::$block_size) {
             $pad = 0;
         }
         return substr($text, 0, (strlen($text) - $pad));
