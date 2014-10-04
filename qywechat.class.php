@@ -1220,7 +1220,7 @@ class Wechat
 	public function getUserList($department_id,$fetch_child=0,$status=0){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
 	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_LIST_URL.'access_token='.$this->access_token
-	            .'&department_id='.$department_id.'&fetch_child'.$fetch_child.'&status='.$status);
+	            .'&department_id='.$department_id.'&fetch_child='.$fetch_child.'&status='.$status);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
