@@ -179,9 +179,9 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 当调用API接口失败时，可以用此类来换取失败原因的中文说明。
 ### 使用方法：
 ```php
-include "errCode.php";
+include "errCode.php";  //或 qyerrCode.php
 
-$ret=ErrCode::getErrText(48001);
+$ret=ErrCode::getErrText(48001); //错误码可以通过公众号类库的公开变量errCode得到
 
 if ($ret) 
 	echo $ret;
@@ -259,16 +259,18 @@ $options = array(
 * deleteMenu($agentid='') 删除菜单,参数:要删除菜单的应用id
 * uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明
 * getMedia($media_id) 根据媒体文件ID获取媒体文件,参数:媒体id
-* createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1")
-* updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组")
+* createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
+* updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * deleteDepartment($id) 删除部门,参数：要删除的部门id
-* getDepartment() 获取部门列表，返回部门数组
+* moveDepartment($data) 移动部门,参数：array("department_id" => "5","to_parentid" => "2","to_position" => "1")
+* getDepartment() 获取部门列表，返回部门数组。其中department部门列表数据。以部门的order字段从小到大排列
 * createUser($data) 创建成员，参数请看php文件内方法说明
 * updateUser($data) 更新成员，参数请看php文件内方法说明
 * deleteUser($userid) 删除成员，参数：员工UserID
 * getUserInfo($userid) 获取成员信息，参数：员工UserID
 * getUserList($department_id,$fetch_child=0,$status=0) 获取部门成员，参数：部门id，是否递归获取子部门，获取类型。
 > 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
+* getUserId($code,$agentid) 根据code获取成员id，参数：Oauth2.0或者二次验证返回的code值，跳转链接时所在的企业应用ID
 * createTag($data) 创建标签，参数：array("tagname" => "UI")
 * updateTag($data) 更新标签，参数：array("tagid" => "1","tagname" => "UI")
 * deleteTag($tagid) 删除标签，参数：标签TagID

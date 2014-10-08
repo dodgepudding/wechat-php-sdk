@@ -5,7 +5,7 @@
  *  @link https://github.com/binsee/wechat-php-sdk
  *  @version 1.0
  *  usage:
- *      $ret=ErrCode::getErrText(40001);
+ *      $ret=ErrCode::getErrText(40001); //错误码可以通过公众号类库的公开变量errCode得到
  *      if ($ret) 
  *      	echo $ret;
  *      else 
@@ -102,7 +102,7 @@ class ErrCode
 	        '43006'=>'需要订阅',
 	        '43007'=>'需要授权',
 	        '43008'=>'需要支付授权',
-	        '43009'=>'需要认证',
+	        '43009'=>'需要员工已关注',
 	        '43010'=>'需要处于企业模式',
 	        '43011'=>'需要企业授权',
 	        '44001'=>'多媒体文件为空',

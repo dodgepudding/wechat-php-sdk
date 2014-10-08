@@ -37,7 +37,8 @@ class Wechat
     const DEPARTMENT_CREATE_URL = '/department/create?';
     const DEPARTMENT_UPDATE_URL = '/department/update?';
     const DEPARTMENT_DELETE_URL = '/department/delete?';
-    const DEPARTMENT_LIST_URL = '/department/LIST?';
+    const DEPARTMENT_MOVE_URL = '/department/move?';
+    const DEPARTMENT_LIST_URL = '/department/list?';
     const TAG_CREATE_URL = '/tag/create?';
     const TAG_UPDATE_URL = '/tag/update?';
     const TAG_DELETE_URL = '/tag/delete?';
@@ -915,6 +916,7 @@ class Wechat
 	 * array (
 	 *     "name" => "邮箱产品组",   //部门名称
 	 *     "parentid" => "1"         //父部门id
+	 *     "order" =>  "1",            //(非必须)在父部门中的次序。从1开始，数字越大排序越靠后
 	 * )
 	 * @return boolean|array
 	 * 成功返回结果
@@ -945,8 +947,10 @@ class Wechat
 	 * 更新部门
 	 * @param array $data 	结构体为:
 	 * array(
-	 *     "id" => "1"               //部门id
-	 *     "name" =>  "邮箱产品组",   //部门名称
+	 *     "id" => "1"               //(必须)部门id
+	 *     "name" =>  "邮箱产品组",   //(非必须)部门名称
+	 *     "parentid" =>  "1",         //(非必须)父亲部门id。根部门id为1
+	 *     "order" =>  "1",            //(非必须)在父部门中的次序。从1开始，数字越大排序越靠后
 	 * )
 	 * @return boolean|array 成功返回结果
 	 * {
@@ -994,6 +998,36 @@ class Wechat
 	    }
 	    return false;
 	}
+
+	/**
+	 * 移动部门
+	 * @param $data
+	 * array(
+	 *    "department_id" => "5",	//所要移动的部门
+	 *    "to_parentid" => "2",		//想移动到的父部门节点，根部门为1
+	 *    "to_position" => "1"		//(非必须)想移动到的父部门下的位置，1表示最上方，往后位置为2，3，4，以此类推，默认为1
+	 * )
+	 * @return boolean|array 成功返回结果
+	 * {
+	 *   "errcode": 0,        //返回码
+	 *   "errmsg": "ok"  //对返回码的文本描述内容
+	 * }
+	 */
+	public function moveDepartment($data){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::DEPARTMENT_MOVE_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode']) || $json['errcode']!=0) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
 	
 	/**
 	 * 获取部门列表
@@ -1001,7 +1035,7 @@ class Wechat
 	 * {
 	 *    "errcode": 0,
 	 *    "errmsg": "ok",
-	 *    "department": [
+	 *    "department": [          //部门列表数据。以部门的order字段从小到大排列
 	 *        {
 	 *            "id": 1,
 	 *            "name": "广州研发中心",
@@ -1186,7 +1220,7 @@ class Wechat
 	public function getUserList($department_id,$fetch_child=0,$status=0){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
 	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_LIST_URL.'access_token='.$this->access_token
-	            .'&department_id='.$department_id.'&fetch_child'.$fetch_child.'&status='.$status);
+	            .'&department_id='.$department_id.'&fetch_child='.$fetch_child.'&status='.$status);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -1196,6 +1230,31 @@ class Wechat
 	            return false;
 	        }
 	        return $json;
+	    }
+	    return false;
+	}
+
+	/**
+	 * 根据code获取成员id
+	 * 通过Oauth2.0或者设置了二次验证时获取的code，用于换取成员的userid
+	 *
+	 * @param $code        Oauth2.0或者二次验证时返回的code值
+	 * @param $agentid     跳转链接时所在的企业应用ID，未填则默认为当前配置的应用id
+	 * @return boolean|string 成功返回userid
+	 */
+	public function getUserId($code,$agentid=0){
+	    if (!$agentid) $agentid=$this->agentid;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_GETINFO_URL.'access_token='.$this->access_token.'&code='.$code.'&agentid'.$agentid);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode']) || $json['errcode']!=0) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json['UserId'];
 	    }
 	    return false;
 	}
@@ -1568,7 +1627,7 @@ class PKCS7Encoder
     {
 
         $pad = ord(substr($text, -1));
-        if ($pad < 1 || $pad > 32) {
+        if ($pad < 1 || $pad > PKCS7Encoder::$block_size) {
             $pad = 0;
         }
         return substr($text, 0, (strlen($text) - $pad));
