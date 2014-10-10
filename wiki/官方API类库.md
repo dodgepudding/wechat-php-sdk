@@ -20,6 +20,7 @@
 - 发货通知 （支付权限） 
 - 支付订单查询 （支付权限） 
 - 模板消息（支付权限） 
+- 语义理解（暂未开放） 
 
 
 ## 初始化动作 
@@ -39,7 +40,7 @@
 
 ## 新增Auth高级权限类方法:   
  *  checkAuth($appid,$appsecret,$token) 此处传入公众后台高级接口提供的appid和appsecret, 或者手动指定$token为access_token。函数将返回access_token操作令牌
- *  createMenu($data) 创建菜单 $data菜单结构详见 http://mp.weixin.qq.com/wiki/index.php?title=%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8F%9C%E5%8D%95%E5%88%9B%E5%BB%BA%E6%8E%A5%E5%8F%A3 
+ *  createMenu($data) 创建菜单 $data菜单结构详见 **[自定义菜单创建接口](http://mp.weixin.qq.com/wiki/index.php?title=自定义菜单创建接口)**
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
  *  uploadMedia($data, $type) 上传多媒体文件
@@ -78,6 +79,7 @@
  *  transfer_customer_service($customer_account) 转发多客服消息
  *  getCustomServiceKFlist() 获取多客服客服基本信息
  *  getCustomServiceOnlineKFlist() 获取多客服在线客服接待信息
+ *  querySemantic($uid,$query,$category,$latitude=0,$longitude=0,$city="",$region="") 语义理解接口 参数含义及返回的json内容请查看 **[微信语义理解接口](http://mp.weixin.qq.com/wiki/index.php?title=语义理解)**
 
 
 
