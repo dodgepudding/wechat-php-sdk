@@ -1485,41 +1485,29 @@ class Wechat
 	 *         ),
 	 * 
 	 *         "news" => array(			//不支持保密
-	 *                 "articles":[
-	 *                 array(
-	 *                         "title" => "Title",
-	 *                         "description" => "Description",
-	 *                         "url" => "URL",
-	 *                         "picurl" => "PIC_URL",
-	 *                 ),
-	 *                 array(
-	 *                         "title" => "Title",
-	 *                         "description" => "Description",
-	 *                         "url" => "URL",
-	 *                         "picurl" => "PIC_URL",
+	 *                 "articles" => array(    //articles  图文消息，一个图文消息支持1到10个图文
+	 *                     array(
+	 *                         "title" => "Title",             //标题
+	 *                         "description" => "Description", //描述
+	 *                         "url" => "URL",                 //点击后跳转的链接。可根据url里面带的code参数校验员工的真实身份。
+	 *                         "picurl" => "PIC_URL",          //图文消息的图片链接,支持JPG、PNG格式，较好的效果为大图640*320，
+	 *                                                         //小图80*80。如不填，在客户端不显示图片
+	 *                     ),
 	 *                 )
-	 *                 ]
 	 *         ),
 	 * 
 	 *         "mpnews" => array(
-	 *                 "articles":[
-	 *                 array(
-	 *                         "thumb_media_id" => "id",
-	 *                         "author" => "Author",
-	 *                         "content_source_url" => "URL",
-	 *                         "content" => "Content"
-	 *                         "digest" => "Digest description",
-	 *                         "show_cover_pic" => "0"
-	 *                 ),
-	 *                 array(
-	 *                         "thumb_media_id" => "id",
-	 *                         "author" => "Author",
-	 *                         "content_source_url" => "URL",
-	 *                         "content" => "Content"
-	 *                         "digest" => "Digest description",
-	 *                         "show_cover_pic" => "0"
+	 *                 "articles" => array(    //articles  图文消息，一个图文消息支持1到10个图文
+	 *                     array(
+	 *                         "title" => "Title",             //图文消息的标题
+	 *                         "thumb_media_id" => "id",       //图文消息缩略图的media_id
+	 *                         "author" => "Author",           //图文消息的作者(可空)
+	 *                         "content_source_url" => "URL",  //图文消息点击“阅读原文”之后的页面链接(可空)
+	 *                         "content" => "Content"          //图文消息的内容，支持html标签
+	 *                         "digest" => "Digest description",   //图文消息的描述
+	 *                         "show_cover_pic" => "0"         //是否显示封面，1为显示，0为不显示(可空)
+	 *                     ),
 	 *                 )
-	 *                 ]
 	 *         )
 	 * )
 	 * 请查看官方开发文档中的 发送消息 -> 消息类型及数据格式
