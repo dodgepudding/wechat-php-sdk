@@ -435,19 +435,11 @@ class Wechat
 	 * @return: array | false
 	 * array (
 	 *   'Count' => '2',
-	 *   'PicList' => 
-	 *   array (
-	 *     'item' => 
-	 *     array (
-	 *       0 => 
-	 *       array (
-	 *         'PicMd5Sum' => 'aaae42617cf2a14342d96005af53624c',
-	 *       ),
-	 *       1 => 
-	 *       array (
-	 *         'PicMd5Sum' => '149bd39e296860a2adc2f1bb81616ff8',
-	 *       ),
-	 *     ),
+	 *   'PicList' =>array (
+	 *         'item' =>array (
+	 *             0 =>array ('PicMd5Sum' => 'aaae42617cf2a14342d96005af53624c'),
+	 *             1 =>array ('PicMd5Sum' => '149bd39e296860a2adc2f1bb81616ff8'),
+	 *         ),
 	 *   ),
 	 * )
 	 * 
