@@ -22,6 +22,7 @@
  *  消息返回结构:  {"id":"消息id","type":"类型号(1为文字,2为图片,3为语音)","fileId":"0","hasReply":"0","fakeId":"用户uid","nickName":"昵称","dateTime":"时间戳","content":"文字内容"} 
  *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据
+ *  quickSetInterface($url, $token) 快速设置接口信息
  *  @author dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
  *  @version 1.2
@@ -595,6 +596,84 @@ class Wechatext
 			return false;
 		}
 		return $result;
+	}
+
+	/**
+	 * 开启开发者模式
+	 */
+	public function openDevModel()
+	{
+		$send_snoopy = new Snoopy;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/misc/skeyform?form=advancedswitchform&lang=zh_CN";
+		$post['flag']=1;
+        $post['type']=2;   
+        $post['token']=$this->_token;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		$this->log($send_snoopy->results);
+		$json = json_decode($result,true);
+		if(!$result){
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 关闭编辑模式
+	 */
+	public function closeEditModel()
+	{
+		$send_snoopy = new Snoopy;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/misc/skeyform?form=advancedswitchform&lang=zh_CN";
+		$post['flag']=0;
+        $post['type']=1;   
+        $post['token']=$this->_token;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		$this->log($send_snoopy->results);
+		$json = json_decode($result,true);
+		if(!$result){
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 配置接口信息
+	 * @param  string $url      接口回调URL
+	 * @param  string $token    接口Token
+	 */
+	public function setUrlToken($url, $token)
+	{
+		$send_snoopy = new Snoopy;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/advanced/callbackprofile?t=ajax-response&lang=zh_CN&token=".$this->_token;
+		$post['url'] = $url;
+		$post['callback_token'] = $token;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		$this->log($send_snoopy->results);
+		$json = json_decode($result,true);
+		if ($json && $json['ret']==0) 
+			return true;
+		return false;
+	}
+
+	/**
+	 * 快速设置接口
+	 * @param  string $url      接口回调URL
+	 * @param  string $token    接口Token
+	 */
+	public function quickSetInterface($url, $token)
+	{
+		if ($this->closeEditModel() && $this->openDevModel() && $this->setUrlToken($url, $token))
+			return true;
+		return false;
 	}
 	
 	/**
