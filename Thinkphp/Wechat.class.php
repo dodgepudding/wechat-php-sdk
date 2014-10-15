@@ -1340,7 +1340,7 @@ class Wechat
 			'openid'=>$openid,
 			'remark'=>$remark
 	    );
-	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_UPDATEREMARK_URL.'access_token='.$this->access_token,$data);
+	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_UPDATEREMARK_URL.'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
