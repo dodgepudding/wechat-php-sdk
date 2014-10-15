@@ -30,6 +30,7 @@
  */
 
 include "snoopy.class.php";
+include "io.class.php";
 class Wechatext
 {
 	private $cookie;
@@ -674,6 +675,136 @@ class Wechatext
 		if ($this->closeEditModel() && $this->openDevModel() && $this->setUrlToken($url, $token))
 			return true;
 		return false;
+	}
+
+	/**
+	 * 获取公众账号基本信息
+	 * @return [type] [description]
+	 */
+	public function getCommonInfo($uid)
+	{
+		$userInfo = array();
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+		// 分析首页内容，获取nickname,avatar,usertype
+		preg_match_all('/class=\"nickname\">(.*)<\/a>/', $result, $matches1);
+        preg_match_all('/<img src=\"(.*)\" class=\"avatar\"/', $result, $matches2);
+        preg_match_all('/<label for=\"\" class=\"type icon_service_label\">(.*)<\/label>/', $result, $matches3);
+        $userInfo["nickname"] = $nickname = $matches1[1][0];
+        if(strpos($nickname, '<') !== false)
+        {
+        	$userInfo["nickname"] = $nickname = substr($nickname, 0, strpos($nickname, '<'));
+        }
+        $userInfo["avatar"] = $avatar = $matches2[1][0];
+        if( ! empty($matches3[1][0]))
+        {
+            $userInfo["type"] = $usertype = $matches3[1][0];
+        }
+        else
+        {
+            $userInfo["type"] = $usertype = "订阅号";
+        }
+		$this->log('Analysis account info:'. "\nNickname:". $nickname. "\nAvatar:". $avatar. "\nUsertype:". $usertype);
+		// 分析设置页面，获取二维码
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+		// $this->log("QRCODE contents:". $result);
+		preg_match_all('/<img src=\"(.*)\" width=\"150\"/', $result, $matches4);
+        $userInfo["qrcode"] = $qrcode = $matches4[1][0];
+        // downloads the avatar
+        $send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com". $avatar;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+        $userInfo["avatar"] = $this->downloadImage($result, 'avatar');
+        // downloads the qrcode
+        $send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com". $qrcode;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+        $userInfo["qrcode"] = $this->downloadImage($result, '/uploads/'. $uid);
+        // 获取appid和appsecret
+        $send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+
+		preg_match_all('/AppId<\/label>\s.*<div.*>(.*)<\/div>/', $result, $matches_id);
+		preg_match_all('/AppSecret<\/label>\s.*<div.*>\s(.*)/', $result, $matches_secret);
+		
+        $userInfo["appid"] = $AppId = $matches_id[1][0];
+        $userInfo["appsecret"] = $AppSecret = $matches_secret[1][0];
+        
+		if(! empty($userInfo)){
+			return $userInfo;
+		}
+		return false;
+	}
+
+	/**
+	 * 下载图片资源
+	 * @param  [string] $from    [资源链接]
+	 * @param  [string] $dirname [相对于网站根目录]
+	 * @return [string]          [返回相对地址]
+	 */
+	public function downloadImage($from, $dirname)
+	{
+	    $random_name =  str_replace('.', '', microtime(true)). rand(2, 10000); // 保存的文件名
+	    $savefile =  Io::strip(Io::mkdir('./'. $dirname) . '/' . $random_name);
+	    // $savefile =  Io::strip(Io::mkdir(DOCROOT . '../application/www/'. $dirname) . '/' . $random_name);
+	    file_put_contents($savefile, $from);
+	    $filesize = filesize($savefile);
+	    $avatar_type = $this->checkImgType($savefile);
+	    if ($filesize <= 0 || $avatar_type=='unknown') 
+	    {
+	        unlink($savefile);
+	    }
+	    exec("mv $savefile ". $savefile. '.'. $avatar_type);
+	    return $dirname. '/'. $random_name. '.'. $avatar_type;
+	}
+
+	/**
+	 * 检测图片类型
+	 * @param  [type] $imgName [description]
+	 * @return [type]          [description]
+	 */
+	public function checkImgType($imgName){
+	    $file = fopen($imgName, "rb");
+	    $bin = fread($file, 2);
+	    $strInfo  = @unpack("C2chars", $bin);
+	    $typeCode = intval($strInfo['chars1'].$strInfo['chars2']);
+	    switch($typeCode)
+	    {
+	        case '255216':
+	            return 'jpg';
+	            break;
+	        case '7173':
+	            return 'gif';
+	            break;
+	        case '13780':
+	            return 'png';
+	            break;
+	        case '6677':
+	            return 'bmp';
+	            break;
+	        default:
+	            return 'unknown';
+	            break;
+	    }
 	}
 	
 	/**
