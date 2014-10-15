@@ -56,6 +56,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 ```php
  $options = array(
 	'token'=>'tokenaccesskey', //填写你设定的key
+	'encodingaeskey'=>'encodingaeskey', //填写加密用的EncodingAESKey
 	'appid'=>'wxdk1234567890', //填写高级调用功能的app id, 请在微信开发模式后台查询
 	'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写高级调用功能的密钥
 	'partnerid'=>'88888888', //财付通商户身份标识，支付权限专用，没有可不填
@@ -240,6 +241,9 @@ $options = array(
 * getRevGeo() 返回地理位置（位置型信息） 返回数组{'x'=>'','y'=>'','scale'=>'','label'=>''}
 * getRevEventGeo() 返回事件地理位置（事件型信息） 返回数组{'x'=>'','y'=>'','precision'=>''}
 * getRevEvent() 返回事件类型（事件型信息） 返回数组{'event'=>'','key'=>''}
+* getRevScanInfo() 获取自定义菜单的扫码推事件信息，事件类型为`scancode_push`或`scancode_waitmsg` 返回数组array ('ScanType'=>'qrcode','ScanResult'=>'123123')
+* getRevSendPicsInfo() 获取自定义菜单的图片发送事件信息,事件类型为`pic_sysphoto`或`pic_photo_or_album`或`pic_weixin` 数组结构见php文件内方法说明
+* getRevSendGeoInfo() 获取自定义菜单的地理位置选择器事件推送，事件类型为`location_select` 数组结构见php文件内方法说明
 * getRevVoice() 返回语音信息（语音型信息） 返回数组{'mediaid'=>'','format'=>''}
 * getRevVoice() 返回语音信息（语音型信息） 返回数组{'mediaid'=>'','format'=>''}
 * getRevVideo() 返回视频信息（视频型信息） 返回数组{'mediaid'=>'','thumbmediaid'=>''}
