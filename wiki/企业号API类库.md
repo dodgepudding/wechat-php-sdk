@@ -90,6 +90,7 @@ $options = array(
 * getTag($tagid) 获取标签成员，参数：标签TagID
 * addTagUser($data) 增加标签成员，参数请看php文件内方法说明
 * delTagUser($data) 删除标签成员，参数请看php文件内方法说明
+* getTagList() 获取标签列表，返回标签数组
 * sendMessage($data) 主动发送信息接口，参数请看php文件内方法说明
 * authSucc($userid) 二次验证，参数： 员工UserID
 * getOauthRedirect($callback,$state='STATE',$scope='snsapi_base') 组合授权跳转接口url
