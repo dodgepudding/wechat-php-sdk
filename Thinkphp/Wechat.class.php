@@ -176,6 +176,8 @@ class Wechat
             	    }
             	}
             	$this->postxml = $array[1];
+            	if (!$this->appid)
+            	    $this->appid = $array[2];//为了没有appid的订阅号。
             } else {
                 $this->postxml = $postStr;
             }
@@ -183,7 +185,7 @@ class Wechat
             $echoStr = isset($_GET["echostr"]) ? $_GET["echostr"]: '';
         }
         if ($return) {
-        		if ($echoStr) {
+        		if (isset($echoStr)) {
         			if ($this->checkSignature($encryptStr)) 
         				return $echoStr;
         			else
@@ -191,7 +193,7 @@ class Wechat
         		} else 
         			return $this->checkSignature($encryptStr);
         } else {
-	        	if ($echoStr) {
+	        	if (isset($echoStr)) {
 	        		if ($this->checkSignature($encryptStr))
 	        			die($echoStr);
 	        		else 
@@ -2076,7 +2078,7 @@ class Prpcrypt
 
         try {
             //获得16位随机字符串，填充到明文之前
-            $random = "aaaabbbbccccdddd"; //$this->getRandomStr();
+            $random = $this->getRandomStr();//"aaaabbbbccccdddd"; 
             $text = $random . pack("N", strlen($text)) . $text . $appid;
             // 网络字节序
             $size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
@@ -2095,7 +2097,7 @@ class Prpcrypt
             //使用BASE64对加密后的字符串进行编码
             return array(ErrorCode::$OK, base64_encode($encrypted));
         } catch (Exception $e) {
-            print $e;
+            //print $e;
             return array(ErrorCode::$EncryptAESError, null);
         }
     }
@@ -2135,13 +2137,17 @@ class Prpcrypt
             $xml_len = $len_list[1];
             $xml_content = substr($content, 4, $xml_len);
             $from_appid = substr($content, $xml_len + 4);
+            if (!$appid)
+                $appid = $from_appid;
+            //如果传入的appid是空的，则认为是订阅号，使用数据中提取出来的appid
         } catch (Exception $e) {
-            print $e;
+            //print $e;
             return array(ErrorCode::$IllegalBuffer, null);
         }
         if ($from_appid != $appid)
             return array(ErrorCode::$ValidateAppidError, null);
-        return array(0, $xml_content);
+        //不注释上边两行，避免传入appid是错误的情况
+        return array(0, $xml_content, $from_appid); //增加appid，为了解决后面加密回复消息的时候没有appid的订阅号会无法回复
 
     }
 
