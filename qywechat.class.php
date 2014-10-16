@@ -45,6 +45,7 @@ class Wechat
     const TAG_GET_URL = '/tag/get?';
     const TAG_ADDUSER_URL = '/tag/addtagusers?';
     const TAG_DELUSER_URL = '/tag/deltagusers?';
+    const TAG_LIST_URL = '/tag/list?';    
     const MEDIA_UPLOAD_URL = '/media/upload?';
     const MEDIA_GET_URL = '/media/get?';
     const AUTHSUCC_URL = '/user/authsucc?';
@@ -1541,6 +1542,34 @@ class Wechat
 	    {
 	        $json = json_decode($result,true);
 	        if (!$json || !empty($json['errcode']) || $json['errcode']!=0) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 获取标签列表
+	 * @return boolean|array	 成功返回数组结果，这里附上json样例
+	 * {
+	 *    "errcode": 0,
+	 *    "errmsg": "ok",
+	 *    "taglist":[
+	 *       {"tagid":1,"tagname":"a"},
+	 *       {"tagid":2,"tagname":"b"}
+	 *    ]
+	 * }
+	 */
+	public function getTagList(){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::TAG_LIST_URL.'access_token='.$this->access_token);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
 	            $this->errCode = $json['errcode'];
 	            $this->errMsg = $json['errmsg'];
 	            return false;

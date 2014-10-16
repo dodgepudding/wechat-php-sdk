@@ -200,9 +200,9 @@ else
 - 接入验证 （初级权限）
 - 自动回复（文本、图片、语音、视频、音乐、图文）
 - 菜单操作（查询、创建、删除）
-- 部门管理（创建、更新、删除、获取列表）
+- 部门管理（创建、更新、删除、获取部门列表）
 - 成员管理（创建、更新、删除、获取成员信息，获取部门成员列表）
-- 标签管理（创建、更新、删除、获取成员、添加成员、删除成员）
+- 标签管理（创建、更新、删除、获取成员、添加成员、删除成员,获取标签列表）
 - 媒体文件管理（上传、获取）
 - 二次验证
 - OAuth2（生成授权url、获取成员信息）
@@ -283,6 +283,7 @@ $options = array(
 * getTag($tagid) 获取标签成员，参数：标签TagID
 * addTagUser($data) 增加标签成员，参数请看php文件内方法说明
 * delTagUser($data) 删除标签成员，参数请看php文件内方法说明
+* getTagList() 获取标签列表，返回标签数组
 * sendMessage($data) 主动发送信息接口，参数请看php文件内方法说明
 * authSucc($userid) 二次验证，参数： 员工UserID
 * getOauthRedirect($callback,$state='STATE',$scope='snsapi_base') 组合授权跳转接口url
