@@ -176,6 +176,7 @@ class Wechat
             	    }
             	}
             	$this->postxml = $array[1];
+            	$this->appid = $array[2];//为了没有appid的订阅号。
             } else {
                 $this->postxml = $postStr;
             }
@@ -2129,9 +2130,11 @@ class Prpcrypt
             print $e;
             return array(ErrorCode::$IllegalBuffer, null);
         }
-        if ($from_appid != $appid)
-            return array(ErrorCode::$ValidateAppidError, null);
-        return array(0, $xml_content);
+        //if ($from_appid != $appid)
+            //return array(ErrorCode::$ValidateAppidError, null);
+        //注释上面两行是为了没有appid的订阅号
+        
+        return array(0, $xml_content, $from_appid); //增加appid，为了解决后面加密回复消息的时候没有appid的订阅号会无法回复
 
     }
 
