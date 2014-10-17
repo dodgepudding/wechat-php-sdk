@@ -1793,7 +1793,7 @@ class Prpcrypt
 
         try {
             //获得16位随机字符串，填充到明文之前
-            $random = "aaaabbbbccccdddd"; //$this->getRandomStr();
+            $random = $this->getRandomStr();//"aaaabbbbccccdddd"; 
             $text = $random . pack("N", strlen($text)) . $text . $appid;
             // 网络字节序
             $size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
@@ -1812,7 +1812,7 @@ class Prpcrypt
             //使用BASE64对加密后的字符串进行编码
             return array(ErrorCode::$OK, base64_encode($encrypted));
         } catch (Exception $e) {
-            print $e;
+            //print $e;
             return array(ErrorCode::$EncryptAESError, null);
         }
     }
@@ -1853,7 +1853,7 @@ class Prpcrypt
             $xml_content = substr($content, 4, $xml_len);
             $from_appid = substr($content, $xml_len + 4);
         } catch (Exception $e) {
-            print $e;
+            //print $e;
             return array(ErrorCode::$IllegalBuffer, null);
         }
         if ($from_appid != $appid)
