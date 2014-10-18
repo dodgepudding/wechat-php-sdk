@@ -23,6 +23,7 @@
  *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据
  *  quickSetInterface($url, $token) 快速设置接口信息
+ *  getCommonInfo($dir) 获取公众账号基本信息, 其中包含：nickname,avatar,type,qrcode,appid,appsecret
  *  @author dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
  *  @version 1.2
@@ -30,7 +31,6 @@
  */
 
 include "snoopy.class.php";
-include "io.class.php";
 class Wechatext
 {
 	private $cookie;
@@ -679,9 +679,10 @@ class Wechatext
 
 	/**
 	 * 获取公众账号基本信息
-	 * @return [type] [description]
+	 * @param  [string] $dir [指定相对于网站根目录的下载路径，因为需要下载二维码和用户头像]
+	 * @return [array]      [公众账号信息，其中包含：nickname,avatar,type,qrcode,appid,appsecret]
 	 */
-	public function getCommonInfo($uid)
+	public function getCommonInfo($dir)
 	{
 		$userInfo = array();
 		$send_snoopy = new Snoopy; 
@@ -726,7 +727,7 @@ class Wechatext
 		$url = "https://mp.weixin.qq.com". $avatar;
 		$send_snoopy->fetch($url);
 		$result = $send_snoopy->results;
-        $userInfo["avatar"] = $this->downloadImage($result, 'avatar');
+        $userInfo["avatar"] = $this->downloadImage($result, $dir. DIRECTORY_SEPARATOR. 'avatars');
         // downloads the qrcode
         $send_snoopy = new Snoopy; 
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
@@ -734,7 +735,7 @@ class Wechatext
 		$url = "https://mp.weixin.qq.com". $qrcode;
 		$send_snoopy->fetch($url);
 		$result = $send_snoopy->results;
-        $userInfo["qrcode"] = $this->downloadImage($result, '/uploads/'. $uid);
+        $userInfo["qrcode"] = $this->downloadImage($result, $dir. DIRECTORY_SEPARATOR. 'qrcodes');
         // 获取appid和appsecret
         $send_snoopy = new Snoopy; 
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
@@ -743,8 +744,8 @@ class Wechatext
 		$send_snoopy->fetch($url);
 		$result = $send_snoopy->results;
 
-		preg_match_all('/AppId<\/label>\s.*<div.*>(.*)<\/div>/', $result, $matches_id);
-		preg_match_all('/AppSecret<\/label>\s.*<div.*>\s(.*)/', $result, $matches_secret);
+		preg_match_all('/name:\"AppId\",value:\"(.*)\"/', $result, $matches_id);
+		preg_match_all('/name:\"AppSecret\",value:\"(.*)\"/', $result, $matches_secret);
 		
         $userInfo["appid"] = $AppId = $matches_id[1][0];
         $userInfo["appsecret"] = $AppSecret = $matches_secret[1][0];
@@ -758,14 +759,17 @@ class Wechatext
 	/**
 	 * 下载图片资源
 	 * @param  [string] $from    [资源链接]
-	 * @param  [string] $dirname [相对于网站根目录]
+	 * @param  [string] $dir [相对于网站根目录]
 	 * @return [string]          [返回相对地址]
 	 */
-	public function downloadImage($from, $dirname)
+	public function downloadImage($from, $dir)
 	{
-	    $random_name =  str_replace('.', '', microtime(true)). rand(2, 10000); // 保存的文件名
-	    $savefile =  Io::strip(Io::mkdir('./'. $dirname) . '/' . $random_name);
-	    // $savefile =  Io::strip(Io::mkdir(DOCROOT . '../application/www/'. $dirname) . '/' . $random_name);
+	    $random_name =  str_replace('.', '', microtime(true)). rand(2, 10000);
+	    if( ! is_dir($dir))
+	    {
+	    	mkdir($dir, 0755, true);	
+	    }
+	    $savefile = preg_replace('/[\\\\\/]+/', DIRECTORY_SEPARATOR, $dir. '/'. $random_name);
 	    file_put_contents($savefile, $from);
 	    $filesize = filesize($savefile);
 	    $avatar_type = $this->checkImgType($savefile);
@@ -774,7 +778,7 @@ class Wechatext
 	        unlink($savefile);
 	    }
 	    exec("mv $savefile ". $savefile. '.'. $avatar_type);
-	    return $dirname. '/'. $random_name. '.'. $avatar_type;
+	    return $dir. '/'. $random_name. '.'. $avatar_type;
 	}
 
 	/**
