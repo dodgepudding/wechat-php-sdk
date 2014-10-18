@@ -783,8 +783,8 @@ class Wechatext
 
 	/**
 	 * 检测图片类型
-	 * @param  [type] $imgName [description]
-	 * @return [type]          [description]
+	 * @param  [string] $imgName [文件路径]
+	 * @return [string]          [文件类型]
 	 */
 	public function checkImgType($imgName){
 	    $file = fopen($imgName, "rb");
