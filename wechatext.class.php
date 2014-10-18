@@ -680,7 +680,7 @@ class Wechatext
 	/**
 	 * 获取公众账号基本信息
 	 * @param  [string] $dir [指定相对于网站根目录的下载路径，因为需要下载二维码和用户头像]
-	 * @return [array]      [公众账号信息，其中包含：nickname,avatar,type,qrcode,appid,appsecret]
+	 * @return [array]       [公众账号信息，其中包含：nickname,avatar,type,qrcode,appid,appsecret]
 	 */
 	public function getCommonInfo($dir)
 	{
@@ -759,7 +759,7 @@ class Wechatext
 	/**
 	 * 下载图片资源
 	 * @param  [string] $from    [资源链接]
-	 * @param  [string] $dir [相对于网站根目录]
+	 * @param  [string] $dir     [相对于网站根目录]
 	 * @return [string]          [返回相对地址]
 	 */
 	public function downloadImage($from, $dir)
