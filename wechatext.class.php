@@ -22,6 +22,8 @@
  *  消息返回结构:  {"id":"消息id","type":"类型号(1为文字,2为图片,3为语音)","fileId":"0","hasReply":"0","fakeId":"用户uid","nickName":"昵称","dateTime":"时间戳","content":"文字内容"} 
  *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据
+ *  quickSetInterface($url, $token) 快速设置接口信息
+ *  getCommonInfo($dir) 获取公众账号基本信息, 其中包含：nickname,avatar,type,qrcode,appid,appsecret
  *  @author dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
  *  @version 1.2
@@ -595,6 +597,218 @@ class Wechatext
 			return false;
 		}
 		return $result;
+	}
+
+	/**
+	 * 开启开发者模式
+	 */
+	public function openDevModel()
+	{
+		$send_snoopy = new Snoopy;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/misc/skeyform?form=advancedswitchform&lang=zh_CN";
+		$post['flag']=1;
+        $post['type']=2;   
+        $post['token']=$this->_token;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		$this->log($send_snoopy->results);
+		$json = json_decode($result,true);
+		if(!$result){
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 关闭编辑模式
+	 */
+	public function closeEditModel()
+	{
+		$send_snoopy = new Snoopy;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/misc/skeyform?form=advancedswitchform&lang=zh_CN";
+		$post['flag']=0;
+        $post['type']=1;   
+        $post['token']=$this->_token;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		$this->log($send_snoopy->results);
+		$json = json_decode($result,true);
+		if(!$result){
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 配置接口信息
+	 * @param  string $url      接口回调URL
+	 * @param  string $token    接口Token
+	 */
+	public function setUrlToken($url, $token)
+	{
+		$send_snoopy = new Snoopy;
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&lang=zh_CN&token=".$this->_token;
+		$submit = "https://mp.weixin.qq.com/advanced/callbackprofile?t=ajax-response&lang=zh_CN&token=".$this->_token;
+		$post['url'] = $url;
+		$post['callback_token'] = $token;
+		$send_snoopy->submit($submit,$post);
+		$result = $send_snoopy->results;
+		$this->log($send_snoopy->results);
+		$json = json_decode($result,true);
+		if ($json && $json['ret']==0) 
+			return true;
+		return false;
+	}
+
+	/**
+	 * 快速设置接口
+	 * @param  string $url      接口回调URL
+	 * @param  string $token    接口Token
+	 */
+	public function quickSetInterface($url, $token)
+	{
+		if ($this->closeEditModel() && $this->openDevModel() && $this->setUrlToken($url, $token))
+			return true;
+		return false;
+	}
+
+	/**
+	 * 获取公众账号基本信息
+	 * @param  [string] $dir [指定相对于网站根目录的下载路径，因为需要下载二维码和用户头像]
+	 * @return [array]       [公众账号信息，其中包含：nickname,avatar,type,qrcode,appid,appsecret]
+	 */
+	public function getCommonInfo($dir)
+	{
+		$userInfo = array();
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+		// 分析首页内容，获取nickname,avatar,usertype
+		preg_match_all('/class=\"nickname\">(.*)<\/a>/', $result, $matches1);
+        preg_match_all('/<img src=\"(.*)\" class=\"avatar\"/', $result, $matches2);
+        preg_match_all('/<label for=\"\" class=\"type icon_service_label\">(.*)<\/label>/', $result, $matches3);
+        $userInfo["nickname"] = $nickname = $matches1[1][0];
+        if(strpos($nickname, '<') !== false)
+        {
+        	$userInfo["nickname"] = $nickname = substr($nickname, 0, strpos($nickname, '<'));
+        }
+        $userInfo["avatar"] = $avatar = $matches2[1][0];
+        if( ! empty($matches3[1][0]))
+        {
+            $userInfo["type"] = $usertype = $matches3[1][0];
+        }
+        else
+        {
+            $userInfo["type"] = $usertype = "订阅号";
+        }
+		$this->log('Analysis account info:'. "\nNickname:". $nickname. "\nAvatar:". $avatar. "\nUsertype:". $usertype);
+		// 分析设置页面，获取二维码
+		$send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+		// $this->log("QRCODE contents:". $result);
+		preg_match_all('/<img src=\"(.*)\" width=\"150\"/', $result, $matches4);
+        $userInfo["qrcode"] = $qrcode = $matches4[1][0];
+        // downloads the avatar
+        $send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com". $avatar;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+        $userInfo["avatar"] = $this->downloadImage($result, $dir. DIRECTORY_SEPARATOR. 'avatars');
+        // downloads the qrcode
+        $send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com". $qrcode;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+        $userInfo["qrcode"] = $this->downloadImage($result, $dir. DIRECTORY_SEPARATOR. 'qrcodes');
+        // 获取appid和appsecret
+        $send_snoopy = new Snoopy; 
+		$send_snoopy->rawheaders['Cookie']= $this->cookie;
+		$send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=".$this->_token;
+		$url = "https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&lang=zh_CN&token=".$this->_token;
+		$send_snoopy->fetch($url);
+		$result = $send_snoopy->results;
+
+		preg_match_all('/name:\"AppId\",value:\"(.*)\"/', $result, $matches_id);
+		preg_match_all('/name:\"AppSecret\",value:\"(.*)\"/', $result, $matches_secret);
+		
+        $userInfo["appid"] = $AppId = $matches_id[1][0];
+        $userInfo["appsecret"] = $AppSecret = $matches_secret[1][0];
+        
+		if(! empty($userInfo)){
+			return $userInfo;
+		}
+		return false;
+	}
+
+	/**
+	 * 下载图片资源
+	 * @param  [string] $from    [资源链接]
+	 * @param  [string] $dir     [相对于网站根目录]
+	 * @return [string]          [返回相对地址]
+	 */
+	public function downloadImage($from, $dir)
+	{
+	    $random_name =  str_replace('.', '', microtime(true)). rand(2, 10000);
+	    if( ! is_dir($dir))
+	    {
+	    	mkdir($dir, 0755, true);	
+	    }
+	    $savefile = preg_replace('/[\\\\\/]+/', DIRECTORY_SEPARATOR, $dir. '/'. $random_name);
+	    file_put_contents($savefile, $from);
+	    $filesize = filesize($savefile);
+	    $avatar_type = $this->checkImgType($savefile);
+	    if ($filesize <= 0 || $avatar_type=='unknown') 
+	    {
+	        unlink($savefile);
+	    }
+	    exec("mv $savefile ". $savefile. '.'. $avatar_type);
+	    return $dir. '/'. $random_name. '.'. $avatar_type;
+	}
+
+	/**
+	 * 检测图片类型
+	 * @param  [string] $imgName [文件路径]
+	 * @return [string]          [文件类型]
+	 */
+	public function checkImgType($imgName){
+	    $file = fopen($imgName, "rb");
+	    $bin = fread($file, 2);
+	    $strInfo  = @unpack("C2chars", $bin);
+	    $typeCode = intval($strInfo['chars1'].$strInfo['chars2']);
+	    switch($typeCode)
+	    {
+	        case '255216':
+	            return 'jpg';
+	            break;
+	        case '7173':
+	            return 'gif';
+	            break;
+	        case '13780':
+	            return 'png';
+	            break;
+	        case '6677':
+	            return 'bmp';
+	            break;
+	        default:
+	            return 'unknown';
+	            break;
+	    }
 	}
 	
 	/**
