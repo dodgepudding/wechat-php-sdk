@@ -1353,12 +1353,16 @@ class Wechat
 	}
 
 	/**
-	 * 根据code获取成员id
-	 * 通过Oauth2.0或者设置了二次验证时获取的code，用于换取成员的userid
+	 * 根据code获取成员信息
+	 * 通过Oauth2.0或者设置了二次验证时获取的code，用于换取成员的UserId和DeviceId
 	 *
 	 * @param $code        Oauth2.0或者二次验证时返回的code值
 	 * @param $agentid     跳转链接时所在的企业应用ID，未填则默认为当前配置的应用id
-	 * @return boolean|string 成功返回userid
+	 * @return boolean|array 成功返回数组
+	 * array(
+	 *     'UserId' => 'USERID',       //员工UserID
+	 *     'DeviceId' => 'DEVICEID'    //手机设备号(由微信在安装时随机生成)
+	 * )
 	 */
 	public function getUserId($code,$agentid=0){
 	    if (!$agentid) $agentid=$this->agentid;
@@ -1372,7 +1376,7 @@ class Wechat
 	            $this->errMsg = $json['errmsg'];
 	            return false;
 	        }
-	        return $json['UserId'];
+	        return $json;
 	    }
 	    return false;
 	}
