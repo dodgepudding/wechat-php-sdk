@@ -7,7 +7,8 @@
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码
  *  get_code_image($code='') 将上面获取的授权码转换为图片二维码
  *  verify_code() 鉴定是否登陆成功,返回200为最终授权成功.
- *  get_login_info() 鉴定成功后调用此方法即可获取用户基本信息
+ *  get_login_cookie() 鉴定成功后调用此方法即可获取用户基本信息
+ *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息
  *  get_avatar($url) 获取用户头像图片数据
  *  @author dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
@@ -18,7 +19,6 @@ include "Snoopy.class.php";
 class Wechatauth
 {
 	private $cookie;
-	private $skey;
 	private $_cookiename;
 	private $_cookieexpired = 3600;
 	private $_account = 'test';
@@ -93,7 +93,7 @@ class Wechatauth
 		}
 		return $result;
 	}
-
+	
 	/**
 	 * 通过授权码获取对应的二维码图片地址
 	 * @param string $code
@@ -127,7 +127,7 @@ class Wechatauth
 		if (!$this->_logincode) return false;
 		$t = time().strval(mt_rand(100,999));
 
-			$url = 'https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?uuid='.$this->_logincode.'&tip=0&_='.$t;
+			$url = 'https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?uuid='.$this->_logincode.'&tip=1&_='.$t;
 			$send_snoopy = new Snoopy; 
 			$send_snoopy->referer = "https://wx.qq.com/";
 			$send_snoopy->fetch($url);
@@ -140,33 +140,26 @@ class Wechatauth
 					if ($status==201) $_SESSION['login_step'] = 1;
 					if ($status==200) {
 						preg_match("/ticket=([0-9a-z-_]+)&lang=zh_CN&scan=(\d+)/",$result,$matches);
-						preg_match("/window.redirect_uri=\"([^\"]+)\"/",$result,$matcheurl);
 						$this->log('step2:'.print_r($matches,true));
-						if (count($matcheurl)>1) {
+						if (count($matches)>1) {
 							$ticket = $matches[1];
 							$scan = $matches[2];
-							//$loginurl = 'https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket='.$ticket.'&lang=zh_CN&scan='.$scan.'&fun=new';
-							$loginurl = str_replace("wx.qq.com", "wx2.qq.com", $matcheurl[1]).'&fun=old';
-							$urlpart = parse_url($loginurl);
+							$loginurl = 'https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket='.$ticket.'&lang=zh_CN&scan='.$scan.'&fun=new';
 							$send_snoopy = new Snoopy; 
-							$send_snoopy->referer = "https://{$urlpart['host']}/cgi-bin/mmwebwx-bin/webwxindex?t=chat";
+							$send_snoopy->referer = "https://wx.qq.com/";
 							$send_snoopy->fetch($loginurl);
-							$result = $send_snoopy->results;
-							$xml = simplexml_load_string($result);
-							if ($xml->ret=="0") $this->skey = $xml->skey;
+							$this->log('step3:'.print_r($send_snoopy->headers,true));
 							foreach ($send_snoopy->headers as $key => $value) {
 								$value = trim($value);
 								if(strpos($value,'Set-Cookie: ') !== false){
 									$tmp = str_replace("Set-Cookie: ","",$value);
-									$tmparray = explode(';', $tmp);
-									$item = trim($tmparray[0]);
-									$cookie.=$item.';';
+									$tmp = str_replace("Path=/","",$tmp);
+									$tmp = str_replace("Domain=.qq.com; ","",$tmp);
+									$cookie.=$tmp;
 								}
 							}
 							$cookie .="Domain=.qq.com;";
 							$this->cookie = $cookie;
-							$this->log('step3:'.$loginurl.';cookie:'.$cookie.';respond:'.$result);
-							
 							$this->saveCookie($this->_cookiename,$this->cookie);
 						}
 					}
@@ -204,25 +197,13 @@ class Wechatauth
 		if (!$this->cookie) return false;
 		$t = time().strval(mt_rand(100,999));
 		$send_snoopy = new Snoopy; 
-		$submit = 'https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxinit?r='.$t.'&skey='.urlencode($this->skey);
+		$submit = 'https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxinit?r='.$t;
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$send_snoopy->referer = "https://wx2.qq.com/";
-		$citems = $this->get_login_cookie(true);
-		$post = array(
-			"BaseRequest"=>array(
-				array(
-					"Uin"=>$citems['wxuin'],
-					"Sid"=>$citems['wxsid'],
-					"Skey"=>$this->skey,
-					"DeviceID"=>''
-				)
-			)
-		);
-		$send_snoopy->submit($submit,json_encode($post));
+		$send_snoopy->referer = "https://wx.qq.com/";
+		$send_snoopy->submit($submit,array());
 		$this->log('login_info:'.$send_snoopy->results);
 		$result = json_decode($send_snoopy->results,true);
 		if ($result['BaseResponse']['Ret']<0) return false;
-		$this->_login_user = $result['User'];
 		return $result;
 	}
 	
@@ -233,11 +214,11 @@ class Wechatauth
 	public function get_avatar($url) {
 		if (!$this->cookie) return false;
 		if (strpos($url, 'http')===false) {
-			$url = 'http://wx2.qq.com'.$url;
+			$url = 'http://wx.qq.com'.$url;
 		}
 		$send_snoopy = new Snoopy; 
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$send_snoopy->referer = "https://wx2.qq.com/";
+		$send_snoopy->referer = "https://wx.qq.com/";
 		$send_snoopy->fetch($url);
 		$result = $send_snoopy->results;
 		if ($result) 
@@ -257,9 +238,9 @@ class Wechatauth
 		if (count($matches)>1) $sid = $matches[1];
 		$this->log('logout: uid='.$uid.';sid='.$sid);
 		$send_snoopy = new Snoopy; 
-		$submit = 'https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxlogout?redirect=1&type=1';
+		$submit = 'https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxlogout?redirect=1&type=1';
 		$send_snoopy->rawheaders['Cookie']= $this->cookie;
-		$send_snoopy->referer = "https://wx2.qq.com/";
+		$send_snoopy->referer = "https://wx.qq.com/";
 		$send_snoopy->submit($submit,array('uin'=>$uid,'sid'=>$sid));
 		$this->deleteCookie($this->_cookiename);
 		return true;
