@@ -159,7 +159,6 @@ class Wechat
 	public function valid($return=false)
     {
         $encryptStr="";
-        $echoStr="";
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $postStr = file_get_contents("php://input");
             $array = (array)simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -182,31 +181,28 @@ class Wechat
             } else {
                 $this->postxml = $postStr;
             }
-        } else {
-            $echoStr = isset($_GET["echostr"]) ? $_GET["echostr"]: '';
+        } elseif (isset($_GET["echostr"])) {
+        	$echoStr = $_GET["echostr"];
+        	if ($return) {
+        		if ($this->checkSignature())
+        			return $echoStr;
+        		else
+        			return false;
+        	} else {
+        		if ($this->checkSignature())
+        			die($echoStr);
+        		else
+        			die('no access');
+        	}
         }
-        if ($return) {
-        		if (isset($echoStr)) {
-        			if ($this->checkSignature($encryptStr)) 
-        				return $echoStr;
-        			else
-        				return false;
-        		} else 
-        			return $this->checkSignature($encryptStr);
-        } else {
-	        	if (isset($echoStr)) {
-	        		if ($this->checkSignature($encryptStr))
-	        			die($echoStr);
-	        		else 
-	        			die('no access');
-	        	}  else {
-	        		if ($this->checkSignature($encryptStr))
-	        			return true;
-	        		else
-	        			die('no access');
-	        	}
+
+        if (!$this->checkSignature($encryptStr)) {
+        	if ($return)
+        		return false;
+        	else 
+        		die('no access');
         }
-        return false;
+        return true;
     }
     
 	/**
