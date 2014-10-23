@@ -159,6 +159,7 @@ class Wechat
 	public function valid($return=false)
     {
         $encryptStr="";
+        $echoStr="";
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $postStr = file_get_contents("php://input");
             $array = (array)simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
