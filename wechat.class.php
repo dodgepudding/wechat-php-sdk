@@ -170,7 +170,7 @@ class Wechat
             	$array = $pc->decrypt($encryptStr,$this->appid);
             	if (!isset($array[0]) || ($array[0] != 0)) {
             	    if (!$return) {
-            	        die('解密失败！');
+            	        die('decrypt error!');
             	    } else {
             	        return false;
             	    }
@@ -181,31 +181,28 @@ class Wechat
             } else {
                 $this->postxml = $postStr;
             }
-        } else {
-            $echoStr = isset($_GET["echostr"]) ? $_GET["echostr"]: '';
+        } elseif (isset($_GET["echostr"])) {
+        	$echoStr = $_GET["echostr"];
+        	if ($return) {
+        		if ($this->checkSignature())
+        			return $echoStr;
+        		else
+        			return false;
+        	} else {
+        		if ($this->checkSignature())
+        			die($echoStr);
+        		else
+        			die('no access');
+        	}
         }
-        if ($return) {
-        		if (isset($echoStr)) {
-        			if ($this->checkSignature($encryptStr)) 
-        				return $echoStr;
-        			else
-        				return false;
-        		} else 
-        			return $this->checkSignature($encryptStr);
-        } else {
-	        	if (isset($echoStr)) {
-	        		if ($this->checkSignature($encryptStr))
-	        			die($echoStr);
-	        		else 
-	        			die('no access');
-	        	}  else {
-	        		if ($this->checkSignature($encryptStr))
-	        			return true;
-	        		else
-	        			die('no access');
-	        	}
+
+        if (!$this->checkSignature($encryptStr)) {
+        	if ($return)
+        		return false;
+        	else 
+        		die('no access');
         }
-        return false;
+        return true;
     }
     
 	/**
