@@ -681,7 +681,7 @@ class Wechat
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_IMAGE,
+			'MsgType'=>self::MSGTYPE_VOICE,
 			'Voice'=>array('MediaId'=>$mediaid),
 			'CreateTime'=>time(),
 			'FuncFlag'=>$FuncFlag
@@ -695,17 +695,17 @@ class Wechat
 	 * Examle: $obj->video('media_id','title','description')->reply();
 	 * @param string $mediaid
 	 */
-	public function video($mediaid='',$title,$description)
+	public function video($mediaid='',$title='',$description='')
 	{
 		$FuncFlag = $this->_funcflag ? 1 : 0;
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_IMAGE,
+			'MsgType'=>self::MSGTYPE_VIDEO,
 			'Video'=>array(
 			        'MediaId'=>$mediaid,
-			        'Title'=>$mediaid,
-			        'Description'=>$mediaid,
+			        'Title'=>$title,
+			        'Description'=>$description,
 			),
 			'CreateTime'=>time(),
 			'FuncFlag'=>$FuncFlag
