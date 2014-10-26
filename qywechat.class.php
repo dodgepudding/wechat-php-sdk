@@ -630,7 +630,7 @@ class Wechat
 	
 	/**
 	 * 设置回复消息
-	 * Examle: $obj->text('hello')->reply();
+	 * Example: $obj->text('hello')->reply();
 	 * @param string $text
 	 */
 	public function text($text='')
@@ -648,7 +648,7 @@ class Wechat
 	
 	/**
 	 * 设置回复消息
-	 * Examle: $obj->image('media_id')->reply();
+	 * Example: $obj->image('media_id')->reply();
 	 * @param string $mediaid
 	 */
 	public function image($mediaid='')
@@ -666,7 +666,7 @@ class Wechat
 	
 	/**
 	 * 设置回复消息
-	 * Examle: $obj->voice('media_id')->reply();
+	 * Example: $obj->voice('media_id')->reply();
 	 * @param string $mediaid
 	 */
 	public function voice($mediaid='')
@@ -684,10 +684,10 @@ class Wechat
 	
 	/**
 	 * 设置回复消息
-	 * Examle: $obj->video('media_id','title','description')->reply();
+	 * Example: $obj->video('media_id','title','description')->reply();
 	 * @param string $mediaid
 	 */
-	public function video($mediaid='',$title,$description)
+	public function video($mediaid='',$title='',$description='')
 	{
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
@@ -695,8 +695,8 @@ class Wechat
 			'MsgType'=>self::MSGTYPE_IMAGE,
 			'Video'=>array(
 			        'MediaId'=>$mediaid,
-			        'Title'=>$mediaid,
-			        'Description'=>$mediaid,
+			        'Title'=>$title,
+			        'Description'=>$description
 			),
 			'CreateTime'=>time(),
 		);

@@ -633,7 +633,7 @@ class Wechat
 	
 	/**
 	 * 设置回复消息
-	 * Examle: $obj->text('hello')->reply();
+	 * Example: $obj->text('hello')->reply();
 	 * @param string $text
 	 */
 	public function text($text='')
@@ -652,7 +652,7 @@ class Wechat
 	}
 	/**
 	 * 设置回复消息
-	 * Examle: $obj->image('media_id')->reply();
+	 * Example: $obj->image('media_id')->reply();
 	 * @param string $mediaid
 	 */
 	public function image($mediaid='')
@@ -672,7 +672,7 @@ class Wechat
 	
 	/**
 	 * 设置回复消息
-	 * Examle: $obj->voice('media_id')->reply();
+	 * Example: $obj->voice('media_id')->reply();
 	 * @param string $mediaid
 	 */
 	public function voice($mediaid='')
@@ -681,7 +681,7 @@ class Wechat
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_IMAGE,
+			'MsgType'=>self::MSGTYPE_VOICE,
 			'Voice'=>array('MediaId'=>$mediaid),
 			'CreateTime'=>time(),
 			'FuncFlag'=>$FuncFlag
@@ -692,20 +692,20 @@ class Wechat
 	
 	/**
 	 * 设置回复消息
-	 * Examle: $obj->video('media_id','title','description')->reply();
+	 * Example: $obj->video('media_id','title','description')->reply();
 	 * @param string $mediaid
 	 */
-	public function video($mediaid='',$title,$description)
+	public function video($mediaid='',$title='',$description='')
 	{
 		$FuncFlag = $this->_funcflag ? 1 : 0;
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_IMAGE,
+			'MsgType'=>self::MSGTYPE_VIDEO,
 			'Video'=>array(
 			        'MediaId'=>$mediaid,
-			        'Title'=>$mediaid,
-			        'Description'=>$mediaid,
+			        'Title'=>$title,
+			        'Description'=>$description
 			),
 			'CreateTime'=>time(),
 			'FuncFlag'=>$FuncFlag
@@ -1877,7 +1877,7 @@ class Wechat
 
 	/**
 	 * 转发多客服消息
-	 * Examle: $obj->transfer_customer_service($customer_account)->reply();
+	 * Example: $obj->transfer_customer_service($customer_account)->reply();
 	 * @param string $customer_account 转发到指定客服帐号：test1@test
 	 */
 	public function transfer_customer_service($customer_account = '')
