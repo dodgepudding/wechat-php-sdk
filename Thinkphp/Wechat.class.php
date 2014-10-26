@@ -170,7 +170,7 @@ class Wechat
             	$array = $pc->decrypt($encryptStr,$this->appid);
             	if (!isset($array[0]) || ($array[0] != 0)) {
             	    if (!$return) {
-            	        die('解密失败！');
+            	        die('decrypt error!');
             	    } else {
             	        return false;
             	    }
@@ -686,7 +686,7 @@ class Wechat
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_IMAGE,
+			'MsgType'=>self::MSGTYPE_VOICE,
 			'Voice'=>array('MediaId'=>$mediaid),
 			'CreateTime'=>time(),
 			'FuncFlag'=>$FuncFlag
@@ -706,7 +706,7 @@ class Wechat
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_IMAGE,
+			'MsgType'=>self::MSGTYPE_VIDEO,
 			'Video'=>array(
 			        'MediaId'=>$mediaid,
 			        'Title'=>$title,
