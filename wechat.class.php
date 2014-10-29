@@ -833,6 +833,7 @@ class Wechat
 		if(stripos($url,"https://")!==FALSE){
 			curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, FALSE);
+			curl_setopt($oCurl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
 		}
 		curl_setopt($oCurl, CURLOPT_URL, $url);
 		curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
@@ -858,6 +859,7 @@ class Wechat
 		if(stripos($url,"https://")!==FALSE){
 			curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, false);
+			curl_setopt($oCurl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
 		}
 		if (is_string($param) || $post_file) {
 			$strPOST = $param;
