@@ -49,7 +49,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 发货通知 （支付权限） 
 - 支付订单查询 （支付权限） 
 - 模板消息（支付权限） 
-- 语义理解（暂未开放） 
+- 语义理解（认证权限） 
 
 
 ### 初始化动作 
