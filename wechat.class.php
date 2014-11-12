@@ -61,6 +61,7 @@ class Wechat
 	const MENU_GET_URL = '/menu/get?';
 	const MENU_DELETE_URL = '/menu/delete?';
 	const MEDIA_GET_URL = '/media/get?';
+	const CALLBACKSERVER_GET_URL = '/getcallbackip?';
 	const QRCODE_CREATE_URL='/qrcode/create?';
 	const QR_SCENE = 0;
 	const QR_LIMIT_SCENE = 1;
@@ -974,6 +975,26 @@ class Wechat
 		if ($is_list)
 			return '[' . $json . ']'; //Return numerical JSON
 		return '{' . $json . '}'; //Return associative JSON
+	}
+	
+	/**
+	 * 获取微信服务器IP地址列表
+	 * @return array('127.0.0.1','127.0.0.1')
+	 */
+	public function getServerIp(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::CALLBACKSERVER_GET_URL.'access_token='.$this->access_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json['ip_list'];
+		}
+		return false;
 	}
 
 	/**
