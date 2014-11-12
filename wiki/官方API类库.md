@@ -20,7 +20,8 @@
 - 发货通知 （支付权限） 
 - 支付订单查询 （支付权限） 
 - 模板消息（支付权限） 
-- 语义理解（暂未开放） 
+- 语义理解（认证权限） 
+- 获取微信服务器IP列表（认证权限） 
 
 
 ## 初始化动作 
@@ -42,6 +43,7 @@
 ## 新增Auth高级权限类方法:   
  *  checkAuth($appid,$appsecret,$token) 此处传入公众后台高级接口提供的appid和appsecret, 或者手动指定$token为access_token。函数将返回access_token操作令牌
  *  createMenu($data) 创建菜单 $data菜单结构详见 **[自定义菜单创建接口](http://mp.weixin.qq.com/wiki/index.php?title=自定义菜单创建接口)**
+ *  getServerIp() 获取微信服务器IP地址列表 返回数组array('127.0.0.1','127.0.0.1')
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
  *  uploadMedia($data, $type) 上传多媒体文件
