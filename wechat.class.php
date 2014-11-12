@@ -1731,10 +1731,10 @@ class Wechat
 				"appid"=>$this->appid,
 				"appkey"=>$this->paysignkey,
 				"openid"=>$openid,
-				"transid"=>strval($transid),
-				"out_trade_no"=>strval($out_trade_no),
-				"deliver_timestamp"=>strval(time()),
-				"deliver_status"=>strval($status),
+				"transid"=>$transid,
+				"out_trade_no"=>$out_trade_no,
+				"deliver_timestamp"=>time(),
+				"deliver_status"=>$status,
 				"deliver_msg"=>$msg,
 		);
 		$postdata['app_signature'] = $this->getSignature($postdata);
