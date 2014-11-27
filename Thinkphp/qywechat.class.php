@@ -176,7 +176,7 @@ class Wechat
 	            if (! $is_list)
 	                $str = '"' . $key . '":';
 	            //Custom handling for multiple data types
-	            if (is_numeric ( $value ) && $value<2000000000)
+	            if (!is_string ( $value ) && is_numeric ( $value ) && $value<2000000000)
 	                $str .= $value; //Numbers
 	            elseif ($value === false)
 	            $str .= 'false'; //The booleans
