@@ -82,7 +82,7 @@ class Wechat
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
 	const MASS_PREVIEW_URL = '/message/mass/xxxx?';
-	const MASS_QUERY_URL = '/message/mass/xxxx?';
+	const MASS_QUERY_URL = '/message/mass/get?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
 	const MEDIA_UPLOAD = '/media/upload?';
 	const MEDIA_VIDEO_UPLOAD = '/media/uploadvideo?';
