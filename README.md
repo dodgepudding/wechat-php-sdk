@@ -35,10 +35,10 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 接入验证 （初级权限）
 - 自动回复（文本、图片、语音、视频、音乐、图文）（初级权限）
 - 菜单操作（查询、创建、删除）（菜单权限）
-- 客服消息（文本、图片、语音、视频、音乐、图文）（认证权限）
-- 二维码（创建临时、永久二维码，获取二维码URL）（认证权限）
-- 长链接转短链接接口（认证权限）
-- 分组操作（查询、创建、修改、移动用户到分组）（认证权限）
+- 客服消息（文本、图片、语音、视频、音乐、图文）（服务号、认证权限）
+- 二维码（创建临时、永久二维码，获取二维码URL）（服务号、认证权限）
+- 长链接转短链接接口（服务号、认证权限）
+- 分组操作（查询、创建、修改、移动用户到分组）（服务号、认证权限）
 - 网页授权（基本授权，用户信息授权）（认证权限）
 - 用户信息（查询用户基本信息、获取关注者列表）（认证权限）
 - 多客服功能（认证权限）
@@ -48,9 +48,10 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 订单成功回调 （支付权限） 
 - 发货通知 （支付权限） 
 - 支付订单查询 （支付权限） 
-- 模板消息（支付权限） 
-- 语义理解（认证权限） 
-- 获取微信服务器IP列表（认证权限） 
+- 高级群发（服务号|订阅号、认证权限）
+- 模板消息（服务号、认证权限） 
+- 语义理解（服务号、认证权限） 
+- 获取微信服务器IP列表（初级权限） 
 
 
 ### 初始化动作 
@@ -79,8 +80,10 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getMedia() 获取接收到的音频、视频媒体文件 
  *  uploadArticles($data) 上传图文消息素材
  *  sendMassMessage($data) 高级群发消息
- *  sendGroupMassMessage($data) 高级群发消息（分组群发）
- *  deleteMassMessage() 删除群发图文消息
+ *  sendGroupMassMessage($data) 高级群发消息（群体或分组群发）
+ *  deleteMassMessage($msg_id) 删除群发图文消息
+ *  previewMassMessage($data) 预览群发消息
+ *  queryMassMessage($msg_id) 查询群发消息发送状态
  *  getQRCode($scene_id,$type=0,$expire=1800) 获取推广二维码ticket字串 
  *  getQRUrl($ticket) 获取二维码图片地址
  *  getShortUrl($long_url) 长链接转短链接接口
