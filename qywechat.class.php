@@ -974,6 +974,7 @@ class Wechat
 
 	/**
 	 * 上传多媒体文件 (只有三天的有效期，过期自动被删除)
+	 * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
 	 * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义
 	 * @param array $data {"media":'@Path\filename.jpg'}
 	 * @param type 媒体文件类型:图片（image）、语音（voice）、视频（video），普通文件(file)

@@ -52,7 +52,7 @@
  *  getServerIp() 获取微信服务器IP地址列表 返回数组array('127.0.0.1','127.0.0.1')
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
- *  uploadMedia($data, $type) 上传多媒体文件
+ *  uploadMedia($data, $type) 上传多媒体文件(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
  *  getMedia() 获取接收到的音频、视频媒体文件 
  *  uploadMpVideo($data) 上传视频素材，当需要群发视频时，必须使用此方法得到的MediaID，否则无法显示
  *  uploadArticles($data) 上传图文消息素材

@@ -1152,6 +1152,7 @@ class Wechat
 
 	/**
 	 * 上传多媒体文件(认证后的订阅号可用)
+	 * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
 	 * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义
 	 * @param array $data {"media":'@Path\filename.jpg'}
 	 * @param type 类型：图片:image 语音:voice 视频:video 缩略图:thumb

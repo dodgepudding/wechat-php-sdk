@@ -83,12 +83,12 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getServerIp() 获取微信服务器IP地址列表 返回数组array('127.0.0.1','127.0.0.1')
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
- *  uploadMedia($data, $type) 上传多媒体文件
+ *  uploadMedia($data, $type) 上传多媒体文件(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
  *  getMedia() 获取接收到的音频、视频媒体文件 
  *  uploadMpVideo($data) 上传视频素材，当需要群发视频时，必须使用此方法得到的MediaID，否则无法显示
  *  uploadArticles($data) 上传图文消息素材
  *  sendMassMessage($data) 高级群发消息
- *  sendGroupMassMessage($data) 高级群发消息（群体或分组群发）
+ *  sendGroupMassMessage($data) 高级群发消息（全体或分组群发）
  *  deleteMassMessage($msg_id) 删除群发图文消息
  *  previewMassMessage($data) 预览群发消息
  *  queryMassMessage($msg_id) 查询群发消息发送状态
@@ -280,7 +280,7 @@ $options = array(
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id
 * getMenu($agentid='') 获取菜单内容,参数:要获取菜单内容的应用id
 * deleteMenu($agentid='') 删除菜单,参数:要删除菜单的应用id
-* uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明
+* uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
 * getMedia($media_id) 根据媒体文件ID获取媒体文件,参数:媒体id
 * createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
