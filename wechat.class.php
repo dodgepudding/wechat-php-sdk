@@ -81,7 +81,7 @@ class Wechat
 	const TEMPLATE_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
-	const MASS_PREVIEW_URL = '/message/mass/xxxx?';
+	const MASS_PREVIEW_URL = '/message/mass/preview?';
 	const MASS_QUERY_URL = '/message/mass/get?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
 	const MEDIA_UPLOAD = '/media/upload?';
@@ -97,7 +97,11 @@ class Wechat
 	const PAY_ORDERQUERY = 'https://api.weixin.qq.com/pay/orderquery?';
 	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
 	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
-	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getkflist?';
+	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
+	const CUSTOM_SERVICE_ACCOUNT_ADD = '/customservice/kfaccount/add?';
+	const CUSTOM_SERVICE_ACCOUNT_UPDATE = '/customservice/kfaccount/update?';
+	const CUSTOM_SERVICE_ACCOUNT_DEL = '/customservice/kfaccount/del?';
+	const CUSTOM_SERVICE_ACCOUNT_UPDATE_HEADIMG = '/customservice/kfaccount/uploadheadimg?';
 	const SEMANTIC_API_URL= 'https://api.weixin.qq.com/semantic/semproxy/search?';
 	
 	private $token;
@@ -2081,10 +2085,10 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
-	 * 获取多客服在线客服接待信息
-	 * 
+	 *  获取多客服在线客服接待信息
+	 *
 	 * @return boolean|array {
 	 "kf_online_list": [
 	 {
@@ -2098,8 +2102,43 @@ class Wechat
 	 }
 	 */
 	public function getCustomServiceOnlineKFlist(){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 添加客服账号
+	 * 
+	 * @param sr $account
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0, 
+	 *   "errmsg": "ok",
+	 * }
+	 *     "kf_account" : test1@test,
+    "nickname" : “客服1”,
+    "password" : "pswmd5",
+	 */
+	public function addCustomServiceKFAccount($account,$nickname,$password){
+	    $data=array(
+	    	"kf_account" =>$account, 
+	        "nickname" => $nickname,
+	        "password" => $password
+	    );
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_ACCOUNT_ADD.'access_token='.$this->access_token,self::json_encode($data));
 		if ($result)
 		{
 			$json = json_decode($result,true);
