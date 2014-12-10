@@ -66,7 +66,7 @@
 	   		alert(res.err_desc);
 	   	}
 	   	//分享到朋友圈
-	   	if (res.err_msg=='share_timeline:confirm') {
+	   	if (res.err_msg=='share_timeline:ok') {
 	   		//todo:func1();
 	   		alert(res.err_desc);
 	   	}
