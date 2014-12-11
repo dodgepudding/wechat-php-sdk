@@ -49,7 +49,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 发货通知 **（支付权限） **
 - 支付订单查询 **（支付权限） **
 - 高级群发**（认证权限）**
-- 模板消息**（服务号、认证权限） **
+- 模板消息(设置所属行业、添加模板、发送模板消息)**（服务号、认证权限） **
 - 语义理解**（服务号、认证权限） **
 - 获取微信服务器IP列表**（初级权限） **
 > 备注：
@@ -117,6 +117,8 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  sendPayDeliverNotify($openid,$transid,$out_trade_no,$status=1,$msg='ok') 发货通知  
  *  getPayOrder($out_trade_no) 查询订单信息  
  *  getAddrSign($url, $timeStamp, $nonceStr, $user_token='') 获取收货地址JS的签名
+ *  setTMIndustry($id1,$id2='') 模板消息，设置所属行业
+ *  addTemplateMessage($tpl_id) 模板消息，添加消息模板
  *  sendTemplateMessage($data) 发送模板消息
  *  getCustomServiceMessage($data) 获取多客服会话记录
  *  transfer_customer_service($customer_account) 转发多客服消息
