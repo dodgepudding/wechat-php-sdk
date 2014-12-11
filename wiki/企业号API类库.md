@@ -7,9 +7,9 @@
 - 接入验证 （初级权限）
 - 自动回复（文本、图片、语音、视频、音乐、图文）
 - 菜单操作（查询、创建、删除）
-- 部门管理（创建、更新、删除、获取列表）
+- 部门管理（创建、更新、删除、获取部门列表）
 - 成员管理（创建、更新、删除、获取成员信息，获取部门成员列表）
-- 标签管理（创建、更新、删除、获取成员、添加成员、删除成员）
+- 标签管理（创建、更新、删除、获取成员、添加成员、删除成员,获取标签列表）
 - 媒体文件管理（上传、获取）
 - 二次验证
 - OAuth2（生成授权url、获取成员信息）
@@ -70,7 +70,7 @@ $options = array(
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id
 * getMenu($agentid='') 获取菜单内容,参数:要获取菜单内容的应用id
 * deleteMenu($agentid='') 删除菜单,参数:要删除菜单的应用id
-* uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明
+* uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
 * getMedia($media_id) 根据媒体文件ID获取媒体文件,参数:媒体id
 * createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")

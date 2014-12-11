@@ -60,7 +60,6 @@ class Wechat
 	const MENU_CREATE_URL = '/menu/create?';
 	const MENU_GET_URL = '/menu/get?';
 	const MENU_DELETE_URL = '/menu/delete?';
-	const MEDIA_GET_URL = '/media/get?';
 	const CALLBACKSERVER_GET_URL = '/getcallbackip?';
 	const QRCODE_CREATE_URL='/qrcode/create?';
 	const QR_SCENE = 0;
@@ -81,24 +80,29 @@ class Wechat
 	const TEMPLATE_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
-	const MASS_PREVIEW_URL = '/message/mass/xxxx?';
+	const MASS_PREVIEW_URL = '/message/mass/preview?';
 	const MASS_QUERY_URL = '/message/mass/get?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
 	const MEDIA_UPLOAD = '/media/upload?';
+	const MEDIA_GET_URL = '/media/get?';
 	const MEDIA_VIDEO_UPLOAD = '/media/uploadvideo?';
 	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
 	const OAUTH_AUTHORIZE_URL = '/authorize?';
-	const OAUTH_TOKEN_PREFIX = 'https://api.weixin.qq.com/sns/oauth2';
-	const OAUTH_TOKEN_URL = '/access_token?';
-	const OAUTH_REFRESH_URL = '/refresh_token?';
-	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
-	const OAUTH_AUTH_URL = 'https://api.weixin.qq.com/sns/auth?';
-	const PAY_DELIVERNOTIFY = 'https://api.weixin.qq.com/pay/delivernotify?';
-	const PAY_ORDERQUERY = 'https://api.weixin.qq.com/pay/orderquery?';
+	const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com'; //以下API接口URL需要使用此前缀
+	const OAUTH_TOKEN_URL = '/sns/oauth2/access_token?';
+	const OAUTH_REFRESH_URL = '/sns/oauth2/refresh_token?';
+	const OAUTH_USERINFO_URL = '/sns/oauth2/sns/userinfo?';
+	const OAUTH_AUTH_URL = '/sns/auth?';
+	const PAY_DELIVERNOTIFY = '/pay/delivernotify?';
+	const PAY_ORDERQUERY = '/pay/orderquery?';
 	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
 	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
-	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getkflist?';
-	const SEMANTIC_API_URL= 'https://api.weixin.qq.com/semantic/semproxy/search?';
+	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
+	const CS_KF_ACCOUNT_ADD_URL = '/customservice/kfaccount/add?';
+	const CS_KF_ACCOUNT_UPDATE_URL = '/customservice/kfaccount/update?';
+	const CS_KF_ACCOUNT_DEL_URL = '/customservice/kfaccount/del?';
+	const CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL = '/customservice/kfaccount/uploadheadimg?';
+	const SEMANTIC_API_URL= '/semantic/semproxy/search?';
 	
 	private $token;
 	private $encodingAesKey;
@@ -1138,6 +1142,7 @@ class Wechat
 
 	/**
 	 * 上传多媒体文件(认证后的订阅号可用)
+	 * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
 	 * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义
 	 * @param array $data {"media":'@Path\filename.jpg'}
 	 * @param type 类型：图片:image 语音:voice 视频:video 缩略图:thumb
@@ -1244,8 +1249,7 @@ class Wechat
 	 *     ),
 	 *      "msgtype"=>"mpvideo", 
 	 *      // 在下面5种类型中选择对应的参数内容
-	 *      // mpvideo =>array ( "media_id"=>"MediaId", "title"=>"TITLE", "description"=>"Description" )
-	 *      // mpnews | voice | image => array( "media_id"=>"MediaId")
+	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
 	 *      // text => array ( "content" => "hello")
 	 * }
 	 * @return boolean|array
@@ -1278,8 +1282,7 @@ class Wechat
 	 *     ),
 	 *      "msgtype"=>"mpvideo", 
 	 *      // 在下面5种类型中选择对应的参数内容
-	 *      // mpvideo =>array ( "media_id"=>"MediaId", "title"=>"TITLE", "description"=>"Description" )
-	 *      // mpnews | voice | image => array( "media_id"=>"MediaId")
+	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
 	 *      // text => array ( "content" => "hello")
 	 * }
 	 * @return boolean|array
@@ -1330,8 +1333,7 @@ class Wechat
 	 *     "touser"=>"OPENID",
 	 *      "msgtype"=>"mpvideo",
 	 *      // 在下面5种类型中选择对应的参数内容
-	 *      // mpvideo =>array ( "media_id"=>"MediaId", "title"=>"TITLE", "description"=>"Description" )
-	 *      // mpnews | voice | image => array( "media_id"=>"MediaId")
+	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
 	 *      // text => array ( "content" => "hello")
 	 * }
 	 * @return boolean|array
@@ -1374,7 +1376,7 @@ class Wechat
 			}
 			return true;
 		}
-		return false;n
+		return false;
 	}
 	
 	/**
@@ -1666,7 +1668,7 @@ class Wechat
 	public function getOauthAccessToken(){
 		$code = isset($_GET['code'])?$_GET['code']:'';
 		if (!$code) return false;
-		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_TOKEN_URL.'appid='.$this->appid.'&secret='.$this->appsecret.'&code='.$code.'&grant_type=authorization_code');
+		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_TOKEN_URL.'appid='.$this->appid.'&secret='.$this->appsecret.'&code='.$code.'&grant_type=authorization_code');
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1687,7 +1689,7 @@ class Wechat
 	 * @return boolean|mixed
 	 */
 	public function getOauthRefreshToken($refresh_token){
-		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_REFRESH_URL.'appid='.$this->appid.'&grant_type=refresh_token&refresh_token='.$refresh_token);
+		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_REFRESH_URL.'appid='.$this->appid.'&grant_type=refresh_token&refresh_token='.$refresh_token);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1710,7 +1712,7 @@ class Wechat
 	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
 	 */
 	public function getOauthUserinfo($access_token,$openid){
-		$result = $this->http_get(self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
+		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1731,7 +1733,7 @@ class Wechat
 	 * @return boolean 是否有效
 	 */
 	public function getOauthAuth($access_token,$openid){
-	    $result = $this->http_get(self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
+	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -1904,7 +1906,7 @@ class Wechat
 		$postdata['app_signature'] = $this->getSignature($postdata);
 		$postdata['sign_method'] = 'sha1';
 		unset($postdata['appkey']);
-		$result = $this->http_post(self::PAY_DELIVERNOTIFY.'access_token='.$this->access_token,self::json_encode($postdata));
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::PAY_DELIVERNOTIFY.'access_token='.$this->access_token,self::json_encode($postdata));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1935,7 +1937,7 @@ class Wechat
 		$postdata['app_signature'] = $this->getSignature($postdata);
 		$postdata['sign_method'] = 'sha1';
 		unset($postdata['appkey']);
-		$result = $this->http_post(self::PAY_ORDERQUERY.'access_token='.$this->access_token,self::json_encode($postdata));
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::PAY_ORDERQUERY.'access_token='.$this->access_token,self::json_encode($postdata));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -2098,8 +2100,42 @@ class Wechat
 	 }
 	 */
 	public function getCustomServiceOnlineKFlist(){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 添加客服账号
+	 * 
+	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+	 * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
+	 * @param string $password     //客服账号明文登录密码，会自动加密
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0, 
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function addKFAccount($account,$nickname,$password){
+	    $data=array(
+	    	"kf_account" =>$account, 
+	        "nickname" => $nickname,
+	        "password" => md5($password)
+	    );
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_ADD_URL.'access_token='.$this->access_token,self::json_encode($data));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -2111,6 +2147,95 @@ class Wechat
 			return $json;
 		}
 		return false;
+	}
+
+	/**
+	 * 修改客服账号信息
+	 *
+	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+	 * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
+	 * @param string $password     //客服账号明文登录密码，会自动加密
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0,
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function updateKFAccount($account,$nickname,$password){
+	    $data=array(
+	            "kf_account" =>$account,
+	            "nickname" => $nickname,
+	            "password" => md5($password)
+	    );
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+
+	/**
+	 * 删除客服账号
+	 *
+	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0,
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function deleteKFAccount($account){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_DEL_URL.'access_token='.$this->access_token.'&kf_account='.$account);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 上传客服头像
+	 *
+	 * @param string $account //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+	 * @param string $imgfile //头像文件完整路径,如：'D:\user.jpg'。头像文件必须JPG格式，像素建议640*640
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0,
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function setKFHeadImg($account,$imgfile){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL.'access_token='.$this->access_token.'&kf_account='.$account,array('media'=>'@'.$imgfile),true);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
 	}
 	
 	/**
@@ -2141,7 +2266,7 @@ class Wechat
 	    } elseif ($region) {
 	        $data['region'] = $region;
 	    }
-	    $result = $this->http_post(self::SEMANTIC_API_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::SEMANTIC_API_URL.'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
