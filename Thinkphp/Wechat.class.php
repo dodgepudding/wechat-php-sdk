@@ -77,6 +77,8 @@ class Wechat
 	const CUSTOM_SEND_URL='/message/custom/send?';
 	const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
 	const MASS_SEND_URL = '/message/mass/send?';
+	const TEMPLATE_SET_INDUSTRY_URL = '/message/template/api_set_industry?';
+	const TEMPLATE_ADD_TPL_URL = '/message/template/api_add_template?';
 	const TEMPLATE_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
@@ -1986,6 +1988,51 @@ class Wechat
 				'accesstoken'=>$user_token
 		);
 		return $this->getSignature($arrdata);
+	}
+
+	/**
+	 * 模板消息 设置所属行业
+	 * @param int $id1  公众号模板消息所属行业编号，参看官方开发文档 行业代码
+	 * @param int $id2  同$id1。但如果只有一个行业，此参数可省略
+	 * @return boolean|array
+	 */
+	public function setTMIndustry($id1,$id2=''){
+	    if ($id1) $data['industry_id1'] = $id1;
+	    if ($id2) $data['industry_id2'] = $id2;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SET_INDUSTRY_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if($result){
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 模板消息 设置所属行业
+	 * 成功返回消息模板的调用id
+	 * @param string $tpl_id 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式
+	 * @return boolean|string
+	 */
+	public function addTemplateMessage($tpl_id){
+	    $data = array ('template_id_short' =>$tpl_id);
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_ADD_TPL_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if($result){
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json['template_id'];
+	    }
+	    return false;
 	}
 	
 	/**
