@@ -2014,7 +2014,7 @@ class Wechat
 	}
 	
 	/**
-	 * 模板消息 设置所属行业
+	 * 模板消息 添加消息模板
 	 * 成功返回消息模板的调用id
 	 * @param string $tpl_id 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式
 	 * @return boolean|string
