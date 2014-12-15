@@ -292,6 +292,7 @@ $options = array(
 * createUser($data) 创建成员，参数请看php文件内方法说明
 * updateUser($data) 更新成员，参数请看php文件内方法说明
 * deleteUser($userid) 删除成员，参数：员工UserID
+* deleteUsers($userids) 批量删除成员，参数：员工UserID数组
 * getUserInfo($userid) 获取成员信息，参数：员工UserID
 * getUserList($department_id,$fetch_child=0,$status=0) 获取部门成员，参数：部门id，是否递归获取子部门，获取类型。
 > 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加

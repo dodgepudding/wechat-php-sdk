@@ -31,6 +31,7 @@ class Wechat
     const USER_CREATE_URL = '/user/create?';
     const USER_UPDATE_URL = '/user/update?';
     const USER_DELETE_URL = '/user/delete?';
+    const USER_BATCHDELETE_URL = '/user/batchdelete?';
     const USER_GET_URL = '/user/get?';
     const USER_LIST_URL = '/user/simplelist?';
     const USER_GETINFO_URL = '/user/getuserinfo?';
@@ -1263,6 +1264,38 @@ class Wechat
 	public function deleteUser($userid){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
 	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_DELETE_URL.'access_token='.$this->access_token.'&userid='.$userid);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode']) || $json['errcode']!=0) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 批量删除成员
+	 * @param array $userid  员工UserID数组。对应管理端的帐号
+	 * {
+	 *     'userid1',
+	 *     'userid2',
+	 *     'userid3',
+	 * }
+	 * @return boolean|array 成功返回结果
+	 * {
+	 *   "errcode": 0,        //返回码
+	 *   "errmsg": "deleted"  //对返回码的文本描述内容
+	 * }
+	 */
+	public function deleteUsers($userids){
+	    if (!$userids) return false;
+	    $data = array('useridlist'=>$userids);
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_BATCHDELETE_URL.'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
