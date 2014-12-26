@@ -100,6 +100,12 @@ class Wechat
 	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
 	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
 	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
+	const CUSTOM_SEESSION_CREATE = '/customservice/kfsession/create?';
+	const CUSTOM_SEESSION_CLOSE = '/customservice/kfsession/close?';
+	const CUSTOM_SEESSION_SWITCH = '/customservice/kfsession/switch?';
+	const CUSTOM_SEESSION_GET = '/customservice/kfsession/getsession?';
+	const CUSTOM_SEESSION_GET_LIST = '/customservice/kfsession/getsessionlist?';
+	const CUSTOM_SEESSION_GET_WAIT = '/customservice/kfsession/getwaitcase?';
 	const CS_KF_ACCOUNT_ADD_URL = '/customservice/kfaccount/add?';
 	const CS_KF_ACCOUNT_UPDATE_URL = '/customservice/kfaccount/update?';
 	const CS_KF_ACCOUNT_DEL_URL = '/customservice/kfaccount/del?';
@@ -608,6 +614,51 @@ class Wechat
 		} else {
 		    return false;
 		}
+	}
+
+	/**
+	 * 获取多客服会话状态推送事件 - 接入会话
+	 * 当Event为 kfcreatesession 即接入会话
+	 * @return string | boolean  返回分配到的客服
+	 */
+	public function getRevKFCreate(){
+		if (isset($this->_receive['KfAccount'])){
+			return $this->_receive['KfAccount'];
+		} else 
+			return false;
+	}
+
+	/**
+	 * 获取多客服会话状态推送事件 - 关闭会话
+	 * 当Event为 kfclosesession 即关闭会话
+	 * @return string | boolean  返回分配到的客服
+	 */
+	public function getRevKFClose(){
+	    if (isset($this->_receive['KfAccount'])){
+	        return $this->_receive['KfAccount'];
+	    } else
+	        return false;
+	}
+
+	/**
+	 * 获取多客服会话状态推送事件 - 转接会话
+	 * 当Event为 kfswitchsession 即转接会话
+	 * @return array | boolean  返回分配到的客服
+	 * {
+	 *     'FromKfAccount' => '',      //原接入客服
+	 *     'ToKfAccount' => ''            //转接到客服
+	 * }
+	 */
+	public function getRevKFSwitch(){
+	    if (isset($this->_receive['FromKfAccount']))     //原接入客服
+	        $array['FromKfAccount'] = $this->_receive['FromKfAccount'];
+	    if (isset($this->_receive['ToKfAccount']))    //转接到客服
+	        $array['ToKfAccount'] = $this->_receive['ToKfAccount'];
+	    if (isset($array) && count($array) > 0) {
+	        return $array;
+	    } else {
+	        return false;
+	    }
 	}
 	
 	public static function xmlSafeStr($str)
@@ -2149,6 +2200,168 @@ class Wechat
 	public function getCustomServiceOnlineKFlist(){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
 	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 创建指定多客服会话
+	 * @tutorial 当用户已被其他客服接待或指定客服不在线则会失败
+	 * @param string $openid           //用户openid
+	 * @param string $kf_account     //客服账号
+	 * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
+	 * @return boolean | array            //成功返回json数组
+	 * {
+	 *   "errcode": 0, 
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function createKFSession($openid,$kf_account,$text=''){
+	    $data=array(
+	    	"openid" =>$openid, 
+	        "nickname" => $kf_account
+	    );
+	    if ($text) $data["text"] = $text;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEESSION_CREATE.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 关闭指定多客服会话
+	 * @tutorial 当用户被其他客服接待时则会失败
+	 * @param string $openid           //用户openid
+	 * @param string $kf_account     //客服账号
+	 * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
+	 * @return boolean | array            //成功返回json数组
+	 * {
+	 *   "errcode": 0, 
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function closeKFSession($openid,$kf_account,$text=''){
+	    $data=array(
+	    	"openid" =>$openid, 
+	        "nickname" => $kf_account
+	    );
+	    if ($text) $data["text"] = $text;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEESSION_CLOSE .'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 获取用户会话状态
+	 * @param string $openid           //用户openid
+	 * @return boolean | array            //成功返回json数组
+	 * { 
+	 *     "errcode" : 0, 
+	 *     "errmsg" : "ok", 
+	 *     "kf_account" : "test1@test",    //正在接待的客服
+	 *     "createtime": 123456789,        //会话接入时间
+	 *  } 
+	 */
+	public function getKFSession($openid){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET .'access_token='.$this->access_token.'&openid='.$openid);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 获取指定客服的会话列表
+	 * @param string $openid           //用户openid
+	 * @return boolean | array            //成功返回json数组
+	 *  array(
+	 *     'sessionlist' => array (
+	 *         array (
+	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *         ),
+	 *         array (
+	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *         ),
+	 *     )
+	 *  )
+	 */
+	public function getKFSessionlist($kf_account){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET_LIST .'access_token='.$this->access_token.'&kf_account='.$kf_account);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 获取未接入会话列表
+	 * @param string $openid           //用户openid
+	 * @return boolean | array            //成功返回json数组
+	 *  array (
+	 *     'count' => 150 ,                            //未接入会话数量
+	 *     'waitcaselist' => array (
+	 *         array (
+	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *         ),
+	 *         array (
+	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *         )
+	 *     )
+	 *  )
+	 */
+	public function getKFSessionWait(){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET_WAIT .'access_token='.$this->access_token);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);

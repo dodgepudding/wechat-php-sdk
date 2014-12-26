@@ -41,7 +41,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 分组操作（查询、创建、修改、移动用户到分组）**（认证权限）**
 - 网页授权（基本授权，用户信息授权）**（服务号、认证权限）**
 - 用户信息（查询用户基本信息、获取关注者列表）**（认证权限）**
-- 多客服功能（客服管理、获取客服记录）**（认证权限）**
+- 多客服功能（客服管理、获取客服记录、客服会话管理）**（认证权限）**
 - 媒体文件（上传、获取）**（认证权限）** 
 - 调用地址组件 **（支付权限） **
 - 生成订单签名数据 **（支付权限） **
@@ -124,6 +124,11 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  transfer_customer_service($customer_account) 转发多客服消息
  *  getCustomServiceKFlist() 获取多客服客服基本信息
  *  getCustomServiceOnlineKFlist() 获取多客服在线客服接待信息
+ *  createKFSession($openid,$kf_account,$text='') 创建指定多客服会话
+ *  closeKFSession($openid,$kf_account,$text='') 关闭指定多客服会话
+ *  getKFSession($openid) 获取用户会话状态
+ *  getKFSessionlist($kf_account) 获取指定客服的会话列表
+ *  getKFSessionWait() 获取未接入会话列表
  *  addKFAccount($account,$nickname,$password) 添加客服账号
  *  updateKFAccount($account,$nickname,$password) 修改客服账号信息
  *  deleteKFAccount($account) 删除客服账号
