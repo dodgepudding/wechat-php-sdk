@@ -32,25 +32,33 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
 
 ### 主要功能 
-- 接入验证 （初级权限）
-- 自动回复（文本、图片、语音、视频、音乐、图文）（初级权限）
-- 菜单操作（查询、创建、删除）（菜单权限）
-- 客服消息（文本、图片、语音、视频、音乐、图文）（认证权限）
-- 二维码（创建临时、永久二维码，获取二维码URL）（认证权限）
-- 长链接转短链接接口（认证权限）
-- 分组操作（查询、创建、修改、移动用户到分组）（认证权限）
-- 网页授权（基本授权，用户信息授权）（认证权限）
-- 用户信息（查询用户基本信息、获取关注者列表）（认证权限）
-- 多客服功能（认证权限）
-- 媒体文件（上传、获取）（认证权限） 
-- 调用地址组件 （支付权限） 
-- 生成订单签名数据 （支付权限） 
-- 订单成功回调 （支付权限） 
-- 发货通知 （支付权限） 
-- 支付订单查询 （支付权限） 
-- 模板消息（支付权限） 
-- 语义理解（认证权限） 
-- 获取微信服务器IP列表（认证权限） 
+- 接入验证 **（初级权限）**
+- 自动回复（文本、图片、语音、视频、音乐、图文）**（初级权限）**
+- 菜单操作（查询、创建、删除）**（菜单权限）**
+- 客服消息（文本、图片、语音、视频、音乐、图文）**（认证权限）**
+- 二维码（创建临时、永久二维码，获取二维码URL）**（服务号、认证权限）**
+- 长链接转短链接接口**（服务号、认证权限）**
+- 分组操作（查询、创建、修改、移动用户到分组）**（认证权限）**
+- 网页授权（基本授权，用户信息授权）**（服务号、认证权限）**
+- 用户信息（查询用户基本信息、获取关注者列表）**（认证权限）**
+- 多客服功能（客服管理、获取客服记录、客服会话管理）**（认证权限）**
+- 媒体文件（上传、获取）**（认证权限）** 
+- 调用地址组件 **（支付权限） **
+- 生成订单签名数据 **（支付权限） **
+- 订单成功回调 **（支付权限） **
+- 发货通知 **（支付权限） **
+- 支付订单查询 **（支付权限） **
+- 高级群发**（认证权限）**
+- 模板消息(设置所属行业、添加模板、发送模板消息)**（服务号、认证权限） **
+- 语义理解**（服务号、认证权限） **
+- 获取微信服务器IP列表**（初级权限） **
+> 备注：
+> 初级权限：基本权限，任何正常的公众号都有此权限
+> 菜单权限：正常的服务号、认证后的订阅号拥有此权限
+> 认证权限：分为订阅号、服务号认证，如前缀服务号则仅认证的服务号有此权限，否则为认证后的订阅号、服务号都有此权限
+> 支付权限：仅认证后的服务号可以申请此权限
+
+
 
 
 ### 初始化动作 
@@ -75,12 +83,15 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getServerIp() 获取微信服务器IP地址列表 返回数组array('127.0.0.1','127.0.0.1')
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
- *  uploadMedia($data, $type) 上传多媒体文件
+ *  uploadMedia($data, $type) 上传多媒体文件(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
  *  getMedia() 获取接收到的音频、视频媒体文件 
+ *  uploadMpVideo($data) 上传视频素材，当需要群发视频时，必须使用此方法得到的MediaID，否则无法显示
  *  uploadArticles($data) 上传图文消息素材
  *  sendMassMessage($data) 高级群发消息
- *  sendGroupMassMessage($data) 高级群发消息（分组群发）
- *  deleteMassMessage() 删除群发图文消息
+ *  sendGroupMassMessage($data) 高级群发消息（全体或分组群发）
+ *  deleteMassMessage($msg_id) 删除群发图文消息
+ *  previewMassMessage($data) 预览群发消息
+ *  queryMassMessage($msg_id) 查询群发消息发送状态
  *  getQRCode($scene_id,$type=0,$expire=1800) 获取推广二维码ticket字串 
  *  getQRUrl($ticket) 获取二维码图片地址
  *  getShortUrl($long_url) 长链接转短链接接口
@@ -106,11 +117,22 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  sendPayDeliverNotify($openid,$transid,$out_trade_no,$status=1,$msg='ok') 发货通知  
  *  getPayOrder($out_trade_no) 查询订单信息  
  *  getAddrSign($url, $timeStamp, $nonceStr, $user_token='') 获取收货地址JS的签名
+ *  setTMIndustry($id1,$id2='') 模板消息，设置所属行业
+ *  addTemplateMessage($tpl_id) 模板消息，添加消息模板
  *  sendTemplateMessage($data) 发送模板消息
  *  getCustomServiceMessage($data) 获取多客服会话记录
  *  transfer_customer_service($customer_account) 转发多客服消息
  *  getCustomServiceKFlist() 获取多客服客服基本信息
  *  getCustomServiceOnlineKFlist() 获取多客服在线客服接待信息
+ *  createKFSession($openid,$kf_account,$text='') 创建指定多客服会话
+ *  closeKFSession($openid,$kf_account,$text='') 关闭指定多客服会话
+ *  getKFSession($openid) 获取用户会话状态
+ *  getKFSessionlist($kf_account) 获取指定客服的会话列表
+ *  getKFSessionWait() 获取未接入会话列表
+ *  addKFAccount($account,$nickname,$password) 添加客服账号
+ *  updateKFAccount($account,$nickname,$password) 修改客服账号信息
+ *  deleteKFAccount($account) 删除客服账号
+ *  setKFHeadImg($account,$imgfile) 上传客服头像
  *  querySemantic($uid,$query,$category,$latitude=0,$longitude=0,$city="",$region="") 语义理解接口 参数含义及返回的json内容请查看 **[微信语义理解接口](http://mp.weixin.qq.com/wiki/index.php?title=语义理解)**
  
  
@@ -265,7 +287,7 @@ $options = array(
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id
 * getMenu($agentid='') 获取菜单内容,参数:要获取菜单内容的应用id
 * deleteMenu($agentid='') 删除菜单,参数:要删除菜单的应用id
-* uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明
+* uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
 * getMedia($media_id) 根据媒体文件ID获取媒体文件,参数:媒体id
 * createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
@@ -275,9 +297,11 @@ $options = array(
 * createUser($data) 创建成员，参数请看php文件内方法说明
 * updateUser($data) 更新成员，参数请看php文件内方法说明
 * deleteUser($userid) 删除成员，参数：员工UserID
+* deleteUsers($userids) 批量删除成员，参数：员工UserID数组
 * getUserInfo($userid) 获取成员信息，参数：员工UserID
 * getUserList($department_id,$fetch_child=0,$status=0) 获取部门成员，参数：部门id，是否递归获取子部门，获取类型。
 > 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
+* getUserListInfo($department_id,$fetch_child=0,$status=0) 获取部门成员详情，参数同上
 * getUserId($code,$agentid) 根据code获取员工UserID与手机设备号，参数：Oauth2.0或者二次验证返回的code值，跳转链接时所在的企业应用ID
 * createTag($data) 创建标签，参数：array("tagname" => "UI")
 * updateTag($data) 更新标签，参数：array("tagid" => "1","tagname" => "UI")

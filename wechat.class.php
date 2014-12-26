@@ -60,7 +60,6 @@ class Wechat
 	const MENU_CREATE_URL = '/menu/create?';
 	const MENU_GET_URL = '/menu/get?';
 	const MENU_DELETE_URL = '/menu/delete?';
-	const MEDIA_GET_URL = '/media/get?';
 	const CALLBACKSERVER_GET_URL = '/getcallbackip?';
 	const QRCODE_CREATE_URL='/qrcode/create?';
 	const QR_SCENE = 0;
@@ -78,24 +77,40 @@ class Wechat
 	const CUSTOM_SEND_URL='/message/custom/send?';
 	const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
 	const MASS_SEND_URL = '/message/mass/send?';
+	const TEMPLATE_SET_INDUSTRY_URL = '/message/template/api_set_industry?';
+	const TEMPLATE_ADD_TPL_URL = '/message/template/api_add_template?';
 	const TEMPLATE_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
+	const MASS_PREVIEW_URL = '/message/mass/preview?';
+	const MASS_QUERY_URL = '/message/mass/get?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
 	const MEDIA_UPLOAD = '/media/upload?';
+	const MEDIA_GET_URL = '/media/get?';
+	const MEDIA_VIDEO_UPLOAD = '/media/uploadvideo?';
 	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
 	const OAUTH_AUTHORIZE_URL = '/authorize?';
-	const OAUTH_TOKEN_PREFIX = 'https://api.weixin.qq.com/sns/oauth2';
-	const OAUTH_TOKEN_URL = '/access_token?';
-	const OAUTH_REFRESH_URL = '/refresh_token?';
-	const OAUTH_USERINFO_URL = 'https://api.weixin.qq.com/sns/userinfo?';
-	const OAUTH_AUTH_URL = 'https://api.weixin.qq.com/sns/auth?';
-	const PAY_DELIVERNOTIFY = 'https://api.weixin.qq.com/pay/delivernotify?';
-	const PAY_ORDERQUERY = 'https://api.weixin.qq.com/pay/orderquery?';
+	const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com'; //以下API接口URL需要使用此前缀
+	const OAUTH_TOKEN_URL = '/sns/oauth2/access_token?';
+	const OAUTH_REFRESH_URL = '/sns/oauth2/refresh_token?';
+	const OAUTH_USERINFO_URL = '/sns/oauth2/sns/userinfo?';
+	const OAUTH_AUTH_URL = '/sns/auth?';
+	const PAY_DELIVERNOTIFY = '/pay/delivernotify?';
+	const PAY_ORDERQUERY = '/pay/orderquery?';
 	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
 	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
-	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getkflist?';
-	const SEMANTIC_API_URL= 'https://api.weixin.qq.com/semantic/semproxy/search?';
+	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
+	const CUSTOM_SEESSION_CREATE = '/customservice/kfsession/create?';
+	const CUSTOM_SEESSION_CLOSE = '/customservice/kfsession/close?';
+	const CUSTOM_SEESSION_SWITCH = '/customservice/kfsession/switch?';
+	const CUSTOM_SEESSION_GET = '/customservice/kfsession/getsession?';
+	const CUSTOM_SEESSION_GET_LIST = '/customservice/kfsession/getsessionlist?';
+	const CUSTOM_SEESSION_GET_WAIT = '/customservice/kfsession/getwaitcase?';
+	const CS_KF_ACCOUNT_ADD_URL = '/customservice/kfaccount/add?';
+	const CS_KF_ACCOUNT_UPDATE_URL = '/customservice/kfaccount/update?';
+	const CS_KF_ACCOUNT_DEL_URL = '/customservice/kfaccount/del?';
+	const CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL = '/customservice/kfaccount/uploadheadimg?';
+	const SEMANTIC_API_URL= '/semantic/semproxy/search?';
 	
 	private $token;
 	private $encodingAesKey;
@@ -554,8 +569,9 @@ class Wechat
 	}
 	
 	/**
-	* 获取模板消息ID
+	* 获取主动推送的消息ID
 	* 经过验证，这个和普通的消息MsgId不一样
+	* 当Event为 MASSSENDJOBFINISH 或 TEMPLATESENDJOBFINISH
 	*/
 	public function getRevTplMsgID(){
 		if (isset($this->_receive['MsgID'])){
@@ -572,6 +588,77 @@ class Wechat
 			return $this->_receive['Status'];
 		} else 
 			return false;
+	}
+	
+	/**
+	* 获取群发或模板消息发送结果
+	* 当Event为 MASSSENDJOBFINISH 或 TEMPLATESENDJOBFINISH，即高级群发/模板消息
+	*/
+	public function getRevResult(){
+		if (isset($this->_receive['Status'])) //发送是否成功，具体的返回值请参考 高级群发/模板消息 的事件推送说明
+			$array['Status'] = $this->_receive['Status'];
+		if (isset($this->_receive['MsgID'])) //发送的消息id
+			$array['MsgID'] = $this->_receive['MsgID'];
+		
+		//以下仅当群发消息时才会有的事件内容
+		if (isset($this->_receive['TotalCount']))     //分组或openid列表内粉丝数量
+			$array['TotalCount'] = $this->_receive['TotalCount'];
+		if (isset($this->_receive['FilterCount']))    //过滤（过滤是指特定地区、性别的过滤、用户设置拒收的过滤，用户接收已超4条的过滤）后，准备发送的粉丝数
+			$array['FilterCount'] = $this->_receive['FilterCount'];
+		if (isset($this->_receive['SentCount']))     //发送成功的粉丝数
+			$array['SentCount'] = $this->_receive['SentCount'];
+		if (isset($this->_receive['ErrorCount']))    //发送失败的粉丝数
+			$array['ErrorCount'] = $this->_receive['ErrorCount'];
+		if (isset($array) && count($array) > 0) {
+		    return $array;
+		} else {
+		    return false;
+		}
+	}
+
+	/**
+	 * 获取多客服会话状态推送事件 - 接入会话
+	 * 当Event为 kfcreatesession 即接入会话
+	 * @return string | boolean  返回分配到的客服
+	 */
+	public function getRevKFCreate(){
+		if (isset($this->_receive['KfAccount'])){
+			return $this->_receive['KfAccount'];
+		} else 
+			return false;
+	}
+
+	/**
+	 * 获取多客服会话状态推送事件 - 关闭会话
+	 * 当Event为 kfclosesession 即关闭会话
+	 * @return string | boolean  返回分配到的客服
+	 */
+	public function getRevKFClose(){
+	    if (isset($this->_receive['KfAccount'])){
+	        return $this->_receive['KfAccount'];
+	    } else
+	        return false;
+	}
+
+	/**
+	 * 获取多客服会话状态推送事件 - 转接会话
+	 * 当Event为 kfswitchsession 即转接会话
+	 * @return array | boolean  返回分配到的客服
+	 * {
+	 *     'FromKfAccount' => '',      //原接入客服
+	 *     'ToKfAccount' => ''            //转接到客服
+	 * }
+	 */
+	public function getRevKFSwitch(){
+	    if (isset($this->_receive['FromKfAccount']))     //原接入客服
+	        $array['FromKfAccount'] = $this->_receive['FromKfAccount'];
+	    if (isset($this->_receive['ToKfAccount']))    //转接到客服
+	        $array['ToKfAccount'] = $this->_receive['ToKfAccount'];
+	    if (isset($array) && count($array) > 0) {
+	        return $array;
+	    } else {
+	        return false;
+	    }
 	}
 	
 	public static function xmlSafeStr($str)
@@ -998,7 +1085,7 @@ class Wechat
 	}
 
 	/**
-	 * 创建菜单
+	 * 创建菜单(认证后的订阅号可用)
 	 * @param array $data 菜单数组数据
 	 * example:
      * 	array (
@@ -1067,7 +1154,7 @@ class Wechat
 	}
 	
 	/**
-	 * 获取菜单
+	 * 获取菜单(认证后的订阅号可用)
 	 * @return array('menu'=>array(....s))
 	 */
 	public function getMenu(){
@@ -1087,7 +1174,7 @@ class Wechat
 	}
 	
 	/**
-	 * 删除菜单
+	 * 删除菜单(认证后的订阅号可用)
 	 * @return boolean
 	 */
 	public function deleteMenu(){
@@ -1107,7 +1194,8 @@ class Wechat
 	}
 
 	/**
-	 * 上传多媒体文件
+	 * 上传多媒体文件(认证后的订阅号可用)
+	 * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
 	 * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义
 	 * @param array $data {"media":'@Path\filename.jpg'}
 	 * @param type 类型：图片:image 语音:voice 视频:video 缩略图:thumb
@@ -1130,7 +1218,7 @@ class Wechat
 	}
 	
 	/**
-	 * 根据媒体文件ID获取媒体文件
+	 * 根据媒体文件ID获取媒体文件(认证后的订阅号可用)
 	 * @param string $media_id 媒体文件id
 	 * @return raw data
 	 */
@@ -1151,7 +1239,7 @@ class Wechat
 	}
 
 	/**
-	 * 上传图文消息素材
+	 * 上传图文消息素材(认证后的订阅号可用)
 	 * @param array $data 消息结构{"articles":[{...}]}
 	 * @return boolean|array
 	 */
@@ -1170,10 +1258,53 @@ class Wechat
 		}
 		return false;
 	}
+
+	/**
+	 * 上传视频素材(认证后的订阅号可用)
+	 * @param array $data 消息结构
+	 * {
+	 *     "media_id"=>"",     //通过上传媒体接口得到的MediaId
+	 *     "title"=>"TITLE",    //视频标题
+	 *     "description"=>"Description"        //视频描述
+	 * }
+	 * @return boolean|array
+	 * {
+	 *     "type":"video",
+	 *     "media_id":"mediaid",
+	 *     "created_at":1398848981
+	 *  }
+	 */
+	public function uploadMpVideo($data){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::UPLOAD_MEDIA_URL.self::MEDIA_VIDEO_UPLOAD.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
 	
 	/**
-	 * 高级群发消息, 根据OpenID列表群发图文消息
-	 * @param array $data 消息结构{ "touser":[ "OPENID1", "OPENID2" ], "mpnews":{ "media_id":"123dsdajkasd231jhksad" }, "msgtype":"mpnews" }
+	 * 高级群发消息, 根据OpenID列表群发图文消息(订阅号不可用)
+	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
+	 *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
+	 * @param array $data 消息结构
+	 * {
+	 *     "touser"=>array(
+	 *         "OPENID1",
+	 *         "OPENID2"
+	 *     ),
+	 *      "msgtype"=>"mpvideo", 
+	 *      // 在下面5种类型中选择对应的参数内容
+	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
+	 *      // text => array ( "content" => "hello")
+	 * }
 	 * @return boolean|array
 	 */
 	public function sendMassMessage($data){
@@ -1193,8 +1324,20 @@ class Wechat
 	}
 	
 	/**
-	 * 高级群发消息, 根据群组id群发图文消息
-	 * @param array $data 消息结构{ "filter":[ "group_id": "2" ], "mpnews":{ "media_id":"123dsdajkasd231jhksad" }, "msgtype":"mpnews" }
+	 * 高级群发消息, 根据群组id群发图文消息(认证后的订阅号可用)
+	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
+	 *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
+	 * @param array $data 消息结构
+	 * {
+	 *     "filter"=>array( 
+	 *         "is_to_all"=>False,     //是否群发给所有用户.True不用分组id，False需填写分组id
+	 *         "group_id"=>"2"     //群发的分组id
+	 *     ),
+	 *      "msgtype"=>"mpvideo", 
+	 *      // 在下面5种类型中选择对应的参数内容
+	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
+	 *      // text => array ( "content" => "hello")
+	 * }
 	 * @return boolean|array
 	 */
 	public function sendGroupMassMessage($data){
@@ -1214,13 +1357,68 @@ class Wechat
 	}
 	
 	/**
-	 * 高级群发消息, 删除群发图文消息
+	 * 高级群发消息, 删除群发图文消息(认证后的订阅号可用)
 	 * @param int $msg_id 消息id
 	 * @return boolean|array
 	 */
 	public function deleteMassMessage($msg_id){
 		if (!$this->access_token && !$this->checkAuth()) return false;
 		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_DELETE_URL.'access_token='.$this->access_token,self::json_encode(array('msg_id'=>$msg_id)));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 高级群发消息, 预览群发消息(认证后的订阅号可用)
+	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
+	 *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
+	 * @param array $data 消息结构
+	 * {
+	 *     "touser"=>"OPENID",
+	 *      "msgtype"=>"mpvideo",
+	 *      // 在下面5种类型中选择对应的参数内容
+	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
+	 *      // text => array ( "content" => "hello")
+	 * }
+	 * @return boolean|array
+	 */
+	public function previewMassMessage($data){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::MASS_PREVIEW_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 高级群发消息, 查询群发消息发送状态(认证后的订阅号可用)
+	 * @param int $msg_id 消息id
+	 * @return boolean|array
+	 * {
+	 *     "msg_id":201053012,     //群发消息后返回的消息id
+	 *     "msg_status":"SEND_SUCCESS" //消息发送后的状态，SEND_SUCCESS表示发送成功
+	 * }
+	 */
+	public function queryMassMessage($msg_id){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_QUERY_URL.'access_token='.$this->access_token,self::json_encode(array('msg_id'=>$msg_id)));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1523,7 +1721,7 @@ class Wechat
 	public function getOauthAccessToken(){
 		$code = isset($_GET['code'])?$_GET['code']:'';
 		if (!$code) return false;
-		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_TOKEN_URL.'appid='.$this->appid.'&secret='.$this->appsecret.'&code='.$code.'&grant_type=authorization_code');
+		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_TOKEN_URL.'appid='.$this->appid.'&secret='.$this->appsecret.'&code='.$code.'&grant_type=authorization_code');
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1544,7 +1742,7 @@ class Wechat
 	 * @return boolean|mixed
 	 */
 	public function getOauthRefreshToken($refresh_token){
-		$result = $this->http_get(self::OAUTH_TOKEN_PREFIX.self::OAUTH_REFRESH_URL.'appid='.$this->appid.'&grant_type=refresh_token&refresh_token='.$refresh_token);
+		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_REFRESH_URL.'appid='.$this->appid.'&grant_type=refresh_token&refresh_token='.$refresh_token);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1567,7 +1765,7 @@ class Wechat
 	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
 	 */
 	public function getOauthUserinfo($access_token,$openid){
-		$result = $this->http_get(self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
+		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1588,7 +1786,7 @@ class Wechat
 	 * @return boolean 是否有效
 	 */
 	public function getOauthAuth($access_token,$openid){
-	    $result = $this->http_get(self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
+	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -1761,7 +1959,7 @@ class Wechat
 		$postdata['app_signature'] = $this->getSignature($postdata);
 		$postdata['sign_method'] = 'sha1';
 		unset($postdata['appkey']);
-		$result = $this->http_post(self::PAY_DELIVERNOTIFY.'access_token='.$this->access_token,self::json_encode($postdata));
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::PAY_DELIVERNOTIFY.'access_token='.$this->access_token,self::json_encode($postdata));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1792,7 +1990,7 @@ class Wechat
 		$postdata['app_signature'] = $this->getSignature($postdata);
 		$postdata['sign_method'] = 'sha1';
 		unset($postdata['appkey']);
-		$result = $this->http_post(self::PAY_ORDERQUERY.'access_token='.$this->access_token,self::json_encode($postdata));
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::PAY_ORDERQUERY.'access_token='.$this->access_token,self::json_encode($postdata));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1831,6 +2029,51 @@ class Wechat
 				'accesstoken'=>$user_token
 		);
 		return $this->getSignature($arrdata);
+	}
+
+	/**
+	 * 模板消息 设置所属行业
+	 * @param int $id1  公众号模板消息所属行业编号，参看官方开发文档 行业代码
+	 * @param int $id2  同$id1。但如果只有一个行业，此参数可省略
+	 * @return boolean|array
+	 */
+	public function setTMIndustry($id1,$id2=''){
+	    if ($id1) $data['industry_id1'] = $id1;
+	    if ($id2) $data['industry_id2'] = $id2;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SET_INDUSTRY_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if($result){
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 模板消息 添加消息模板
+	 * 成功返回消息模板的调用id
+	 * @param string $tpl_id 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式
+	 * @return boolean|string
+	 */
+	public function addTemplateMessage($tpl_id){
+	    $data = array ('template_id_short' =>$tpl_id);
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_ADD_TPL_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if($result){
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json['template_id'];
+	    }
+	    return false;
 	}
 	
 	/**
@@ -1955,8 +2198,204 @@ class Wechat
 	 }
 	 */
 	public function getCustomServiceOnlineKFlist(){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 创建指定多客服会话
+	 * @tutorial 当用户已被其他客服接待或指定客服不在线则会失败
+	 * @param string $openid           //用户openid
+	 * @param string $kf_account     //客服账号
+	 * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
+	 * @return boolean | array            //成功返回json数组
+	 * {
+	 *   "errcode": 0, 
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function createKFSession($openid,$kf_account,$text=''){
+	    $data=array(
+	    	"openid" =>$openid, 
+	        "nickname" => $kf_account
+	    );
+	    if ($text) $data["text"] = $text;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEESSION_CREATE.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 关闭指定多客服会话
+	 * @tutorial 当用户被其他客服接待时则会失败
+	 * @param string $openid           //用户openid
+	 * @param string $kf_account     //客服账号
+	 * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
+	 * @return boolean | array            //成功返回json数组
+	 * {
+	 *   "errcode": 0, 
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function closeKFSession($openid,$kf_account,$text=''){
+	    $data=array(
+	    	"openid" =>$openid, 
+	        "nickname" => $kf_account
+	    );
+	    if ($text) $data["text"] = $text;
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEESSION_CLOSE .'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 获取用户会话状态
+	 * @param string $openid           //用户openid
+	 * @return boolean | array            //成功返回json数组
+	 * { 
+	 *     "errcode" : 0, 
+	 *     "errmsg" : "ok", 
+	 *     "kf_account" : "test1@test",    //正在接待的客服
+	 *     "createtime": 123456789,        //会话接入时间
+	 *  } 
+	 */
+	public function getKFSession($openid){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET .'access_token='.$this->access_token.'&openid='.$openid);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 获取指定客服的会话列表
+	 * @param string $openid           //用户openid
+	 * @return boolean | array            //成功返回json数组
+	 *  array(
+	 *     'sessionlist' => array (
+	 *         array (
+	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *         ),
+	 *         array (
+	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *         ),
+	 *     )
+	 *  )
+	 */
+	public function getKFSessionlist($kf_account){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET_LIST .'access_token='.$this->access_token.'&kf_account='.$kf_account);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 获取未接入会话列表
+	 * @param string $openid           //用户openid
+	 * @return boolean | array            //成功返回json数组
+	 *  array (
+	 *     'count' => 150 ,                            //未接入会话数量
+	 *     'waitcaselist' => array (
+	 *         array (
+	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *         ),
+	 *         array (
+	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *         )
+	 *     )
+	 *  )
+	 */
+	public function getKFSessionWait(){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET_WAIT .'access_token='.$this->access_token);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 添加客服账号
+	 * 
+	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+	 * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
+	 * @param string $password     //客服账号明文登录密码，会自动加密
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0, 
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function addKFAccount($account,$nickname,$password){
+	    $data=array(
+	    	"kf_account" =>$account, 
+	        "nickname" => $nickname,
+	        "password" => md5($password)
+	    );
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_ADD_URL.'access_token='.$this->access_token,self::json_encode($data));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -1968,6 +2407,95 @@ class Wechat
 			return $json;
 		}
 		return false;
+	}
+
+	/**
+	 * 修改客服账号信息
+	 *
+	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+	 * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
+	 * @param string $password     //客服账号明文登录密码，会自动加密
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0,
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function updateKFAccount($account,$nickname,$password){
+	    $data=array(
+	            "kf_account" =>$account,
+	            "nickname" => $nickname,
+	            "password" => md5($password)
+	    );
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+
+	/**
+	 * 删除客服账号
+	 *
+	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0,
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function deleteKFAccount($account){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_DEL_URL.'access_token='.$this->access_token.'&kf_account='.$account);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 上传客服头像
+	 *
+	 * @param string $account //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+	 * @param string $imgfile //头像文件完整路径,如：'D:\user.jpg'。头像文件必须JPG格式，像素建议640*640
+	 * @return boolean|array
+	 * 成功返回结果
+	 * {
+	 *   "errcode": 0,
+	 *   "errmsg": "ok",
+	 * }
+	 */
+	public function setKFHeadImg($account,$imgfile){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL.'access_token='.$this->access_token.'&kf_account='.$account,array('media'=>'@'.$imgfile),true);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
 	}
 	
 	/**
@@ -1998,7 +2526,7 @@ class Wechat
 	    } elseif ($region) {
 	        $data['region'] = $region;
 	    }
-	    $result = $this->http_post(self::SEMANTIC_API_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::SEMANTIC_API_URL.'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);

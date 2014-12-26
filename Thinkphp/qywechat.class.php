@@ -31,8 +31,10 @@ class Wechat
     const USER_CREATE_URL = '/user/create?';
     const USER_UPDATE_URL = '/user/update?';
     const USER_DELETE_URL = '/user/delete?';
+    const USER_BATCHDELETE_URL = '/user/batchdelete?';
     const USER_GET_URL = '/user/get?';
     const USER_LIST_URL = '/user/simplelist?';
+    const USER_LIST_INFO_URL = '/user/list?';
     const USER_GETINFO_URL = '/user/getuserinfo?';
     const DEPARTMENT_CREATE_URL = '/department/create?';
     const DEPARTMENT_UPDATE_URL = '/department/update?';
@@ -983,6 +985,7 @@ class Wechat
 
 	/**
 	 * 上传多媒体文件 (只有三天的有效期，过期自动被删除)
+	 * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
 	 * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义
 	 * @param array $data {"media":'@Path\filename.jpg'}
 	 * @param type 媒体文件类型:图片（image）、语音（voice）、视频（video），普通文件(file)
@@ -1285,6 +1288,38 @@ class Wechat
 	}
 	
 	/**
+	 * 批量删除成员
+	 * @param array $userid  员工UserID数组。对应管理端的帐号
+	 * {
+	 *     'userid1',
+	 *     'userid2',
+	 *     'userid3',
+	 * }
+	 * @return boolean|array 成功返回结果
+	 * {
+	 *   "errcode": 0,        //返回码
+	 *   "errmsg": "deleted"  //对返回码的文本描述内容
+	 * }
+	 */
+	public function deleteUsers($userids){
+	    if (!$userids) return false;
+	    $data = array('useridlist'=>$userids);
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_BATCHDELETE_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode']) || $json['errcode']!=0) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
 	 * 获取成员信息
 	 * @param $userid  员工UserID。对应管理端的帐号
 	 * @return boolean|array	 成功返回结果
@@ -1302,6 +1337,7 @@ class Wechat
 	 *    "weixinid": "lisifordev",        //微信号
 	 *    "avatar": "http://wx.qlogo.cn/mmopen/ajNVdqHZLLA3W..../0",   //头像url。注：如果要获取小图将url最后的"/0"改成"/64"即可
 	 *    "status": 1      //关注状态: 1=已关注，2=已冻结，4=未关注
+	 *    "extattr": {"attrs":[{"name":"爱好","value":"旅游"},{"name":"卡号","value":"1234567234"}]}
 	 * }
 	 */
 	public function getUserInfo($userid){
@@ -1340,6 +1376,50 @@ class Wechat
 	public function getUserList($department_id,$fetch_child=0,$status=0){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
 	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_LIST_URL.'access_token='.$this->access_token
+	            .'&department_id='.$department_id.'&fetch_child='.$fetch_child.'&status='.$status);
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode']) || $json['errcode']!=0) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+	
+	/**
+	 * 获取部门成员详情
+	 * @param $department_id   部门id
+	 * @param $fetch_child     1/0：是否递归获取子部门下面的成员
+	 * @param $status          0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
+	 * @return boolean|array	 成功返回结果
+	 * {
+	 *    "errcode": 0,
+	 *    "errmsg": "ok",
+	 *    "userlist": [
+	 *            {
+	 *                   "userid": "zhangsan",
+	 *                   "name": "李四",
+	 *                   "department": [1, 2],
+	 *                   "position": "后台工程师",
+	 *                   "mobile": "15913215421",
+	 *                   "gender": 1,     //性别。gender=0表示男，=1表示女
+	 *                   "tel": "62394",
+	 *                   "email": "zhangsan@gzdev.com",
+	 *                   "weixinid": "lisifordev",        //微信号
+	 *                   "avatar": "http://wx.qlogo.cn/mmopen/ajNVdqHZLLA3W..../0",   //头像url。注：如果要获取小图将url最后的"/0"改成"/64"即可
+	 *                   "status": 1      //关注状态: 1=已关注，2=已冻结，4=未关注
+	 *                   "extattr": {"attrs":[{"name":"爱好","value":"旅游"},{"name":"卡号","value":"1234567234"}]}
+	 *            }
+	 *      ]
+	 * }
+	 */
+	public function getUserListInfo($department_id,$fetch_child=0,$status=0){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_LIST_INFO_URL.'access_token='.$this->access_token
 	            .'&department_id='.$department_id.'&fetch_child='.$fetch_child.'&status='.$status);
 	    if ($result)
 	    {
