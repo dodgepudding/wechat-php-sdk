@@ -56,6 +56,7 @@ class Wechat
     const MENU_GET_URL = '/menu/get?';
     const MENU_DELETE_URL = '/menu/delete?';
     const TOKEN_GET_URL = '/gettoken?';
+	const CALLBACKSERVER_GET_URL = '/getcallbackip?';
 	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
 	const OAUTH_AUTHORIZE_URL = '/authorize?';
 	
@@ -1020,6 +1021,26 @@ class Wechat
 				return false;
 			}
 			return $result;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取企业微信服务器IP地址列表
+	 * @return array('127.0.0.1','127.0.0.1')
+	 */
+	public function getServerIp(){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_get(self::API_URL_PREFIX.self::CALLBACKSERVER_GET_URL.'access_token='.$this->access_token);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json['ip_list'];
 		}
 		return false;
 	}

@@ -289,6 +289,7 @@ $options = array(
 * deleteMenu($agentid='') 删除菜单,参数:要删除菜单的应用id
 * uploadMedia($data, $type) 上传媒体文件,参数请看php文件内方法说明(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
 * getMedia($media_id) 根据媒体文件ID获取媒体文件,参数:媒体id
+* getServerIp() 获取企业微信服务器IP地址列表 返回数组array('127.0.0.1','127.0.0.1')
 * createDepartment($data) 创建部门,参数: array("name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * updateDepartment($data) 更新部门,参数: array("id"=>"1"，"name"=>"邮箱产品组","parentid"=>"1","order" =>  "1")
 * deleteDepartment($id) 删除部门,参数：要删除的部门id
