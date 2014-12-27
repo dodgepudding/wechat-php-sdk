@@ -31,7 +31,7 @@
  *   		default:
  *   			$weObj->text("help info")->reply();
  *   }
- *   
+ *
  *   //获取菜单操作:
  *   $menu = $weObj->getMenu();
  *   //设置菜单
@@ -55,6 +55,27 @@ class Wechat
 	const MSGTYPE_NEWS = 'news';
 	const MSGTYPE_VOICE = 'voice';
 	const MSGTYPE_VIDEO = 'video';
+	const EVENT_SUBSCRIBE = 'subscribe';       //订阅
+	const EVENT_UNSUBSCRIBE = 'unsubscribe';   //取消订阅
+	const EVENT_SCAN = 'SCAN';                 //扫描带参数二维码
+	const EVENT_LOCATION = 'LOCATION';         //上报地理位置
+	const EVENT_MENU_VIEW = 'VIEW';                     //菜单 - 点击菜单跳转链接
+	const EVENT_MENU_CLICK = 'CLICK';                   //菜单 - 点击菜单拉取消息
+	const EVENT_MENU_SCAN_PUSH = 'scancode_push';       //菜单 - 扫码推事件(客户端跳URL)
+	const EVENT_MENU_SCAN_WAITMSG = 'scancode_waitmsg'; //菜单 - 扫码推事件(客户端不跳URL)
+	const EVENT_MENU_PIC_SYS = 'pic_sysphoto';          //菜单 - 弹出系统拍照发图
+	const EVENT_MENU_PIC_PHOTO = 'pic_photo_or_album';  //菜单 - 弹出拍照或者相册发图
+	const EVENT_MENU_PIC_WEIXIN = 'pic_weixin';         //菜单 - 弹出微信相册发图器
+	const EVENT_MENU_LOCATION = 'location_select';      //菜单 - 弹出地理位置选择器
+	const EVENT_SEND_MASS = 'MASSSENDJOBFINISH';        //发送结果 - 高级群发完成
+	const EVENT_SEND_TEMPLATE = 'TEMPLATESENDJOBFINISH';//发送结果 - 模板消息发送结果
+	const EVENT_KF_SEESION_CREATE = 'kfcreatesession';  //多客服 - 接入会话
+	const EVENT_KF_SEESION_CLOSE = 'kfclosesession';    //多客服 - 关闭会话
+	const EVENT_KF_SEESION_SWITCH = 'kfswitchsession';  //多客服 - 转接会话
+	const EVENT_CARD_PASS = 'card_pass_check';          //卡券 - 审核通过
+	const EVENT_CARD_NOTPASS = 'card_not_pass_check';   //卡券 - 审核未通过
+	const EVENT_CARD_USER_GET = 'user_get_card';        //卡券 - 用户领取卡券
+	const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡券
 	const API_URL_PREFIX = 'https://api.weixin.qq.com/cgi-bin';
 	const AUTH_URL = '/token?grant_type=client_credential&';
 	const MENU_CREATE_URL = '/menu/create?';
@@ -68,7 +89,7 @@ class Wechat
 	const SHORT_URL='/shorturl?';
 	const USER_GET_URL='/user/get?';
 	const USER_INFO_URL='/user/info?';
-	const USER_UPDATEREMARK_URL='/user/info/updateremark?';	
+	const USER_UPDATEREMARK_URL='/user/info/updateremark?';
 	const GROUP_GET_URL='/groups/get?';
 	const USER_GROUP_URL='/groups/getid?';
 	const GROUP_CREATE_URL='/groups/create?';
@@ -97,6 +118,7 @@ class Wechat
 	const OAUTH_AUTH_URL = '/sns/auth?';
 	const PAY_DELIVERNOTIFY = '/pay/delivernotify?';
 	const PAY_ORDERQUERY = '/pay/orderquery?';
+	///多客服相关地址
 	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
 	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
 	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
@@ -110,8 +132,31 @@ class Wechat
 	const CS_KF_ACCOUNT_UPDATE_URL = '/customservice/kfaccount/update?';
 	const CS_KF_ACCOUNT_DEL_URL = '/customservice/kfaccount/del?';
 	const CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL = '/customservice/kfaccount/uploadheadimg?';
+	///卡券相关地址
+	const CARD_CREATE                     = '/card/create?';
+	const CARD_DELETE                     = '/card/delete?';
+	const CARD_UPDATE                     = '/card/update?';
+	const CARD_GET                        = '/card/get?';
+	const CARD_BATCHGET                   = '/card/batchget?';
+	const CARD_MODIFY_STOCK               = '/card/modifystock?';
+	const CARD_LOCATION_BATCHADD          = '/card/location/batchadd?';
+	const CARD_LOCATION_BATCHGET          = '/card/location/batchget?';
+	const CARD_GETCOLORS                  = '/card/getcolors?';
+	const CARD_QRCODE_CREATE              = '/card/qrcode/create?';
+	const CARD_CODE_CONSUME               = '/card/code/consume?';
+	const CARD_CODE_DECRYPT               = '/card/code/decrypt?';
+	const CARD_CODE_GET                   = '/card/code/get?';
+	const CARD_CODE_UPDATE                = '/card/code/update?';
+	const CARD_CODE_UNAVAILABLE           = '/card/code/unavailable?';
+	const CARD_TESTWHILELIST_SET          = '/card/testwhitelist/set?';
+	const CARD_MEMBERCARD_ACTIVATE        = '/card/membercard/activate?';      //激活会员卡
+	const CARD_MEMBERCARD_UPDATEUSER      = '/card/membercard/updateuser?';    //更新会员卡
+	const CARD_MOVIETICKET_UPDATEUSER     = '/card/movieticket/updateuser?';   //更新电影票(未加方法)
+	const CARD_BOARDINGPASS_CHECKIN       = '/card/boardingpass/checkin?';     //飞机票-在线选座(未加方法)
+	const CARD_LUCKYMONEY_UPDATE          = '/card/luckymoney/updateuserbalance?';     //更新红包金额
+
 	const SEMANTIC_API_URL= '/semantic/semproxy/search?';
-	
+
 	private $token;
 	private $encodingAesKey;
 	private $encrypt_type;
@@ -131,7 +176,7 @@ class Wechat
 	public $errCode = 40001;
 	public $errMsg = "no access";
 	private $_logcallback;
-	
+
 	public function __construct($options)
 	{
 		$this->token = isset($options['token'])?$options['token']:'';
@@ -144,32 +189,32 @@ class Wechat
 		$this->debug = isset($options['debug'])?$options['debug']:false;
 		$this->_logcallback = isset($options['logcallback'])?$options['logcallback']:false;
 	}
-	
+
 	/**
-	 * For weixin server validation 
-	 */	
+	 * For weixin server validation
+	 */
 	private function checkSignature($str='')
 	{
         $signature = isset($_GET["signature"])?$_GET["signature"]:'';
 	    $signature = isset($_GET["msg_signature"])?$_GET["msg_signature"]:$signature; //如果存在加密验证则用加密验证段
         $timestamp = isset($_GET["timestamp"])?$_GET["timestamp"]:'';
         $nonce = isset($_GET["nonce"])?$_GET["nonce"]:'';
-        		
+
 		$token = $this->token;
 		$tmpArr = array($token, $timestamp, $nonce,$str);
 		sort($tmpArr, SORT_STRING);
 		$tmpStr = implode( $tmpArr );
 		$tmpStr = sha1( $tmpStr );
-		
+
 		if( $tmpStr == $signature ){
 			return true;
 		}else{
 			return false;
 		}
 	}
-	
+
 	/**
-	 * For weixin server validation 
+	 * For weixin server validation
 	 * @param bool $return 是否返回
 	 */
 	public function valid($return=false)
@@ -215,12 +260,12 @@ class Wechat
         if (!$this->checkSignature($encryptStr)) {
         	if ($return)
         		return false;
-        	else 
+        	else
         		die('no access');
         }
         return true;
     }
-    
+
 	/**
 	 * 设置发送消息
 	 * @param array $msg 消息数组
@@ -239,12 +284,12 @@ class Wechat
     			return $this->_msg;
     		}
     }
-    
+
     public function setFuncFlag($flag) {
     		$this->_funcflag = $flag;
     		return $this;
     }
-    
+
     private function log($log){
     		if ($this->debug ) {
     			if (function_exists($this->_logcallback)) {
@@ -256,7 +301,7 @@ class Wechat
     		}
     		return false;
     }
-    
+
     /**
      * 获取微信服务器发来的信息
      */
@@ -271,7 +316,7 @@ class Wechat
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * 获取微信服务器发来的信息
 	 */
@@ -279,57 +324,57 @@ class Wechat
 	{
 		return $this->_receive;
 	}
-	
+
 	/**
 	 * 获取消息发送者
 	 */
 	public function getRevFrom() {
 		if (isset($this->_receive['FromUserName']))
 			return $this->_receive['FromUserName'];
-		else 
+		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取消息接受者
 	 */
 	public function getRevTo() {
 		if (isset($this->_receive['ToUserName']))
 			return $this->_receive['ToUserName'];
-		else 
+		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收消息的类型
 	 */
 	public function getRevType() {
 		if (isset($this->_receive['MsgType']))
 			return $this->_receive['MsgType'];
-		else 
+		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取消息ID
 	 */
 	public function getRevID() {
 		if (isset($this->_receive['MsgId']))
 			return $this->_receive['MsgId'];
-		else 
+		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取消息发送时间
 	 */
 	public function getRevCtime() {
 		if (isset($this->_receive['CreateTime']))
 			return $this->_receive['CreateTime'];
-		else 
+		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收消息内容正文
 	 */
@@ -341,7 +386,7 @@ class Wechat
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收消息图片
 	 */
@@ -351,10 +396,10 @@ class Wechat
 				'mediaid'=>$this->_receive['MediaId'],
 				'picurl'=>(string)$this->_receive['PicUrl'],    //防止picurl为空导致解析出错
 			);
-		else 
+		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收消息链接
 	 */
@@ -365,10 +410,10 @@ class Wechat
 				'title'=>$this->_receive['Title'],
 				'description'=>$this->_receive['Description']
 			);
-		} else 
+		} else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收地理位置
 	 */
@@ -380,10 +425,10 @@ class Wechat
 				'scale'=>$this->_receive['Scale'],
 				'label'=>$this->_receive['Label']
 			);
-		} else 
+		} else
 			return false;
 	}
-	
+
 	/**
 	 * 获取上报地理位置事件
 	 */
@@ -397,7 +442,7 @@ class Wechat
 		} else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收事件推送
 	 */
@@ -414,14 +459,14 @@ class Wechat
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 获取自定义菜单的扫码推事件信息
-	 * 
+	 *
 	 * 事件类型为以下两种时则调用此方法有效
 	 * Event	 事件类型，scancode_push
 	 * Event	 事件类型，scancode_waitmsg
-	 * 
+	 *
 	 * @return: array | false
 	 * array (
 	 *     'ScanType'=>'qrcode',
@@ -443,15 +488,15 @@ class Wechat
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 获取自定义菜单的图片发送事件信息
-	 * 
+	 *
 	 * 事件类型为以下三种时则调用此方法有效
 	 * Event	 事件类型，pic_sysphoto        弹出系统拍照发图的事件推送
 	 * Event	 事件类型，pic_photo_or_album  弹出拍照或者相册发图的事件推送
 	 * Event	 事件类型，pic_weixin          弹出微信相册发图器的事件推送
-	 * 
+	 *
 	 * @return: array | false
 	 * array (
 	 *   'Count' => '2',
@@ -462,7 +507,7 @@ class Wechat
 	 *         ),
 	 *   ),
 	 * )
-	 * 
+	 *
 	 */
 	public function getRevSendPicsInfo(){
 		if (isset($this->_receive['SendPicsInfo'])){
@@ -492,7 +537,7 @@ class Wechat
 	 * 获取自定义菜单的地理位置选择器事件推送
 	 *
 	 * 事件类型为以下时则可以调用此方法有效
-	 * Event	 事件类型，location_select        弹出系统拍照发图的事件推送
+	 * Event	 事件类型，location_select        弹出地理位置选择器的事件推送
 	 *
 	 * @return: array | false
 	 * array (
@@ -502,7 +547,7 @@ class Wechat
 	 *   'Label' => '某某市某某区某某路',
 	 *   'Poiname' => '',
 	 * )
-	 * 
+	 *
 	 */
 	public function getRevSendGeoInfo(){
 	    if (isset($this->_receive['SendLocationInfo'])){
@@ -525,7 +570,7 @@ class Wechat
 	        return false;
 	    }
 	}
-	
+
 	/**
 	 * 获取接收语音推送
 	 */
@@ -535,10 +580,10 @@ class Wechat
 				'mediaid'=>$this->_receive['MediaId'],
 				'format'=>$this->_receive['Format'],
 			);
-		} else 
+		} else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收视频推送
 	 */
@@ -551,7 +596,7 @@ class Wechat
 		} else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收TICKET
 	 */
@@ -561,7 +606,7 @@ class Wechat
 		} else
 			return false;
 	}
-	
+
 	/**
 	* 获取二维码的场景值
 	*/
@@ -572,7 +617,7 @@ class Wechat
 			return false;
 		}
 	}
-	
+
 	/**
 	* 获取主动推送的消息ID
 	* 经过验证，这个和普通的消息MsgId不一样
@@ -581,20 +626,20 @@ class Wechat
 	public function getRevTplMsgID(){
 		if (isset($this->_receive['MsgID'])){
 			return $this->_receive['MsgID'];
-		} else 
+		} else
 			return false;
 	}
-	
+
 	/**
 	* 获取模板消息发送状态
 	*/
 	public function getRevStatus(){
 		if (isset($this->_receive['Status'])){
 			return $this->_receive['Status'];
-		} else 
+		} else
 			return false;
 	}
-	
+
 	/**
 	* 获取群发或模板消息发送结果
 	* 当Event为 MASSSENDJOBFINISH 或 TEMPLATESENDJOBFINISH，即高级群发/模板消息
@@ -604,7 +649,7 @@ class Wechat
 			$array['Status'] = $this->_receive['Status'];
 		if (isset($this->_receive['MsgID'])) //发送的消息id
 			$array['MsgID'] = $this->_receive['MsgID'];
-		
+
 		//以下仅当群发消息时才会有的事件内容
 		if (isset($this->_receive['TotalCount']))     //分组或openid列表内粉丝数量
 			$array['TotalCount'] = $this->_receive['TotalCount'];
@@ -629,7 +674,7 @@ class Wechat
 	public function getRevKFCreate(){
 		if (isset($this->_receive['KfAccount'])){
 			return $this->_receive['KfAccount'];
-		} else 
+		} else
 			return false;
 	}
 
@@ -665,12 +710,60 @@ class Wechat
 	        return false;
 	    }
 	}
-	
+
+	/**
+	 * 获取卡券事件推送 - 卡卷审核是否通过
+	 * 当Event为 card_pass_check(审核通过) 或 card_not_pass_check(未通过)
+	 * @return string|boolean  返回卡券ID
+	 */
+	public function getRevCardPass(){
+	    if (isset($this->_receive['CardId']))
+	        return $this->_receive['CardId'];
+	    else
+	        return false;
+	}
+
+	/**
+	 * 获取卡券事件推送 - 领取卡券
+	 * 当Event为 user_get_card(用户领取卡券)
+	 * @return array|boolean
+	 */
+	public function getRevCardGet(){
+	    if (isset($this->_receive['CardId']))     //卡券 ID
+	        $array['CardId'] = $this->_receive['CardId'];
+	    if (isset($this->_receive['IsGiveByFriend']))    //是否为转赠，1 代表是，0 代表否。
+	        $array['IsGiveByFriend'] = $this->_receive['IsGiveByFriend'];
+	    if (isset($this->_receive['UserCardCode']) && !empty($this->_receive['UserCardCode'])) //code 序列号。自定义 code 及非自定义 code的卡券被领取后都支持事件推送。
+	        $array['UserCardCode'] = $this->_receive['UserCardCode'];
+	    if (isset($array) && count($array) > 0) {
+	        return $array;
+	    } else {
+	        return false;
+	    }
+	}
+
+	/**
+	 * 获取卡券事件推送 - 删除卡券
+	 * 当Event为 user_del_card(用户删除卡券)
+	 * @return array|boolean
+	 */
+	public function getRevCardDel(){
+	    if (isset($this->_receive['CardId']))     //卡券 ID
+	        $array['CardId'] = $this->_receive['CardId'];
+	    if (isset($this->_receive['UserCardCode']) && !empty($this->_receive['UserCardCode'])) //code 序列号。自定义 code 及非自定义 code的卡券被领取后都支持事件推送。
+	        $array['UserCardCode'] = $this->_receive['UserCardCode'];
+	    if (isset($array) && count($array) > 0) {
+	        return $array;
+	    } else {
+	        return false;
+	    }
+	}
+
 	public static function xmlSafeStr($str)
-	{   
-		return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';   
-	} 
-	
+	{
+		return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';
+	}
+
 	/**
 	 * 数据XML编码
 	 * @param mixed $data 数据
@@ -686,8 +779,8 @@ class Wechat
 	        $xml    .=  "</$key>";
 	    }
 	    return $xml;
-	}	
-	
+	}
+
 	/**
 	 * XML编码
 	 * @param mixed $data 数据
@@ -713,7 +806,7 @@ class Wechat
 	    $xml   .= "</{$root}>";
 	    return $xml;
 	}
-	
+
 	/**
 	 * 过滤文字回复\r\n换行符
 	 * @param string $text
@@ -723,7 +816,7 @@ class Wechat
 		if (!$this->_text_filter) return $text;
 		return str_replace("\r\n", "\n", $text);
 	}
-	
+
 	/**
 	 * 设置回复消息
 	 * Example: $obj->text('hello')->reply();
@@ -762,7 +855,7 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置回复消息
 	 * Example: $obj->voice('media_id')->reply();
@@ -782,7 +875,7 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置回复消息
 	 * Example: $obj->video('media_id','title','description')->reply();
@@ -806,15 +899,16 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置回复音乐
 	 * @param string $title
 	 * @param string $desc
 	 * @param string $musicurl
 	 * @param string $hgmusicurl
+	 * @param string $thumbmediaid 音乐图片缩略图的媒体id，非必须
 	 */
-	public function music($title,$desc,$musicurl,$hgmusicurl='') {
+	public function music($title,$desc,$musicurl,$hgmusicurl='',$thumbmediaid='') {
 		$FuncFlag = $this->_funcflag ? 1 : 0;
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
@@ -829,13 +923,16 @@ class Wechat
 			),
 			'FuncFlag'=>$FuncFlag
 		);
+		if ($thumbmediaid) {
+			$msg['Music']['ThumbMediaId'] = $thumbmediaid;
+		}
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置回复图文
-	 * @param array $newsData 
+	 * @param array $newsData
 	 * 数组结构:
 	 *  array(
 	 *  	"0"=>array(
@@ -851,7 +948,7 @@ class Wechat
 	{
 		$FuncFlag = $this->_funcflag ? 1 : 0;
 		$count = count($newsData);
-		
+
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
@@ -864,9 +961,9 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * 回复微信服务器, 此函数支持链式操作
 	 * Example: $this->text('msg tips')->reply();
 	 * @param string $msg 要发送的信息, 默认取$this->_msg
@@ -874,7 +971,7 @@ class Wechat
 	 */
 	public function reply($msg=array(),$return = false)
 	{
-		if (empty($msg)) 
+		if (empty($msg))
 			$msg = $this->_msg;
 		$xmldata=  $this->xml_encode($msg);
 		$this->log($xmldata);
@@ -916,7 +1013,7 @@ class Wechat
 </xml>";
 	    return sprintf($format, $encrypt, $signature, $timestamp, $nonce);
 	}
-	
+
 	/**
 	 * GET 请求
 	 * @param string $url
@@ -939,7 +1036,7 @@ class Wechat
 			return false;
 		}
 	}
-	
+
 	/**
 	 * POST 请求
 	 * @param string $url
@@ -976,7 +1073,7 @@ class Wechat
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 通用auth验证方法，暂时仅用于菜单更新操作
 	 * @param string $appid
@@ -1073,7 +1170,7 @@ class Wechat
 			return '[' . $json . ']'; //Return numerical JSON
 		return '{' . $json . '}'; //Return associative JSON
 	}
-	
+
 	/**
 	 * 获取微信服务器IP地址列表
 	 * @return array('127.0.0.1','127.0.0.1')
@@ -1162,7 +1259,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取菜单(认证后的订阅号可用)
 	 * @return array('menu'=>array(....s))
@@ -1182,7 +1279,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 删除菜单(认证后的订阅号可用)
 	 * @return boolean
@@ -1226,7 +1323,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 根据媒体文件ID获取媒体文件(认证后的订阅号可用)
 	 * @param string $media_id 媒体文件id
@@ -1299,7 +1396,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 高级群发消息, 根据OpenID列表群发图文消息(订阅号不可用)
 	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
@@ -1310,7 +1407,7 @@ class Wechat
 	 *         "OPENID1",
 	 *         "OPENID2"
 	 *     ),
-	 *      "msgtype"=>"mpvideo", 
+	 *      "msgtype"=>"mpvideo",
 	 *      // 在下面5种类型中选择对应的参数内容
 	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
 	 *      // text => array ( "content" => "hello")
@@ -1332,18 +1429,18 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 高级群发消息, 根据群组id群发图文消息(认证后的订阅号可用)
 	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
 	 *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
 	 * @param array $data 消息结构
 	 * {
-	 *     "filter"=>array( 
+	 *     "filter"=>array(
 	 *         "is_to_all"=>False,     //是否群发给所有用户.True不用分组id，False需填写分组id
 	 *         "group_id"=>"2"     //群发的分组id
 	 *     ),
-	 *      "msgtype"=>"mpvideo", 
+	 *      "msgtype"=>"mpvideo",
 	 *      // 在下面5种类型中选择对应的参数内容
 	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
 	 *      // text => array ( "content" => "hello")
@@ -1365,7 +1462,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 高级群发消息, 删除群发图文消息(认证后的订阅号可用)
 	 * @param int $msg_id 消息id
@@ -1386,7 +1483,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 高级群发消息, 预览群发消息(认证后的订阅号可用)
 	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
@@ -1416,7 +1513,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 高级群发消息, 查询群发消息发送状态(认证后的订阅号可用)
 	 * @param int $msg_id 消息id
@@ -1441,7 +1538,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 创建二维码ticket
 	 * @param int $scene_id 自定义追踪id
@@ -1472,7 +1569,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取二维码图片
 	 * @param string $ticket 传入由getQRCode方法生成的ticket参数
@@ -1481,7 +1578,7 @@ class Wechat
 	public function getQRUrl($ticket) {
 		return self::QRCODE_IMG_URL.$ticket;
 	}
-	
+
 	/**
 	 * 长链接转短链接接口
 	 * @param string $long_url 传入要转换的长url
@@ -1526,7 +1623,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取关注者详细信息
 	 * @param string $openid
@@ -1574,7 +1671,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取用户分组列表
 	 * @return boolean|array
@@ -1594,7 +1691,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取用户所在分组
 	 * @param string $openid
@@ -1613,12 +1710,12 @@ class Wechat
 	            $this->errCode = $json['errcode'];
 	            $this->errMsg = $json['errmsg'];
 	            return false;
-	        } else 
+	        } else
                 if (isset($json['groupid'])) return $json['groupid'];
 	    }
 	    return false;
 	}
-    
+
 	/**
 	 * 新增自定分组
 	 * @param string $name 分组名称
@@ -1642,7 +1739,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 更改分组名称
 	 * @param int $groupid 分组id
@@ -1667,7 +1764,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 移动用户分组
 	 * @param int $groupid 分组id
@@ -1693,7 +1790,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 发送客服消息
 	 * @param array $data 消息结构{"touser":"OPENID","msgtype":"news","news":{...}}
@@ -1714,7 +1811,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * oauth 授权跳转接口
 	 * @param string $callback 回调URI
@@ -1723,7 +1820,7 @@ class Wechat
 	public function getOauthRedirect($callback,$state='',$scope='snsapi_userinfo'){
 		return self::OAUTH_PREFIX.self::OAUTH_AUTHORIZE_URL.'appid='.$this->appid.'&redirect_uri='.urlencode($callback).'&response_type=code&scope='.$scope.'&state='.$state.'#wechat_redirect';
 	}
-	
+
 	/**
 	 * 通过code获取Access Token
 	 * @return array {access_token,expires_in,refresh_token,openid,scope}
@@ -1745,7 +1842,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 刷新access token并续期
 	 * @param string $refresh_token
@@ -1766,7 +1863,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取授权后的用户资料
 	 * @param string $access_token
@@ -1809,7 +1906,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取签名
 	 * @param array $arrdata 签名数组
@@ -1830,7 +1927,7 @@ class Wechat
 		$paySign = $method($paramstring);
 		return $paySign;
 	}
-	
+
 	/**
 	 * 生成随机字串
 	 * @param number $length 长度，默认为16，最长为32字节
@@ -1846,7 +1943,7 @@ class Wechat
 		}
 		return $str;
 	}
-	
+
 	/**
 	 * 生成原生支付url
 	 * @param number $productid 商品编号，最长为32字节
@@ -1872,7 +1969,7 @@ class Wechat
 		    //weixin://wxpay/bizpayurl?sign=XXXXX&appid=XXXXXX&productid=XXXXXX&timestamp=XXXXXX&noncestr=XXXXXX
 	}
 
-	
+
 	/**
 	 * 生成订单package字符串
 	 * @param string $out_trade_no 必填，商户系统内部的订单号,32个字符内,确保在商户系统唯一
@@ -1886,7 +1983,7 @@ class Wechat
 	 * @param string $time_start 交易起始时间,订单生成时间,格式yyyyMMddHHmmss
 	 * @param string $time_expire 交易结束时间,也是订单失效时间
 	 * @param int $transport_fee 物流费用,单位为分
-	 * @param int $product_fee 商品费用,单位为分,必须保证 transport_fee + product_fee=total_fee 
+	 * @param int $product_fee 商品费用,单位为分,必须保证 transport_fee + product_fee=total_fee
 	 * @param string $goods_tag 商品标记,优惠券时可能用到
 	 * @param string $attach 附加数据，notify接口原样返回
 	 * @return string
@@ -1913,7 +2010,7 @@ class Wechat
 			$package = http_build_query($arrdata) . "&sign=" . $signValue;
 			return $package;
 	}
-	
+
 	/**
 	 * 支付签名(paySign)生成方法
 	 * @param string $package 订单详情字串
@@ -1926,7 +2023,7 @@ class Wechat
 		$paySign = $this->getSignature($arrdata);
 		return $paySign;
 	}
-	
+
 	/**
 	 * 回调通知签名验证
 	 * @param array $orderxml 返回的orderXml的数组表示，留空则自动从post数据获取
@@ -1944,7 +2041,7 @@ class Wechat
 		if ($paySign!=$orderxml['AppSignature']) return false;
 		return true;
 	}
-	
+
 	/**
 	 * 发货通知
 	 * @param string $openid 用户open_id
@@ -1982,7 +2079,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 查询订单信息
 	 * @param string $out_trade_no 订单号
@@ -2013,7 +2110,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取收货地址JS的签名
 	 * @tutorial 参考weixin.js脚本的WeixinJS.editAddress方法调用
@@ -2063,7 +2160,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 模板消息 添加消息模板
 	 * 成功返回消息模板的调用id
@@ -2085,7 +2182,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 发送模板消息
 	 * @param array $data 消息结构
@@ -2129,7 +2226,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取多客服会话记录
 	 * @param array $data 数据结构{"starttime":123456789,"endtime":987654321,"openid":"OPENID","pagesize":10,"pageindex":1,}
@@ -2170,10 +2267,10 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 获取多客服客服基本信息
-	 * 
+	 *
 	 * @return boolean|array
 	 */
 	public function getCustomServiceKFlist(){
@@ -2191,10 +2288,10 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取多客服在线客服接待信息
-	 * 
+	 *
 	 * @return boolean|array {
 	 "kf_online_list": [
 	 {
@@ -2222,7 +2319,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 创建指定多客服会话
 	 * @tutorial 当用户已被其他客服接待或指定客服不在线则会失败
@@ -2231,13 +2328,13 @@ class Wechat
 	 * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
 	 * @return boolean | array            //成功返回json数组
 	 * {
-	 *   "errcode": 0, 
+	 *   "errcode": 0,
 	 *   "errmsg": "ok",
 	 * }
 	 */
 	public function createKFSession($openid,$kf_account,$text=''){
 	    $data=array(
-	    	"openid" =>$openid, 
+	    	"openid" =>$openid,
 	        "nickname" => $kf_account
 	    );
 	    if ($text) $data["text"] = $text;
@@ -2255,7 +2352,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 关闭指定多客服会话
 	 * @tutorial 当用户被其他客服接待时则会失败
@@ -2264,13 +2361,13 @@ class Wechat
 	 * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
 	 * @return boolean | array            //成功返回json数组
 	 * {
-	 *   "errcode": 0, 
+	 *   "errcode": 0,
 	 *   "errmsg": "ok",
 	 * }
 	 */
 	public function closeKFSession($openid,$kf_account,$text=''){
 	    $data=array(
-	    	"openid" =>$openid, 
+	    	"openid" =>$openid,
 	        "nickname" => $kf_account
 	    );
 	    if ($text) $data["text"] = $text;
@@ -2288,17 +2385,17 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取用户会话状态
 	 * @param string $openid           //用户openid
 	 * @return boolean | array            //成功返回json数组
-	 * { 
-	 *     "errcode" : 0, 
-	 *     "errmsg" : "ok", 
+	 * {
+	 *     "errcode" : 0,
+	 *     "errmsg" : "ok",
 	 *     "kf_account" : "test1@test",    //正在接待的客服
 	 *     "createtime": 123456789,        //会话接入时间
-	 *  } 
+	 *  }
 	 */
 	public function getKFSession($openid){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
@@ -2315,7 +2412,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取指定客服的会话列表
 	 * @param string $openid           //用户openid
@@ -2323,12 +2420,12 @@ class Wechat
 	 *  array(
 	 *     'sessionlist' => array (
 	 *         array (
-	 *             'openid'=>'OPENID',             //客户 openid 
-	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *             'openid'=>'OPENID',             //客户 openid
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
 	 *         ),
 	 *         array (
-	 *             'openid'=>'OPENID',             //客户 openid 
-	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *             'openid'=>'OPENID',             //客户 openid
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
 	 *         ),
 	 *     )
 	 *  )
@@ -2348,7 +2445,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取未接入会话列表
 	 * @param string $openid           //用户openid
@@ -2357,14 +2454,14 @@ class Wechat
 	 *     'count' => 150 ,                            //未接入会话数量
 	 *     'waitcaselist' => array (
 	 *         array (
-	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'openid'=>'OPENID',             //客户 openid
 	 *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
-	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
 	 *         ),
 	 *         array (
-	 *             'openid'=>'OPENID',             //客户 openid 
+	 *             'openid'=>'OPENID',             //客户 openid
 	 *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
-	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳 
+	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
 	 *         )
 	 *     )
 	 *  )
@@ -2384,23 +2481,23 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 添加客服账号
-	 * 
+	 *
 	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
 	 * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
 	 * @param string $password     //客服账号明文登录密码，会自动加密
 	 * @return boolean|array
 	 * 成功返回结果
 	 * {
-	 *   "errcode": 0, 
+	 *   "errcode": 0,
 	 *   "errmsg": "ok",
 	 * }
 	 */
 	public function addKFAccount($account,$nickname,$password){
 	    $data=array(
-	    	"kf_account" =>$account, 
+	    	"kf_account" =>$account,
 	        "nickname" => $nickname,
 	        "password" => md5($password)
 	    );
@@ -2479,7 +2576,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 上传客服头像
 	 *
@@ -2507,7 +2604,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 语义理解接口
 	 * @param String $uid      用户唯一id（非开发者id），用户区分公众号下的不同用户（建议填入用户openid）
@@ -2549,10 +2646,505 @@ class Wechat
 	    }
 	    return false;
 	}
+
+    /**
+     * 创建卡券
+     * @param Array $data      卡券数据
+     * @return array|boolean 返回数组中card_id为卡券ID
+     */
+    public function createCard($data) {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CREATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 更改卡券信息
+     * 调用该接口更新信息后会重新送审，卡券状态变更为待审核。已被用户领取的卡券会实时更新票面信息。
+     * @param string $data
+     * @return boolean
+     */
+    public function updateCard($data) {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_UPDATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 删除卡券
+     * 允许商户删除任意一类卡券。删除卡券后，该卡券对应已生成的领取用二维码、添加到卡包 JS API 均会失效。
+     * 注意：删除卡券不能删除已被用户领取，保存在微信客户端中的卡券，已领取的卡券依旧有效。
+     * @param string $card_id 卡券ID
+     * @return boolean
+     */
+    public function delCard($card_id) {
+        $data = array(
+            'card_id' => $card_id,
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_DELETE . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 查询卡券详情
+     * @param string $card_id
+     * @return boolean|array    返回数组信息比较复杂，请参看卡券接口文档
+     */
+    public function getCardInfo($card_id) {
+        $data = array(
+            'card_id' => $card_id,
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_GET . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 获取颜色列表
+	 * 获得卡券的最新颜色列表，用于创建卡券
+	 * @return boolean|array   返回数组请参看 微信卡券接口文档 的json格式
+     */
+    public function getCardColors() {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_BASE_URL_PREFIX . self::CARD_GETCOLORS . 'access_token=' . $this->access_token);
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 拉取门店列表
+	 * 获取在公众平台上申请创建的门店列表
+	 * @param int $offset  开始拉取的偏移，默认为0从头开始
+	 * @param int $count   拉取的数量，默认为0拉取全部
+	 * @return boolean|array   返回数组请参看 微信卡券接口文档 的json格式
+     */
+    public function getCardLocations($offset=0,$count=0) {
+	    $data=array(
+	    	'offset'=>$offset,
+	        'count'=>$count
+	    );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LOCATION_BATCHGET . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 批量导入门店信息
+	 * @tutorial 返回插入的门店id列表，以逗号分隔。如果有插入失败的，则为-1，请自行核查是哪个插入失败
+	 * @param array $data    数组形式的json数据，由于内容较多，具体内容格式请查看 微信卡券接口文档
+	 * @return boolean|string 成功返回插入的门店id列表
+     */
+    public function addCardLocations($data) {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LOCATION_BATCHADD . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 生成卡券二维码
+	 * 成功则直接返回ticket值，可以用 getQRUrl($ticket) 换取二维码url
+	 *
+	 * @param string $cardid 卡券ID 必须
+	 * @param string $code 指定卡券 code 码，只能被领一次。use_custom_code 字段为 true 的卡券必须填写，非自定义 code 不必填写。
+	 * @param string $openid 指定领取者的 openid，只有该用户能领取。bind_openid 字段为 true 的卡券必须填写，非自定义 openid 不必填写。
+	 * @param int $expire_seconds 指定二维码的有效时间，范围是 60 ~ 1800 秒。不填默认为永久有效。
+	 * @param boolean $is_unique_code 指定下发二维码，生成的二维码随机分配一个 code，领取后不可再次扫描。填写 true 或 false。默认 false。
+	 * @param string $balance 红包余额，以分为单位。红包类型必填（LUCKY_MONEY），其他卡券类型不填。
+     * @return boolean|string
+     */
+    public function createCardQrcode($card_id,$code='',$openid='',$expire_seconds=0,$is_unique_code=false,$balance='') {
+        $card = array(
+                'card_id' => $card_id
+        );
+        if ($code)
+            $card['code'] = $code;
+        if ($openid)
+            $card['openid'] = $openid;
+        if ($expire_seconds)
+            $card['expire_seconds'] = $expire_seconds;
+        if ($is_unique_code)
+            $card['is_unique_code'] = $is_unique_code;
+        if ($balance)
+            $card['balance'] = $balance;
+        $data = array(
+            'action_name' => "QR_CARD",
+            'action_info' => array('card' => $card)
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_QRCODE_CREATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 消耗 code
+     * 自定义 code（use_custom_code 为 true）的优惠券，在 code 被核销时，必须调用此接口。
+     *
+     * @param string $code 要消耗的序列号
+     * @param string $code_id 要消耗序列号所述的 card_id，创建卡券时use_custom_code 填写 true 时必填。
+     * @return boolean|array
+     * {
+     *  "errcode":0,
+     *  "errmsg":"ok",
+     *  "card":{"card_id":"pFS7Fjg8kV1IdDz01r4SQwMkuCKc"},
+     *  "openid":"oFS7Fjl0WsZ9AMZqrI80nbIq8xrA"
+     * }
+     */
+    public function consumeCardCode($code,$card_id='') {
+        $data = array('code' => $code);
+        if ($card_id)
+            $data['card_id'] = $card_id;
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_CONSUME . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * code 解码
+     * @param string $encrypt_code 通过 choose_card_info 获取的加密字符串
+     * @return boolean|array
+     * {
+     *  "errcode":0,
+     *  "errmsg":"ok",
+     *  "code":"751234212312"
+     *  }
+     */
+    public function decryptCardCode($encrypt_code) {
+        $data = array(
+            'encrypt_code' => $encrypt_code,
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_DECRYPT . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 查询 code 的有效性（非自定义 code）
+     * @param string $code
+     * @return boolean|array
+     * {
+     *  "errcode":0,
+     *  "errmsg":"ok",
+     *  "openid":"oFS7Fjl0WsZ9AMZqrI80nbIq8xrA",    //用户 openid
+     *  "card":{
+     *      "card_id":"pFS7Fjg8kV1IdDz01r4SQwMkuCKc",
+     *      "begin_time": 1404205036,               //起始使用时间
+     *      "end_time": 1404205036,                 //结束时间
+     *  }
+     * }
+     */
+    public function checkCardCode($code) {
+        $data = array(
+            'code' => $code,
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_GET . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 批量查询卡列表
+	 * @param $offset  开始拉取的偏移，默认为0从头开始
+	 * @param $count   需要查询的卡片的数量（数量最大50,默认50）
+     * @return boolean|array
+     * {
+     *  "errcode":0,
+     *  "errmsg":"ok",
+     *  "card_id_list":["ph_gmt7cUVrlRk8swPwx7aDyF-pg"],    //卡 id 列表
+     *  "total_num":1                                       //该商户名下 card_id 总数
+     * }
+     */
+    public function getCardIdList($offset=0,$count=50) {
+        if ($count>50)
+            $count = 50;
+        $data = array(
+            'offset' => $offset,
+            'count'  => $count,
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_BATCHGET . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 更改 code
+     * 为确保转赠后的安全性，微信允许自定义code的商户对已下发的code进行更改。
+     * 注：为避免用户疑惑，建议仅在发生转赠行为后（发生转赠后，微信会通过事件推送的方式告知商户被转赠的卡券code）对用户的code进行更改。
+     * @param string $code      卡券的 code 编码
+     * @param string $code_id   卡券 ID
+     * @param string $new_code  新的卡券 code 编码
+     * @return boolean
+     */
+    public function updateCardCode($code,$code_id,$new_code) {
+        $data = array(
+            'code' => $card,
+            'card_id' => $card_id,
+            'new_code' => $new_code,
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_UPDATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 设置卡券失效
+     * 设置卡券失效的操作不可逆
+     * @param string $code 需要设置为失效的 code
+     * @param string $code 自定义 code 的卡券必填。非自定义 code 的卡券不填。
+     * @return boolean
+     */
+    public function unavailableCardCode($code,$code_id='') {
+        $data = array(
+            'code' => $code,
+        );
+        if ($code_id)
+            $data['code_id'] = $code_id;
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_UNAVAILABLE . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 库存修改
+     * @param string $data
+     * @return boolean
+     */
+    public function modifyCardStock($data) {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MODIFY_STOCK . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 激活/绑定会员卡
+     * @param string $data 具体结构请参看卡券开发文档(6.1.1 激活/绑定会员卡)章节
+     * @return boolean
+     */
+    public function activateMemberCard($data) {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEMBERCARD_ACTIVATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 会员卡交易
+     * 会员卡交易后每次积分及余额变更需通过接口通知微信，便于后续消息通知及其他扩展功能。
+     * @param string $data 具体结构请参看卡券开发文档(6.1.2 会员卡交易)章节
+     * @return boolean|array
+     */
+    public function updateMemberCard($data) {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEMBERCARD_UPDATEUSER . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 更新红包金额
+     * @param string $code      红包的序列号
+     * @param $balance          红包余额
+     * @param string $card_id   自定义 code 的卡券必填。非自定义 code 可不填。
+     * @return boolean|array
+     */
+    public function updateLuckyMoney($code,$balance,$card_id='') {
+        $data = array(
+                'code' => $code,
+                'balance' => $balance
+        );
+        if ($card_id)
+            $data['card_id'] = $card_id;
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LUCKYMONEY_UPDATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 设置卡券测试白名单
+     * @param string $openid    测试的 openid 列表
+     * @param string $user      测试的微信号列表
+     * @return boolean
+     */
+    public function setCardTestWhiteList($openid=array(),$user=array()) {
+        $data = array();
+        if (count($openid) > 0)
+            $data['openid'] = $openid;
+        if (count($user) > 0)
+            $data['username'] = $user;
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_TESTWHILELIST_SET . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
 }
-
-
-
 /**
  * PKCS7Encoder class
  *
@@ -2626,7 +3218,7 @@ class Prpcrypt
 
         try {
             //获得16位随机字符串，填充到明文之前
-            $random = $this->getRandomStr();//"aaaabbbbccccdddd"; 
+            $random = $this->getRandomStr();//"aaaabbbbccccdddd";
             $text = $random . pack("N", strlen($text)) . $text . $appid;
             // 网络字节序
             $size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
