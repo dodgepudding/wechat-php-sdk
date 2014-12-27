@@ -6,9 +6,9 @@
  *  @version 1.0
  *  usage:
  *      $ret=ErrCode::getErrText(40001); //错误码可以通过公众号类库的公开变量errCode得到
- *      if ($ret) 
+ *      if ($ret)
  *      	echo $ret;
- *      else 
+ *      else
  *          echo "未找到对应的内容";
  */
 class ErrCode
@@ -54,6 +54,7 @@ class ErrCode
 	    '40039'=>'不合法的URL长度',
 	    '40050'=>'不合法的分组id',
 	    '40051'=>'分组名字不合法',
+	    '40099'=>'该 code 已被核销',
 	    '41001'=>'缺少access_token参数',
 	    '41002'=>'缺少appid参数',
 	    '41003'=>'缺少refresh_token参数',
@@ -66,6 +67,7 @@ class ErrCode
 	    '42001'=>'access_token超时',
 	    '42002'=>'refresh_token超时',
 	    '42003'=>'oauth_code超时',
+	    '42005'=>'调用接口频率超过上限',
 	    '43001'=>'需要GET请求',
 	    '43002'=>'需要POST请求',
 	    '43003'=>'需要HTTPS请求',
@@ -124,7 +126,7 @@ class ErrCode
 	        '7000035'=>'获取股票信息失败',
 	        '7000036'=>'utf8 编码转换失败',
 	);
-	
+
 	public static function getErrText($err) {
 		if (isset(self::$errCode[$err])) {
 			return self::$errCode[$err];

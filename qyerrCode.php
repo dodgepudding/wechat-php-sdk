@@ -6,9 +6,9 @@
  *  @version 1.0
  *  usage:
  *      $ret=ErrCode::getErrText(40001); //错误码可以通过公众号类库的公开变量errCode得到
- *      if ($ret) 
+ *      if ($ret)
  *      	echo $ret;
- *      else 
+ *      else
  *          echo "未找到对应的内容";
  */
 class ErrCode
@@ -166,7 +166,7 @@ class ErrCode
 	        '60114'=>'性别不合法',
 
 	);
-	
+
 	public static function getErrText($err) {
 		if (isset(self::$errCode[$err])) {
 			return self::$errCode[$err];
