@@ -1513,7 +1513,7 @@ class Wechat
 	 * @return boolean|array
 	 * {
 	 *     "msg_id":201053012,     //群发消息后返回的消息id
-	 *     "msg_status":"SEND_SUCCESS" //消息发送后的状态，SEND_SUCCESS表示发送成功
+	 *     "msg_status":"SEND_SUCCESS" //消息发送后的状态，SENDING表示正在发送 SEND_SUCCESS表示发送成功
 	 * }
 	 */
 	public function queryMassMessage($msg_id){
@@ -1527,7 +1527,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return true;
+			return $json;
 		}
 		return false;
 	}
