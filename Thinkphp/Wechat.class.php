@@ -381,8 +381,6 @@ class Wechat
 	public function getRevContent(){
 		if (isset($this->_receive['Content']))
 			return $this->_receive['Content'];
-		else if (isset($this->_receive['Recognition'])) //获取语音识别文字内容，需申请开通
-			return $this->_receive['Recognition'];
 		else
 			return false;
 	}
@@ -579,6 +577,7 @@ class Wechat
 			return array(
 				'mediaid'=>$this->_receive['MediaId'],
 				'format'=>$this->_receive['Format'],
+				'recognition'=>$this->_receive['Recognition'],
 			);
 		} else
 			return false;
