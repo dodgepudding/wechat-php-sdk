@@ -9,7 +9,7 @@
 ## 使用详解
 使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
 微信公众平台： http://mp.weixin.qq.com/wiki/
-微信企业平台： http://qy.weixin.qq.com/wiki/
+微信企业平台： http://qydev.weixin.qq.com/wiki/
 
 微信支付接入文档：https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl
 

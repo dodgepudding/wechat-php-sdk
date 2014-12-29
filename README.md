@@ -9,7 +9,7 @@ weixin developer SDK.
 ## 使用详解
 使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
 微信公众平台： http://mp.weixin.qq.com/wiki/
-微信企业平台： http://qy.weixin.qq.com/wiki/
+微信企业平台： http://qydev.weixin.qq.com/wiki/
 
 微信支付接入文档：
 https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
@@ -18,13 +18,13 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 
 ## 目录 
-> **[wechat.class.php 官方API类库](#1-wechatclassphp-官方api类库)**  
-> **[wechatext.class.php 非官方扩展API](#2-wechatextclassphp-非官方扩展api)**  
-> **[wechatauth.class.php 授权登陆](#3-wechatauthclassphp-授权登陆)**  
-> **[wechat.js 内嵌JS](#4-wechatjs-内嵌js)**  
-> **[errCode.php 全局返回码类](#5-errcodephp-全局返回码类)**  
-> **[qywechat.class.php 企业号API类库](#6-qywechatclassphp-企业号api类库)**  
-> **[调用示例](#调用示例)**  
+> **[wechat.class.php 官方API类库](#user-content-1-wechatclassphp-官方api类库)**  
+> **[wechatext.class.php 非官方扩展API](#user-content-2-wechatextclassphp-非官方扩展api)**  
+> **[wechatauth.class.php 授权登陆](#user-content-3-wechatauthclassphp-授权登陆)**  
+> **[wechat.js 内嵌JS](#user-content-4-wechatjs-内嵌js)**  
+> **[errCode.php 全局返回码类](#user-content-5-errcodephp-全局返回码类)**  
+> **[qywechat.class.php 企业号API类库](#user-content-6-qywechatclassphp-企业号api类库)**  
+> **[调用示例](#user-content-调用示例)**  
 
 ----------
 
