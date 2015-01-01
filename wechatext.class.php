@@ -7,6 +7,7 @@
  *  send($id,$content) 向某用户id发送微信文字信息
  *  getUserList($page,$pagesize,$groupid) 获取用户信息
  *  getGroupList($page,$pagesize) 获取群组信息
+ *  putIntoGroup($fakeidsList, $groupid) 将用户添加到指定分组
  *  sendNews($id,$msgid) 发送图文消息
  *  getNewsList($page,$pagesize) 获取图文信息列表
  *  uploadFile($filepath,$type) 上传附件,包括图片/音频/视频
@@ -186,7 +187,33 @@ class Wechatext
 		}
 		return false;
 	}
-	
+	/**
+ +	 * 将用户放入制定的分组
+ +	 * @param array $fakeidsList 需要移動的用戶fakeid
+ +	 * @param string $groupid
+ +	 * @return boolean 放入是否成功（成功則返回受影響的用戶列表）
+ +	 */
+ +	public function putIntoGroup($fakeidsList, $groupid){
+ +	      $fakeidsListString = "";
+ +	      if(is_array($fakeidsList)){
+ +	          foreach ($fakeidsList as $value){
+ +	              $fakeidsListString .= $value."|";
+ +	          }
+ +	      }else{
+ +	          $fakeidsListString = $fakeidsList;
+ +	      }
+ +	      $send_snoopy = new Snoopy;
+ +	      $send_snoopy->rawheaders['Cookie']= $this->cookie;
+ +	      $send_snoopy->referer = "https://mp.weixin.qq.com/cgi-bin/modifycontacts?action=modifycontacts&t=ajax-putinto-group";
+ +	      $submit = "https://mp.weixin.qq.com/cgi-bin/modifycontacts?action=modifycontacts&t=ajax-putinto-group";
+ +	      $post = array('ajax'=>1,'token'=>$this->_token, 'contacttype'=>$groupid, 'tofakeidlist'=>$fakeidsListString);
+ +	      $send_snoopy->submit($submit,$post);
+ +	      $this->log($send_snoopy->results);
+ +	      $tmp = json_decode($send_snoopy->results,true);
+ +	      $result = $tmp['ret']=="0"&&!empty($tmp)?true:false;
+ +	      return $result;
+ +	}
+ +	
 	/**
 	 * 获取图文信息列表
 	 * @param $page 页码(从0开始)
