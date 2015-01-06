@@ -285,6 +285,9 @@ class Wechat
     		}
     }
 
+    /**
+     * 设置消息的星标标志，官方已取消对此功能的支持
+     */
     public function setFuncFlag($flag) {
     		$this->_funcflag = $flag;
     		return $this;
@@ -971,8 +974,11 @@ class Wechat
 	 */
 	public function reply($msg=array(),$return = false)
 	{
-		if (empty($msg))
+		if (empty($msg)) {
+		    if (empty($this->_msg))   //防止不先设置回复内容，直接调用reply方法导致异常
+		        return false;
 			$msg = $this->_msg;
+		}
 		$xmldata=  $this->xml_encode($msg);
 		$this->log($xmldata);
 		if ($this->encrypt_type == 'aes') { //如果来源消息为加密方式
