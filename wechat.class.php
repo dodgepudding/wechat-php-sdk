@@ -1175,7 +1175,7 @@ class Wechat
 	    if (!$this->jsapi_ticket && !$this->getJsTicket($appid)) return false;
 	    $ret = strpos($url,'#');
 	    if ($ret)
-	        $url = strsub($url,0,$ret);
+	        $url = substr($url,0,$ret);
 	    $url = trim($url);
 	    if (empty($url))
 	        return false;
