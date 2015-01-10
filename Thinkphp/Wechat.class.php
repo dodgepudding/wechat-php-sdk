@@ -1166,7 +1166,6 @@ class Wechat
 			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
-				var_dump($json);
 				return false;
 			}
 			$this->jsapi_ticket = $json['ticket'];
