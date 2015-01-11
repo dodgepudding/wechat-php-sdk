@@ -78,6 +78,7 @@ class Wechat
 	const MENU_CREATE_URL = '/menu/create?';
 	const MENU_GET_URL = '/menu/get?';
 	const MENU_DELETE_URL = '/menu/delete?';
+	const GET_TICKET_URL = '/ticket/getticket?';
 	const CALLBACKSERVER_GET_URL = '/getcallbackip?';
 	const QRCODE_CREATE_URL='/qrcode/create?';
 	const QR_SCENE = 0;
@@ -158,6 +159,7 @@ class Wechat
 	private $appid;
 	private $appsecret;
 	private $access_token;
+	private $jsapi_ticket;
 	private $user_token;
 	private $partnerid;
 	private $partnerkey;
@@ -277,6 +279,9 @@ class Wechat
     		}
     }
 
+    /**
+     * 设置消息的星标标志，官方已取消对此功能的支持
+     */
     public function setFuncFlag($flag) {
     		$this->_funcflag = $flag;
     		return $this;
@@ -963,8 +968,11 @@ class Wechat
 	 */
 	public function reply($msg=array(),$return = false)
 	{
-		if (empty($msg))
+		if (empty($msg)) {
+		    if (empty($this->_msg))   //防止不先设置回复内容，直接调用reply方法导致异常
+		        return false;
 			$msg = $this->_msg;
+		}
 		$xmldata=  $this->xml_encode($msg);
 		$this->log($xmldata);
 		if ($this->encrypt_type == 'aes') { //如果来源消息为加密方式
@@ -1067,7 +1075,7 @@ class Wechat
 	}
 
 	/**
-	 * 通用auth验证方法，暂时仅用于菜单更新操作
+	 * 通用auth验证方法，获取access_token
 	 * @param string $appid
 	 * @param string $appsecret
 	 * @param string $token 手动指定access_token，非必要情况不建议用
@@ -1113,6 +1121,72 @@ class Wechat
 		$authname = 'wechat_access_token'.$appid;
 		S($authname,null);
 		return true;
+	}
+
+	/**
+	 * 删除JSAPI授权TICKET
+	 * @param string $appid 用于多个appid时使用
+	 */
+	public function resetJsTicket($appid=''){
+		if (!$appid) $appid = $this->appid;
+		$this->jsapi_ticket = '';
+		$authname = 'wechat_jsapi_ticket'.$appid;
+		S($authname,null);
+		return true;
+	}
+
+	/**
+	 * 获取JSAPI授权TICKET
+	 * @param string $appid 用于多个appid时使用,可空
+	 * @param string $jsapi_ticket 手动指定jsapi_ticket，非必要情况不建议用
+	 */
+	public function getJsTicket($appid='',$jsapi_ticket=''){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		if ($jsapi_ticket) { //手动指定token，优先使用
+		    $this->jsapi_ticket = $jsapi_ticket;
+		    return $this->access_token;
+		}
+		$authname = 'wechat_jsapi_ticket'.$appid;
+		if ($rs = S($authname))  {
+			$this->jsapi_ticket = $rs;
+			return $rs;
+		}
+		$result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=jsapi');
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			$this->jsapi_ticket = $json['ticket'];
+			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
+			S($authname,$this->access_token,$expire);
+			return $this->jsapi_ticket;
+		}
+		return false;
+	}
+
+
+	/**
+	 * 获取JsApi使用签名
+	 * @param string $url 网页的URL，不包含#及其后面部分
+	 * @param string $timeStamp 当前时间戳（需与JS输出的一致）
+	 * @param string $nonceStr 随机串（需与JS输出的一致）
+	 * @param string $appid 用于多个appid时使用,可空
+	 * @return string 返回签名字串
+	 */
+	public function getJsSign($url, $timeStamp, $nonceStr, $appid=''){
+	    if (!$this->jsapi_ticket && !$this->getJsTicket($appid)) return false;
+	    $ret = strpos($url,'#');
+	    if ($ret)
+	        $url = substr($url,0,$ret);
+	    $url = trim($url);
+	    if (empty($url))
+	        return false;
+	    $arrdata = array("timestamp" => $timeStamp, "noncestr" => $nonceStr, "url" => $url, "jsapi_ticket" => $this->jsapi_ticket);
+	    return $this->getSignature($arrdata);
 	}
 
 	/**
@@ -1512,7 +1586,7 @@ class Wechat
 	 * @return boolean|array
 	 * {
 	 *     "msg_id":201053012,     //群发消息后返回的消息id
-	 *     "msg_status":"SEND_SUCCESS" //消息发送后的状态，SEND_SUCCESS表示发送成功
+	 *     "msg_status":"SEND_SUCCESS" //消息发送后的状态，SENDING表示正在发送 SEND_SUCCESS表示发送成功
 	 * }
 	 */
 	public function queryMassMessage($msg_id){
@@ -1526,7 +1600,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return true;
+			return $json;
 		}
 		return false;
 	}

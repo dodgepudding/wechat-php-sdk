@@ -9,7 +9,7 @@ weixin developer SDK.
 ## 使用详解
 使用前需先打开微信帐号的开发模式，详细步骤请查看微信公众平台接口使用说明：  
 微信公众平台： http://mp.weixin.qq.com/wiki/
-微信企业平台： http://qy.weixin.qq.com/wiki/
+微信企业平台： http://qydev.weixin.qq.com/wiki/
 
 微信支付接入文档：
 https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
@@ -18,13 +18,13 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 
 ## 目录 
-> **[wechat.class.php 官方API类库](#1-wechatclassphp-官方api类库)**  
-> **[wechatext.class.php 非官方扩展API](#2-wechatextclassphp-非官方扩展api)**  
-> **[wechatauth.class.php 授权登陆](#3-wechatauthclassphp-授权登陆)**  
-> **[wechat.js 内嵌JS](#4-wechatjs-内嵌js)**  
-> **[errCode.php 全局返回码类](#5-errcodephp-全局返回码类)**  
-> **[qywechat.class.php 企业号API类库](#6-qywechatclassphp-企业号api类库)**  
-> **[调用示例](#调用示例)**  
+> **[wechat.class.php 官方API类库](#user-content-1-wechatclassphp-官方api类库)**  
+> **[wechatext.class.php 非官方扩展API](#user-content-2-wechatextclassphp-非官方扩展api)**  
+> **[wechatauth.class.php 授权登陆](#user-content-3-wechatauthclassphp-授权登陆)**  
+> **[wechat.js 内嵌JS](#user-content-4-wechatjs-内嵌js)**  
+> **[errCode.php 全局返回码类](#user-content-5-errcodephp-全局返回码类)**  
+> **[qywechat.class.php 企业号API类库](#user-content-6-qywechatclassphp-企业号api类库)**  
+> **[调用示例](#user-content-调用示例)**  
 
 ----------
 
@@ -53,6 +53,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 卡券管理（创建、修改、删除、发放、门店管理等） **（认证权限）**
 - 语义理解 **（服务号、认证权限）**
 - 获取微信服务器IP列表 **（初级权限）**  
+- 微信JSAPI授权(获取ticket、获取签名) **（初级权限`暂未确定`）**
 > 备注：  
 > 初级权限：基本权限，任何正常的公众号都有此权限  
 > 菜单权限：正常的服务号、认证后的订阅号拥有此权限  
@@ -157,6 +158,10 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 ### 主动接口方法:   
  *  checkAuth($appid,$appsecret,$token) 此处传入公众后台高级接口提供的appid和appsecret, 或者手动指定$token为access_token。函数将返回access_token操作令牌
+ *  resetAuth($appid='') 删除验证数据
+ *  resetJsTicket($appid='') 删除JSAPI授权TICKET
+ *  getJsTicket($appid='',$jsapi_ticket='') 获取JSAPI授权TICKET
+ *  getJsSign($url, $timeStamp, $nonceStr, $appid='') 获取JsApi使用签名
  *  createMenu($data) 创建菜单 $data菜单结构详见 **[自定义菜单创建接口](http://mp.weixin.qq.com/wiki/index.php?title=自定义菜单创建接口)**
  *  getServerIp() 获取微信服务器IP地址列表 返回数组array('127.0.0.1','127.0.0.1')
  *  getMenu() 获取菜单 
