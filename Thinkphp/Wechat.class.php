@@ -1236,6 +1236,27 @@ class Wechat
 			return '[' . $json . ']'; //Return numerical JSON
 		return '{' . $json . '}'; //Return associative JSON
 	}
+	
+	/**
+	 * 获取签名
+	 * @param array $arrdata 签名数组
+	 * @param string $method 签名方法
+	 * @return boolean|string 签名值
+	 */
+	public function getSignature($arrdata,$method="sha1") {
+		if (!function_exists($method)) return false;
+		ksort($arrdata);
+		$paramstring = "";
+		foreach($arrdata as $key => $value)
+		{
+			if(strlen($paramstring) == 0)
+				$paramstring .= $key . "=" . $value;
+			else
+				$paramstring .= "&" . $key . "=" . $value;
+		}
+		$paySign = $method($paramstring);
+		return $paySign;
+	}
 
 	/**
 	 * 获取微信服务器IP地址列表
