@@ -115,7 +115,7 @@ class Wechat
 	const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com'; //以下API接口URL需要使用此前缀
 	const OAUTH_TOKEN_URL = '/sns/oauth2/access_token?';
 	const OAUTH_REFRESH_URL = '/sns/oauth2/refresh_token?';
-	const OAUTH_USERINFO_URL = '/sns/oauth2/sns/userinfo?';
+	const OAUTH_USERINFO_URL = '/sns/userinfo?';
 	const OAUTH_AUTH_URL = '/sns/auth?';
 	const PAY_DELIVERNOTIFY = '/pay/delivernotify?';
 	const PAY_ORDERQUERY = '/pay/orderquery?';
