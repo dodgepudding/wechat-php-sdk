@@ -116,6 +116,7 @@ $options = array(
 > 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
 * getUserListInfo($department_id,$fetch_child=0,$status=0) 获取部门成员详情，参数同上
 * getUserId($code,$agentid) 根据code获取员工UserID与手机设备号，参数：Oauth2.0或者二次验证返回的code值，跳转链接时所在的企业应用ID
+* sendInvite($userid,$invite_tips='') 邀请成员关注
 * createTag($data) 创建标签，参数：array("tagname" => "UI")
 * updateTag($data) 更新标签，参数：array("tagid" => "1","tagname" => "UI")
 * deleteTag($tagid) 删除标签，参数：标签TagID

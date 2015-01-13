@@ -1,5 +1,7 @@
 #wechat.js
 
+**此JS脚本已经废弃不再更新，原因是官方在微信6.0.2版本开放了全新的JSAPI接口，更全面好用。请查看：[微信公众平台WIKI](http://mp.weixin.qq.com/wiki)**
+
 ##微信内嵌网页特殊功能js调用：
  * WeixinJS.hideOptionMenu() 隐藏右上角按钮
  * WeixinJS.showOptionMenu() 显示右上角按钮

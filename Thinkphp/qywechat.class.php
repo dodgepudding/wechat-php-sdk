@@ -50,6 +50,7 @@ class Wechat
     const USER_LIST_URL = '/user/simplelist?';
     const USER_LIST_INFO_URL = '/user/list?';
     const USER_GETINFO_URL = '/user/getuserinfo?';
+    const USER_INVITE_URL = 'invite/send?';
     const DEPARTMENT_CREATE_URL = '/department/create?';
     const DEPARTMENT_UPDATE_URL = '/department/update?';
     const DEPARTMENT_DELETE_URL = '/department/delete?';
@@ -73,7 +74,7 @@ class Wechat
 	const CALLBACKSERVER_GET_URL = '/getcallbackip?';
 	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
 	const OAUTH_AUTHORIZE_URL = '/authorize?';
-	
+
 	private $token;
 	private $encodingAesKey;
 	private $appid;         //也就是企业号的CorpID
@@ -90,7 +91,7 @@ class Wechat
 	public $errCode = 40001;
 	public $errMsg = "no access";
 	private $_logcallback;
-	
+
 	public function __construct($options)
 	{
 		$this->token = isset($options['token'])?$options['token']:'';
@@ -101,7 +102,7 @@ class Wechat
 		$this->debug = isset($options['debug'])?$options['debug']:false;
 		$this->_logcallback = isset($options['logcallback'])?$options['logcallback']:false;
 	}
-	
+
 	private function log($log){
 	    if ($this->debug ) {
 	        if (function_exists($this->_logcallback)) {
@@ -130,12 +131,12 @@ class Wechat
 	    }
 	    return $xml;
 	}
-	
+
 	public static function xmlSafeStr($str)
 	{
 	    return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';
 	}
-	
+
 	/**
 	 * XML编码
 	 * @param mixed $data 数据
@@ -161,7 +162,7 @@ class Wechat
 	    $xml   .= "</{$root}>";
 	    return $xml;
 	}
-	
+
 
 	/**
 	 * 微信api不支持中文转义的json结构
@@ -210,7 +211,7 @@ class Wechat
 	        return '[' . $json . ']'; //Return numerical JSON
 	    return '{' . $json . '}'; //Return associative JSON
 	}
-	
+
 	/**
 	 * 过滤文字回复\r\n换行符
 	 * @param string $text
@@ -220,7 +221,7 @@ class Wechat
 	    if (!$this->_text_filter) return $text;
 	    return str_replace("\r\n", "\n", $text);
 	}
-	
+
 	/**
 	 * GET 请求
 	 * @param string $url
@@ -243,7 +244,7 @@ class Wechat
 	        return false;
 	    }
 	}
-	
+
 	/**
 	 * POST 请求
 	 * @param string $url
@@ -299,7 +300,7 @@ class Wechat
 	        return false;
 	    }
 	}
-	
+
 	/**
 	 * 微信验证，包括post来的xml解密
 	 * @param bool $return 是否返回
@@ -352,7 +353,7 @@ class Wechat
         }
         return false;
     }
-    
+
     /**
      * 获取微信服务器发来的信息
      */
@@ -369,7 +370,7 @@ class Wechat
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * 获取微信服务器发来的信息
 	 */
@@ -377,7 +378,7 @@ class Wechat
 	{
 		return $this->_receive;
 	}
-	
+
 	/**
 	 * 获取微信服务器发来的原始加密信息
 	 */
@@ -385,7 +386,7 @@ class Wechat
 	{
 	    return $this->postxml;
 	}
-	
+
 	/**
 	 * 获取消息发送者
 	 */
@@ -395,7 +396,7 @@ class Wechat
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取消息接受者
 	 */
@@ -405,7 +406,7 @@ class Wechat
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收消息的应用id
 	 */
@@ -425,7 +426,7 @@ class Wechat
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取消息ID
 	 */
@@ -435,7 +436,7 @@ class Wechat
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取消息发送时间
 	 */
@@ -445,7 +446,7 @@ class Wechat
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收消息内容正文
 	 */
@@ -455,7 +456,7 @@ class Wechat
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收消息图片
 	 */
@@ -468,7 +469,7 @@ class Wechat
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收地理位置
 	 */
@@ -483,7 +484,7 @@ class Wechat
 		} else
 			return false;
 	}
-	
+
 	/**
 	 * 获取上报地理位置事件
 	 */
@@ -497,7 +498,7 @@ class Wechat
 		} else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收事件推送
 	 */
@@ -543,7 +544,7 @@ class Wechat
 	        return false;
 	    }
 	}
-	
+
 	/**
 	 * 获取自定义菜单的图片发送事件信息
 	 *
@@ -587,7 +588,7 @@ class Wechat
 	        return false;
 	    }
 	}
-	
+
 	/**
 	 * 获取自定义菜单的地理位置选择器事件推送
 	 *
@@ -625,7 +626,7 @@ class Wechat
 	        return false;
 	    }
 	}
-	
+
 	/**
 	 * 获取接收语音推送
 	 */
@@ -638,7 +639,7 @@ class Wechat
 		} else
 			return false;
 	}
-	
+
 	/**
 	 * 获取接收视频推送
 	 */
@@ -651,7 +652,7 @@ class Wechat
 		} else
 			return false;
 	}
-	
+
 	/**
 	 * 设置回复消息
 	 * Example: $obj->text('hello')->reply();
@@ -669,7 +670,7 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置回复消息
 	 * Example: $obj->image('media_id')->reply();
@@ -687,7 +688,7 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置回复消息
 	 * Example: $obj->voice('media_id')->reply();
@@ -705,7 +706,7 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置回复消息
 	 * Example: $obj->video('media_id','title','description')->reply();
@@ -727,7 +728,7 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置回复图文
 	 * @param array $newsData
@@ -746,7 +747,7 @@ class Wechat
 	{
 
 		$count = count($newsData);
-		
+
 		$msg = array(
 			'ToUserName' => $this->getRevFrom(),
 			'FromUserName'=>$this->getRevTo(),
@@ -759,7 +760,7 @@ class Wechat
 		$this->Message($msg);
 		return $this;
 	}
-	
+
 	/**
 	 * 设置发送消息
 	 * @param array $msg 消息数组
@@ -813,7 +814,7 @@ class Wechat
 		elseif ($smsg){
 			echo $smsg;
 		    return true;
-		    
+
 		}else
 		    return false;
 	}
@@ -829,7 +830,7 @@ class Wechat
 </xml>";
 	    return sprintf($format, $encrypt, $signature, $timestamp, $nonce);
 	}
-	
+
 
 	/**
 	 * 通用auth验证方法
@@ -951,7 +952,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取菜单
 	 * @return array('menu'=>array(....s))
@@ -974,7 +975,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 删除菜单
 	 * @return boolean
@@ -1026,7 +1027,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 根据媒体文件ID获取媒体文件
 	 * @param string $media_id 媒体文件id
@@ -1047,7 +1048,7 @@ class Wechat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 获取企业微信服务器IP地址列表
 	 * @return array('127.0.0.1','127.0.0.1')
@@ -1099,7 +1100,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 
 	/**
 	 * 更新部门
@@ -1186,7 +1187,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取部门列表
 	 * @return boolean|array	 成功返回结果
@@ -1259,8 +1260,8 @@ class Wechat
 	    }
 	    return false;
 	}
-	
-	
+
+
 	/**
 	 * 更新成员
 	 * @param array $data 	结构体为:
@@ -1296,7 +1297,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 删除成员
 	 * @param $userid  员工UserID。对应管理端的帐号
@@ -1321,7 +1322,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 批量删除成员
 	 * @param array $userid  员工UserID数组。对应管理端的帐号
@@ -1353,7 +1354,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取成员信息
 	 * @param $userid  员工UserID。对应管理端的帐号
@@ -1390,7 +1391,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取部门成员
 	 * @param $department_id   部门id
@@ -1424,7 +1425,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取部门成员详情
 	 * @param $department_id   部门id
@@ -1499,6 +1500,39 @@ class Wechat
 	}
 
 	/**
+	 * 邀请成员关注
+	 * 向未关注企业号的成员发送关注邀请。认证号优先判断顺序weixinid>手机号>邮箱绑定>邮件；非认证号只能邮件邀请
+	 *
+	 * @param $userid        用户的userid
+	 * @param $invite_tips   推送到微信上的提示语（只有认证号可以使用）。当使用微信推送时，该字段默认为“请关注XXX企业号”，邮件邀请时，该字段无效。
+	 * @return boolean|array 成功返回数组
+	 * array(
+	 *     'errcode' => 0,
+	 *     'errmsg' => 'ok',
+	 *     'type' => 1         //邀请方式 1.微信邀请 2.邮件邀请
+	 * )
+	 */
+	public function sendInvite($userid,$invite_tips=''){
+	    $data = array( 'userid' => $userid );
+	    if (!$invite_tips) {
+	    	$data['invite_tips'] = $invite_tips
+	    }
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_INVITE_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json;
+	    }
+	    return false;
+	}
+
+	/**
 	 * 创建标签
 	 * @param array $data 	结构体为:
 	 * array(
@@ -1527,7 +1561,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 更新标签
 	 * @param array $data 	结构体为:
@@ -1556,7 +1590,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 删除标签
 	 * @param $tagid  标签TagID
@@ -1581,7 +1615,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取标签成员
 	 * @param $tagid  标签TagID
@@ -1612,7 +1646,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 增加标签成员
 	 * @param array $data 	结构体为:
@@ -1646,7 +1680,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 删除标签成员
 	 * @param array $data 	结构体为:
@@ -1680,7 +1714,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * 获取标签列表
 	 * @return boolean|array	 成功返回数组结果，这里附上json样例
@@ -1826,7 +1860,7 @@ class Wechat
 	    }
 	    return false;
 	}
-	
+
 	/**
 	 * oauth 授权跳转接口
 	 * @param string $callback 回调URI

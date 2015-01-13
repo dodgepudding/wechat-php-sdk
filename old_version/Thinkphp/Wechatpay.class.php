@@ -1,6 +1,6 @@
 <?php
 /**
- *	微信公众平台PHP-SDK, 旧版微信支付接口
+ *	微信公众平台PHP-SDK, 旧版微信支付接口(微信支付V2)
  *  @author  dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
  *  @version 1.2
@@ -122,9 +122,9 @@ class Wechatpay
 	}
 
 	/**
-	 * 通用auth验证方法，暂时仅用于菜单更新操作
-	 * @param string $appid
-	 * @param string $appsecret
+	 * 获取access_token
+	 * @param string $appid 如在类初始化时已提供，则可为空
+	 * @param string $appsecret 如在类初始化时已提供，则可为空
 	 * @param string $token 手动指定access_token，非必要情况不建议用
 	 */
 	public function checkAuth($appid='',$appsecret='',$token=''){
@@ -421,16 +421,7 @@ class Wechatpay
 		}
 		return false;
 	}
-	
-	/**
-	 * 设置用户授权密钥
-	 * @param string $user_token
-	 * @return string
-	 */
-	public function setUserToken($user_token) {
-		return $this->user_token = $user_token;
-	}
-	
+
 	/**
 	 * 设置用户授权密钥
 	 * @param string $user_token
