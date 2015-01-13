@@ -1075,9 +1075,9 @@ class Wechat
 	}
 
 	/**
-	 * 通用auth验证方法，获取access_token
-	 * @param string $appid
-	 * @param string $appsecret
+	 * 获取access_token
+	 * @param string $appid 如在类初始化时已提供，则可为空
+	 * @param string $appsecret 如在类初始化时已提供，则可为空
 	 * @param string $token 手动指定access_token，非必要情况不建议用
 	 */
 	public function checkAuth($appid='',$appsecret='',$token=''){
@@ -1236,7 +1236,7 @@ class Wechat
 			return '[' . $json . ']'; //Return numerical JSON
 		return '{' . $json . '}'; //Return associative JSON
 	}
-	
+
 	/**
 	 * 获取签名
 	 * @param array $arrdata 签名数组
@@ -1254,8 +1254,24 @@ class Wechat
 			else
 				$paramstring .= "&" . $key . "=" . $value;
 		}
-		$paySign = $method($paramstring);
-		return $paySign;
+		$Sign = $method($paramstring);
+		return $Sign;
+	}
+
+	/**
+	 * 生成随机字串
+	 * @param number $length 长度，默认为16，最长为32字节
+	 * @return string
+	 */
+	public function generateNonceStr($length=16){
+		// 密码字符集，可任意添加你需要的字符
+		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		$str = "";
+		for($i = 0; $i < $length; $i++)
+		{
+			$str .= $chars[mt_rand(0, strlen($chars) - 1)];
+		}
+		return $str;
 	}
 
 	/**

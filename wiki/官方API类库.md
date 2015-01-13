@@ -14,17 +14,12 @@
 - 用户信息（查询用户基本信息、获取关注者列表） **（认证权限）**
 - 多客服功能（客服管理、获取客服记录、客服会话管理） **（认证权限）**
 - 媒体文件（上传、获取） **（认证权限）**
-- 调用地址组件 **（支付权限）**
-- 生成订单签名数据 **（支付权限）**
-- 订单成功回调 **（支付权限）**
-- 发货通知 **（支付权限）**
-- 支付订单查询 **（支付权限）**
 - 高级群发 **（认证权限）**
 - 模板消息（设置所属行业、添加模板、发送模板消息） **（服务号、认证权限）**
 - 卡券管理（创建、修改、删除、发放、门店管理等） **（认证权限）**
 - 语义理解 **（服务号、认证权限）**
 - 获取微信服务器IP列表 **（初级权限）**  
-- 微信JSAPI授权(获取ticket、获取签名) **（初级权限`暂未确定`）**
+- 微信JSAPI授权(获取ticket、获取签名) **（初级权限）**
 > 备注：  
 > 初级权限：基本权限，任何正常的公众号都有此权限  
 > 菜单权限：正常的服务号、认证后的订阅号拥有此权限  
@@ -38,10 +33,7 @@
 	'token'=>'tokenaccesskey', //填写你设定的key
 	'encodingaeskey'=>'encodingaeskey', //填写加密用的EncodingAESKey
 	'appid'=>'wxdk1234567890', //填写高级调用功能的app id, 请在微信开发模式后台查询
-	'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写高级调用功能的密钥
-	'partnerid'=>'88888888', //财付通商户身份标识，支付权限专用，没有可不填
-	'partnerkey'=>'', //财付通商户权限密钥Key，支付权限专用
-	'paysignkey'=>'' //商户签名密钥Key，支付权限专用
+	'appsecret'=>'xxxxxxxxxxxxxxxxxxx' //填写高级调用功能的密钥
 	);
  $weObj = new Wechat($options); //创建实例对象
  //TODO：调用$weObj各实例方法
@@ -164,13 +156,7 @@
  *  getOauthUserinfo($access_token,$openid) 通过网页授权的access_token获取用户资料  
  *  getOauthAuth($access_token,$openid)  检验授权凭证access_token是否有效
  *  getSignature($arrdata,'sha1') 生成签名字串  
- *  generateNonceStr($length) 获取随机字串  
- *  createPackage($out_trade_no,$body,$total_fee,$notify_url,$spbill_create_ip,$fee_type=1,$bank_type="WX",$input_charset="UTF-8",$time_start="",$time_expire="",$transport_fee="",$product_fee="",$goods_tag="",$attach="") 生成订单package字符串  
- *  getPaySign($package, $timeStamp, $nonceStr) 支付签名(paySign)生成方法  
- *  checkOrderSignature($orderxml='') 回调通知签名验证  
- *  sendPayDeliverNotify($openid,$transid,$out_trade_no,$status=1,$msg='ok') 发货通知  
- *  getPayOrder($out_trade_no) 查询订单信息  
- *  getAddrSign($url, $timeStamp, $nonceStr, $user_token='') 获取收货地址JS的签名
+ *  generateNonceStr($length=16) 获取随机字串  
  *  setTMIndustry($id1,$id2='') 模板消息，设置所属行业
  *  addTemplateMessage($tpl_id) 模板消息，添加消息模板
  *  sendTemplateMessage($data) 发送模板消息

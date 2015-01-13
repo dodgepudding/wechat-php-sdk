@@ -19,13 +19,13 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 ## 目录 
 > **[wechat.class.php 官方API类库](#user-content-1-wechatclassphp-官方api类库)**  
-> **[wechatext.class.php 非官方扩展API](#user-content-2-wechatextclassphp-非官方扩展api)**  
-> **[wechatauth.class.php 授权登陆](#user-content-3-wechatauthclassphp-授权登陆)**  
-> **[wechat.js 内嵌JS](#user-content-4-wechatjs-内嵌js)**  
-> **[errCode.php 全局返回码类](#user-content-5-errcodephp-全局返回码类)**  
 > **[qywechat.class.php 企业号API类库](#user-content-6-qywechatclassphp-企业号api类库)**  
+> **[errCode.php|qyerrCode.php 全局返回码类](#user-content-5-errcodephp-全局返回码类)**  
+> **[old_version/wechatpay.class.php 旧版微信支付V2接口类库](#user-content-7-wechatpayclassphp-旧版微信支付V2接口类库)**  
+> ~~**[old_version/wechatext.class.php 非官方扩展API(停止维护)](#user-content-2-wechatextclassphp-非官方扩展api)**~~  
+> ~~**[old_version/wechatauth.class.php 授权登陆(停止维护)](#user-content-3-wechatauthclassphp-授权登陆)**~~  
+> ~~**[old_version/wechat.js 内嵌JS(已废弃)](#user-content-4-wechatjs-内嵌js)**~~  
 > **[调用示例](#user-content-调用示例)**  
-
 ----------
 
 ## 1. wechat.class.php 官方API类库
@@ -43,17 +43,12 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 用户信息（查询用户基本信息、获取关注者列表） **（认证权限）**
 - 多客服功能（客服管理、获取客服记录、客服会话管理） **（认证权限）**
 - 媒体文件（上传、获取） **（认证权限）**
-- 调用地址组件 **（支付权限）**
-- 生成订单签名数据 **（支付权限）**
-- 订单成功回调 **（支付权限）**
-- 发货通知 **（支付权限）**
-- 支付订单查询 **（支付权限）**
 - 高级群发 **（认证权限）**
 - 模板消息（设置所属行业、添加模板、发送模板消息） **（服务号、认证权限）**
 - 卡券管理（创建、修改、删除、发放、门店管理等） **（认证权限）**
 - 语义理解 **（服务号、认证权限）**
 - 获取微信服务器IP列表 **（初级权限）**  
-- 微信JSAPI授权(获取ticket、获取签名) **（初级权限`暂未确定`）**
+- 微信JSAPI授权(获取ticket、获取签名) **（初级权限）**
 > 备注：  
 > 初级权限：基本权限，任何正常的公众号都有此权限  
 > 菜单权限：正常的服务号、认证后的订阅号拥有此权限  
@@ -67,10 +62,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 	'token'=>'tokenaccesskey', //填写你设定的key
 	'encodingaeskey'=>'encodingaeskey', //填写加密用的EncodingAESKey
 	'appid'=>'wxdk1234567890', //填写高级调用功能的app id, 请在微信开发模式后台查询
-	'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写高级调用功能的密钥
-	'partnerid'=>'88888888', //财付通商户身份标识，支付权限专用，没有可不填
-	'partnerkey'=>'', //财付通商户权限密钥Key，支付权限专用
-	'paysignkey'=>'' //商户签名密钥Key，支付权限专用
+	'appsecret'=>'xxxxxxxxxxxxxxxxxxx' //填写高级调用功能的密钥
 	);
  $weObj = new Wechat($options); //创建实例对象
  //TODO：调用$weObj各实例方法
@@ -193,13 +185,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getOauthUserinfo($access_token,$openid) 通过网页授权的access_token获取用户资料  
  *  getOauthAuth($access_token,$openid)  检验授权凭证access_token是否有效
  *  getSignature($arrdata,'sha1') 生成签名字串  
- *  generateNonceStr($length) 获取随机字串  
- *  createPackage($out_trade_no,$body,$total_fee,$notify_url,$spbill_create_ip,$fee_type=1,$bank_type="WX",$input_charset="UTF-8",$time_start="",$time_expire="",$transport_fee="",$product_fee="",$goods_tag="",$attach="") 生成订单package字符串  
- *  getPaySign($package, $timeStamp, $nonceStr) 支付签名(paySign)生成方法  
- *  checkOrderSignature($orderxml='') 回调通知签名验证  
- *  sendPayDeliverNotify($openid,$transid,$out_trade_no,$status=1,$msg='ok') 发货通知  
- *  getPayOrder($out_trade_no) 查询订单信息  
- *  getAddrSign($url, $timeStamp, $nonceStr, $user_token='') 获取收货地址JS的签名
+ *  generateNonceStr($length=16) 获取随机字串  
  *  setTMIndustry($id1,$id2='') 模板消息，设置所属行业
  *  addTemplateMessage($tpl_id) 模板消息，添加消息模板
  *  sendTemplateMessage($data) 发送模板消息
@@ -238,7 +224,8 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  setCardTestWhiteList($openid=array(),$user=array()) 设置卡券测试白名单
  
  
-## 2. wechatext.class.php 非官方扩展API  
+## ~~2. wechatext.class.php 非官方扩展API~~  
+**此扩展类库已经不再更新，原因是官方对公众号开放了众多接口，此类库继续维护的意义不大**
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
 类方法里提及的用户id在接口返回结构里表述为FakeId, 属同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  
 调用下列方法前必须经过login()方法和checkValid()验证方法才能获得调用权限. 有的账户无法通过登陆可能因为要求提供验证码, 可以手动登陆后把获取到的cookie写进程序存放cookie的文件解决.  
@@ -263,7 +250,8 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getMsgImage($msgid,$mode='large') 若消息type类型为2, 调用此方法获取图片数据  
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据  
 
-## 3. wechatauth.class.php 授权登陆
+## ~~3. wechatauth.class.php 授权登陆~~
+**此扩展类库已经不再更新，原因是官方开放平台对网站应用开放的有授权登陆接口，更标准，更好用。请查看：[微信开放平台](http://open.weixin.qq.com)**
 通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 首先程序分别通过get_login_code和get_code_image方法获取授权二维码图片, 然后利用微信手机客户端扫描二维码图片后将自动跳出授权页面, 用户点击授权后即可获取对应的用户资料和头像信息. 详细验证步骤请看test3.php例子.   
 ### 类主要方法:
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码  
@@ -273,7 +261,8 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  get_avatar($url) 获取用户头像图片数据  
  *  logout() 注销登陆  
 
-## 4. wechat.js 内嵌JS
+## ~~4. wechat.js 内嵌JS~~
+**此JS脚本已经废弃不再更新，原因是官方在微信6.0.2版本开放了全新的JSAPI接口，更全面好用。请查看：[微信公众平台WIKI](http://mp.weixin.qq.com/wiki)**
 ### 微信内嵌网页特殊功能js调用：
  * WeixinJS.hideOptionMenu() 隐藏右上角按钮
  * WeixinJS.showOptionMenu() 显示右上角按钮
@@ -306,6 +295,8 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 
 ## 5. errCode.php 全局返回码类
 当调用API接口失败时，可以用此类来换取失败原因的中文说明。
+注意：微信公众号引用`errCode.php`，企业号引用`qyerrCode.php`。
+
 ### 使用方法：
 ```php
 include "errCode.php";  //或 qyerrCode.php
@@ -435,6 +426,7 @@ $options = array(
 > 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
 * getUserListInfo($department_id,$fetch_child=0,$status=0) 获取部门成员详情，参数同上
 * getUserId($code,$agentid) 根据code获取员工UserID与手机设备号，参数：Oauth2.0或者二次验证返回的code值，跳转链接时所在的企业应用ID
+* sendInvite($userid,$invite_tips='') 邀请成员关注
 * createTag($data) 创建标签，参数：array("tagname" => "UI")
 * updateTag($data) 更新标签，参数：array("tagid" => "1","tagname" => "UI")
 * deleteTag($tagid) 删除标签，参数：标签TagID
@@ -446,6 +438,54 @@ $options = array(
 * authSucc($userid) 二次验证，参数： 员工UserID
 * getOauthRedirect($callback,$state='STATE',$scope='snsapi_base') 组合授权跳转接口url
 
+
+## 7. wechatpay.class.php 旧版微信支付V2接口类库
+旧版微信支付类库(微信支付V2)，已移动至old_version目录下。
+自2014年8月开始申请到的微信支付都是V3接口，据官方说V2的会陆续升级为V3接口，但时间及升级渠道未确认。
+
+### 主要功能 
+- 获取access_token **（初级权限）**
+- 调用地址组件 **（支付权限）**
+- 生成订单签名数据 **（支付权限）**
+- 订单成功回调 **（支付权限）**
+- 发货通知 **（支付权限）**
+- 支付订单查询 **（支付权限）**
+> 备注：  
+> 初级权限：基本权限，任何正常的公众号都有此权限  
+> 菜单权限：正常的服务号、认证后的订阅号拥有此权限  
+> 认证权限：分为订阅号、服务号认证，如前缀服务号则仅认证的服务号有此权限，否则为认证后的订阅号、服务号都有此权限  
+> 支付权限：仅认证后的服务号可以申请此权限  
+
+
+### 初始化动作 
+```php
+ $options = array(
+	'appid'=>'wxdk1234567890', //填写高级调用功能的app id, 请在微信开发模式后台查询
+	'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写高级调用功能的密钥
+	'partnerid'=>'88888888', //财付通商户身份标识，支付权限专用，没有可不填
+	'partnerkey'=>'', //财付通商户权限密钥Key，支付权限专用
+	'paysignkey'=>'' //商户签名密钥Key，支付权限专用
+	);
+ $weObj = new Wechat($options); //创建实例对象
+ //TODO：调用$weObj各实例方法
+```
+
+### 主动接口方法:   
+ *  checkAuth($appid='',$appsecret='',$token='') 获取access_token。可根据appid和appsecret获取，或手动指定access_token
+ *  resetAuth($appid='') 删除验证数据
+ *  getSignature($arrdata,'sha1') 生成签名字串  
+ *  generateNonceStr($length=16) 获取随机字串  
+ *  createNativeUrl($productid) 生成原生支付url
+ *  createPackage($out_trade_no,$body,$total_fee,$notify_url,$spbill_create_ip,$fee_type=1,$bank_type="WX",$input_charset="UTF-8",$time_start="",$time_expire="",$transport_fee="",$product_fee="",$goods_tag="",$attach="") 生成订单package字符串  
+ *  getPaySign($package, $timeStamp, $nonceStr) 支付签名(paySign)生成方法  
+ *  checkOrderSignature($orderxml='') 回调通知签名验证  
+ *  sendPayDeliverNotify($openid,$transid,$out_trade_no,$status=1,$msg='ok') 发货通知  
+ *  getPayOrder($out_trade_no) 查询订单信息  
+ *  setUserToken($user_token) 设置用户授权密钥
+ *  getAddrSign($url, $timeStamp, $nonceStr, $user_token='') 获取收货地址JS的签名
+
+
+
 # 调用示例
 ----------
 
@@ -454,7 +494,8 @@ $options = array(
 //test1.php
 include "wechat.class.php";
 $options = array(
-		'token'=>'tokenaccesskey' //填写你设定的key
+		'token'=>'tokenaccesskey', //填写你设定的key
+        'encodingaeskey'=>'encodingaeskey' //填写加密用的EncodingAESKey，如接口为明文模式可忽略
 	);
 $weObj = new Wechat($options);
 $weObj->valid();//明文或兼容模式可以在接口验证通过后注释此句，但加密模式一定不能注释，否则会验证失败
@@ -473,9 +514,35 @@ switch($type) {
 }
 ```
 
+## 企业号API类库调用示例：
+可参考**test**目录下的**qydemo.php**
+```php
+include "wechat.class.php";
+$options = array(
+        'token'=>'9Ixxxxxxx',	//填写应用接口的Token
+        'encodingaeskey'=>'d4o9WVg8sxxxxxxxxxxxxxxxxxxxxxx',//填写加密用的EncodingAESKey
+        'appid'=>'wxa07979baxxxxxxxx',	//填写高级调用功能的appid
+);
+$weObj = new Wechat($options);
+$weObj->valid(); //注意, 企业号与普通公众号不同，必须打开验证，不要注释掉
+$type = $weObj->getRev()->getRevType();
+switch($type) {
+	case Wechat::MSGTYPE_TEXT:
+			$weObj->text("hello, I'm wechat")->reply();
+			exit;
+			break;
+	case Wechat::MSGTYPE_EVENT:
+			break;
+	case Wechat::MSGTYPE_IMAGE:
+			break;
+	default:
+			$weObj->text("help info")->reply();
+}
+```
+
 ## 扩展包Wechatext调用示例: 
 ```php
-//test2.php 
+// old_version/test/test2.php 
 	include "wechatext.class.php";
 	
 	function logdebug($text){
@@ -505,7 +572,7 @@ switch($type) {
 
 ## 微信二维码Wechatauth登陆示例: 
 ```php
-//test3.php
+// old_version/test/test3.php
 	include "../wechatauth.class.php";
 	session_start();
 	$sid  = session_id();
@@ -533,33 +600,10 @@ switch($type) {
 	$logincode =  $wechat->get_login_code(); //获取授权码
 	$qrimg = $wechat->get_code_image(); //待输出的二维码图片
 ```
-HTML部分请看test/test3.php, 主要是定时ajax查询是否已经授权成功
+HTML部分请看old_version/test/test3.php, 主要是定时ajax查询是否已经授权成功
 
-## 企业号API类库调用示例：
-可参考**test**目录下的**qydemo.php**
-```php
-include "wechat.class.php";
-$options = array(
-        'token'=>'9Ixxxxxxx',	//填写应用接口的Token
-        'encodingaeskey'=>'d4o9WVg8sxxxxxxxxxxxxxxxxxxxxxx',//填写加密用的EncodingAESKey
-        'appid'=>'wxa07979baxxxxxxxx',	//填写高级调用功能的appid
-);
-$weObj = new Wechat($options);
-$weObj->valid(); //注意, 企业号与普通公众号不同，必须打开验证，不要注释掉
-$type = $weObj->getRev()->getRevType();
-switch($type) {
-	case Wechat::MSGTYPE_TEXT:
-			$weObj->text("hello, I'm wechat")->reply();
-			exit;
-			break;
-	case Wechat::MSGTYPE_EVENT:
-			break;
-	case Wechat::MSGTYPE_IMAGE:
-			break;
-	default:
-			$weObj->text("help info")->reply();
-}
-```
+## 新版微信JSAPI调用DEMO: 
+请看test/jsapi目录
 
 License
 -------

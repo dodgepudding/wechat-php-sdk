@@ -22,25 +22,29 @@
     > 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ；
 
  - [[企业号API类库]]
-    > qywechat.class.php 
+    > qywechat.class.php
     > 微信公众平台企业号PHP-SDK
     > 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ；
 
- - [[非官方扩展类库]]
-    > wechatext.class.php 
+ - [[API接口错误码]]
+    > errCode.php 或 qyerrCode.php
+    > 当调用API接口失败时，可以用此类来换取失败原因的中文说明。
+
+ - [[旧版微信支付V2接口类库]]
+    > old_version/wechatpay.class.php
+    > 当调用API接口失败时，可以用此类来换取失败原因的中文说明。
+
+ - ~~[[非官方扩展类库]]~~*(停止维护)*
+    > old_version/wechatext.class.php
     > 非官方扩展API，模拟人工操作微信平台，此方式不保证长期有效。  
 
- - [[授权登陆类库]]
-    > wechatauth.class.php  
+ - ~~[[授权登陆类库]]~~*(停止维护)*
+    > old_version/wechatauth.class.php
     > 通过微信二维码登陆微信的API, 能实现第三方网站同步登陆
 
- - [[内嵌JS]]
-    > wechat.js
+ - ~~[[内嵌JS]]~~*(已废弃)*
+    > old_version/wechat.js
     > 微信内嵌网页功能调用js
-
- - [[API接口错误码]]
-    > errCode.php 或 qyerrCode.php 
-    > 当调用API接口失败时，可以用此类来换取失败原因的中文说明。
 
 
 
