@@ -182,6 +182,26 @@ class Wechat
 		$this->appsecret = isset($options['appsecret'])?$options['appsecret']:'';
 		$this->debug = isset($options['debug'])?$options['debug']:false;
 		$this->_logcallback = isset($options['logcallback'])?$options['logcallback']:false;
+		
+		$n = S('wechat_access_token');
+		if(empty($n)){
+			$result = $this->http_get(self::API_URL_PREFIX.self::AUTH_URL.'appid='.$appid.'&secret='.$appsecret);
+			if ($result){
+				$json = json_decode($result,true);
+				if (!$json || isset($json['errcode'])) {
+					$this->errCode = $json['errcode'];
+					$this->errMsg = $json['errmsg'];
+					return false;
+				}
+				//$this->errMsg = '已经缓存';
+				$this->access_token = $json['access_token'];
+				S('wechat_access_token',$this->access_token,7200);
+			}
+		}else{
+			//$this->errMsg = '缓存数据';
+			$this->access_token = S('wechat_access_token');
+		}
+		
 	}
 
 	/**
