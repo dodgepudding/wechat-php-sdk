@@ -46,5 +46,8 @@
     > old_version/wechat.js
     > 微信内嵌网页功能调用js
 
+ - [[为开发框架进行适配]]
+    > 为不同的开发框架进行适配缓存操作(保存access_token、jsapi_ticket)，及输出调试日志。
+
 
 
