@@ -172,7 +172,7 @@ class Wechat
 	public $debug =  false;
 	public $errCode = 40001;
 	public $errMsg = "no access";
-	private $_logcallback;
+	public $logcallback;
 
 	public function __construct($options)
 	{
@@ -181,7 +181,7 @@ class Wechat
 		$this->appid = isset($options['appid'])?$options['appid']:'';
 		$this->appsecret = isset($options['appsecret'])?$options['appsecret']:'';
 		$this->debug = isset($options['debug'])?$options['debug']:false;
-		$this->_logcallback = isset($options['logcallback'])?$options['logcallback']:false;
+		$this->logcallback = isset($options['logcallback'])?$options['logcallback']:false;
 	}
 
 	/**
@@ -287,10 +287,15 @@ class Wechat
     		return $this;
     }
 
-    private function log($log){
-    		if ($this->debug && function_exists($this->_logcallback)) {
+    /**
+     * 日志记录，可被重载。
+     * @param mixed $log 输入日志
+     * @return mixed
+     */
+    protected function log($log){
+    		if ($this->debug && function_exists($this->logcallback)) {
     			if (is_array($log)) $log = print_r($log,true);
-    			return call_user_func($this->_logcallback,$log);
+    			return call_user_func($this->logcallback,$log);
     		}
     }
 
@@ -1068,6 +1073,38 @@ class Wechat
 			return false;
 		}
 	}
+	
+	/**
+	 * 设置缓存，按需重载
+	 * @param string $cachename
+	 * @param mixed $value
+	 * @param int $expired
+	 * @return boolean
+	 */
+	protected function setCache($cachename,$value,$expired){
+		//TODO: set cache implementation
+		return false;
+	}
+
+	/**
+	 * 获取缓存，按需重载
+	 * @param string $cachename
+	 * @return mixed
+	 */
+	protected function getCache($cachename){
+		//TODO: get cache implementation
+		return false;
+	}
+	
+	/**
+	 * 清除缓存，按需重载
+	 * @param string $cachename
+	 * @return boolean
+	 */
+	protected function removeCache($cachename){
+		//TODO: remove cache implementation
+		return false;
+	}
 
 	/**
 	 * 获取access_token
@@ -1084,7 +1121,13 @@ class Wechat
 		    $this->access_token=$token;
 		    return $this->access_token;
 		}
-		//TODO: get the cache access_token
+		
+		$authname = 'wechat_access_token'.$appid;
+		if ($rs = $this->getCache($authname))  {
+			$this->access_token = $rs;
+			return $rs;
+		}
+		
 		$result = $this->http_get(self::API_URL_PREFIX.self::AUTH_URL.'appid='.$appid.'&secret='.$appsecret);
 		if ($result)
 		{
@@ -1096,7 +1139,7 @@ class Wechat
 			}
 			$this->access_token = $json['access_token'];
 			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
-			//TODO: cache access_token
+			$this->setCache($authname,$this->access_token,$expire);
 			return $this->access_token;
 		}
 		return false;
@@ -1109,7 +1152,8 @@ class Wechat
 	public function resetAuth($appid=''){
 		if (!$appid) $appid = $this->appid;
 		$this->access_token = '';
-		//TODO: remove cache
+		$authname = 'wechat_access_token'.$appid;
+		$this->removeCache($authname);
 		return true;
 	}
 
@@ -1120,7 +1164,8 @@ class Wechat
 	public function resetJsTicket($appid=''){
 		if (!$appid) $appid = $this->appid;
 		$this->jsapi_ticket = '';
-		//TODO: remove cache
+		$authname = 'wechat_jsapi_ticket'.$appid;
+		$this->removeCache($authname);
 		return true;
 	}
 
@@ -1135,7 +1180,11 @@ class Wechat
 		    $this->jsapi_ticket = $jsapi_ticket;
 		    return $this->access_token;
 		}
-		//TODO: get the cache jsapi_ticket
+		$authname = 'wechat_jsapi_ticket'.$appid;
+		if ($rs = $this->getCache($authname))  {
+			$this->jsapi_ticket = $rs;
+			return $rs;
+		}
 		$result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=jsapi');
 		if ($result)
 		{
@@ -1147,7 +1196,7 @@ class Wechat
 			}
 			$this->jsapi_ticket = $json['ticket'];
 			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
-			//TODO: cache jsapi_ticket
+			$this->setCache($authname,$this->jsapi_ticket,$expire);
 			return $this->jsapi_ticket;
 		}
 		return false;
