@@ -14,7 +14,7 @@
  *	 $weObj = new TPWechat($options);
  *   $weObj->valid();
  *   ...
- *  
+ *
  */
 class TPWechat extends Wechat
 {
@@ -29,11 +29,12 @@ class TPWechat extends Wechat
 				return call_user_func($this->logcallback,$log);
 			}elseif (class_exists('Log')) {
 				Log::write('wechat：'.$log, Log::DEBUG);
+				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 重载设置缓存
 	 * @param string $cachename
@@ -44,7 +45,7 @@ class TPWechat extends Wechat
 	protected function setCache($cachename,$value,$expired){
 		return S($cachename,$value,$expired);
 	}
-	
+
 	/**
 	 * 重载获取缓存
 	 * @param string $cachename
@@ -53,7 +54,7 @@ class TPWechat extends Wechat
 	protected function getCache($cachename){
 		return S($cachename);
 	}
-	
+
 	/**
 	 * 重载清除缓存
 	 * @param string $cachename

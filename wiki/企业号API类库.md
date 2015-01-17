@@ -14,6 +14,7 @@
 - 二次验证
 - OAuth2（生成授权url、获取成员信息）
 - 获取企业微信服务器IP列表
+- 微信JSAPI授权(获取ticket、获取签名)
 
 
 ## 初始化动作 
@@ -96,6 +97,11 @@ $options = array(
 ## 主动接口方法：
 * checkAuth($appid='',$appsecret='',$token='') 通用auth验证方法,也用来换取ACCESS_TOKEN 。仅在需要手动指定access_token时才用`$token`
 * resetAuth($appid='') 清除记录的ACCESS_TOKEN
+* resetJsTicket($appid='') 删除JSAPI授权TICKET
+* getJsTicket($appid='',$jsapi_ticket='') 获取JSAPI授权TICKET
+* getJsSign($url, $timeStamp, $nonceStr, $appid='') 获取JsApi使用签名
+* getSignature($arrdata,'sha1') 生成签名字串  
+* generateNonceStr($length=16) 获取随机字串  
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id
 * getMenu($agentid='') 获取菜单内容,参数:要获取菜单内容的应用id
 * deleteMenu($agentid='') 删除菜单,参数:要删除菜单的应用id
