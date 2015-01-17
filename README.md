@@ -25,7 +25,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 > ~~**[old_version/wechatext.class.php 非官方扩展API(停止维护)](#user-content-2-wechatextclassphp-非官方扩展api)**~~  
 > ~~**[old_version/wechatauth.class.php 授权登陆(停止维护)](#user-content-3-wechatauthclassphp-授权登陆)**~~  
 > ~~**[old_version/wechat.js 内嵌JS(已废弃)](#user-content-4-wechatjs-内嵌js)**~~  
-> **[为开发框架进行适配](#user-content-为开发框架进行适配)** 
+> **[为开发框架进行适配](#user-content-为开发框架进行适配)**  
 > **[调用示例](#user-content-调用示例)**  
 
 ----------
