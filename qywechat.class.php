@@ -50,7 +50,7 @@ class Wechat
     const USER_LIST_URL = '/user/simplelist?';
     const USER_LIST_INFO_URL = '/user/list?';
     const USER_GETINFO_URL = '/user/getuserinfo?';
-    const USER_INVITE_URL = 'invite/send?';
+    const USER_INVITE_URL = '/invite/send?';
     const DEPARTMENT_CREATE_URL = '/department/create?';
     const DEPARTMENT_UPDATE_URL = '/department/update?';
     const DEPARTMENT_DELETE_URL = '/department/delete?';
