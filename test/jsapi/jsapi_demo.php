@@ -7,7 +7,6 @@ $opt = array(
         'appid'=>'wxxxxxxxxxxxxxx'	//填写高级调用功能的appid
 );
 
-logg("GET参数为：\n".var_export($_GET,true));
 $we = new Wechat($opt);
 $auth = $we->checkAuth();
 $js_ticket = $we->getJsTicket();
@@ -17,10 +16,8 @@ if (!$js_ticket) {
     echo ' 错误原因：'.ErrCode::getErrText($weObj->errCode);
     exit;
 }
-$timestamp = time();
-$noncestr = $we->generateNonceStr();
 $url = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-$js_sign = $we->getJsSign($url, $timestamp, $noncestr);
+$js_sign = $we->getJsSign($url);
 ?>
 <!DOCTYPE html>
 <html>
@@ -146,10 +143,10 @@ $js_sign = $we->getJsSign($url, $timestamp, $noncestr);
 <script>
   wx.config({
       debug: false,
-      appId: '<?php echo $opt['appid']; ?>', // 必填，公众号的唯一标识
-      timestamp: <?php echo $timestamp; ?>, // 必填，生成签名的时间戳
-      nonceStr: '<?php echo $noncestr; ?>', // 必填，生成签名的随机串
-      signature: '<?php echo $js_sign; ?>', // 必填，签名，见附录1
+      appId: '<?php echo $js_sign['appid']; ?>', // 必填，公众号的唯一标识
+      timestamp: <?php echo $js_sign['timestamp']; ?>, // 必填，生成签名的时间戳，切记时间戳是整数型，别加引号
+      nonceStr: '<?php echo $js_sign['noncestr']; ?>', // 必填，生成签名的随机串
+      signature: '<?php echo $js_sign['signature']; ?>', // 必填，签名，见附录1
       jsApiList: [
         'checkJsApi',
         'onMenuShareTimeline',

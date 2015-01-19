@@ -987,8 +987,8 @@ class Wechat
 	    if (!$sign)
 	        return false;
 	    $signPackage = array(
-	            "appId"     => $this->appid,
-	            "nonceStr"  => $nonceStr,
+	            "appid"     => $this->appid,
+	            "noncestr"  => $nonceStr,
 	            "timestamp" => $timestamp,
 	            "url"       => $url,
 	            "signature" => $sign
