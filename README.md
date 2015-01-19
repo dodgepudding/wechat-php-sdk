@@ -50,7 +50,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 卡券管理（创建、修改、删除、发放、门店管理等） **（认证权限）**
 - 语义理解 **（服务号、认证权限）**
 - 获取微信服务器IP列表 **（初级权限）**  
-- 微信JSAPI授权(获取ticket、获取签名) **（初级权限）**
+- 微信JSAPI授权(获取ticket、获取签名) **（初级权限）**  
 > 备注：  
 > 初级权限：基本权限，任何正常的公众号都有此权限  
 > 菜单权限：正常的服务号、认证后的订阅号拥有此权限  
@@ -227,7 +227,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  
  
 ## ~~2. wechatext.class.php 非官方扩展API~~  
-**此扩展类库已经不再更新，原因是官方对公众号开放了众多接口，此类库继续维护的意义不大**
+**此扩展类库已经不再更新，原因是官方对公众号开放了众多接口，此类库继续维护的意义不大**  
 非官方扩展API，需要配置公众平台账户和密码，能实现对已关注用户的点对点微信，此方式不保证长期有效。  
 类方法里提及的用户id在接口返回结构里表述为FakeId, 属同一概念, 在下面wechatauth类里则表示为Uin, 用户id对应的微信号必须通过getInfo()方法通过返回数组的Username值获取, 但非关注关系用户资料不能获取.  
 调用下列方法前必须经过login()方法和checkValid()验证方法才能获得调用权限. 有的账户无法通过登陆可能因为要求提供验证码, 可以手动登陆后把获取到的cookie写进程序存放cookie的文件解决.  
@@ -253,7 +253,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  getMsgVoice($msgid) 若消息type类型为3, 调用此方法获取语音数据  
 
 ## ~~3. wechatauth.class.php 授权登陆~~
-**此扩展类库已经不再更新，原因是官方开放平台对网站应用开放的有授权登陆接口，更标准，更好用。请查看：[微信开放平台](http://open.weixin.qq.com)**
+**此扩展类库已经不再更新，原因是官方开放平台对网站应用开放的有授权登陆接口，更标准，更好用。请查看：[微信开放平台](http://open.weixin.qq.com)**  
 通过微信二维码登陆微信的API, 能实现第三方网站同步登陆, 首先程序分别通过get_login_code和get_code_image方法获取授权二维码图片, 然后利用微信手机客户端扫描二维码图片后将自动跳出授权页面, 用户点击授权后即可获取对应的用户资料和头像信息. 详细验证步骤请看test3.php例子.   
 ### 类主要方法:
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码  
@@ -296,7 +296,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  ```
 
 ## 5. errCode.php 全局返回码类
-当调用API接口失败时，可以用此类来换取失败原因的中文说明。
+当调用API接口失败时，可以用此类来换取失败原因的中文说明。  
 注意：微信公众号引用`errCode.php`，企业号引用`qyerrCode.php`。
 
 ### 使用方法：
@@ -448,7 +448,7 @@ $options = array(
 
 
 ## 7. wechatpay.class.php 旧版微信支付V2接口类库
-旧版微信支付类库(微信支付V2)，已移动至old_version目录下。
+旧版微信支付类库(微信支付V2)，已移动至old_version目录下。  
 自2014年8月开始申请到的微信支付都是V3接口，据官方说V2的会陆续升级为V3接口，但时间及升级渠道未确认。
 
 ### 主要功能 
@@ -457,7 +457,7 @@ $options = array(
 - 生成订单签名数据 **（支付权限）**
 - 订单成功回调 **（支付权限）**
 - 发货通知 **（支付权限）**
-- 支付订单查询 **（支付权限）**
+- 支付订单查询 **（支付权限）**  
 > 备注：  
 > 初级权限：基本权限，任何正常的公众号都有此权限  
 > 菜单权限：正常的服务号、认证后的订阅号拥有此权限  
