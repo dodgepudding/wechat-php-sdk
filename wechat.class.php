@@ -104,7 +104,7 @@ class Wechat
 	const MASS_PREVIEW_URL = '/message/mass/preview?';
 	const MASS_QUERY_URL = '/message/mass/get?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
-	const MEDIA_UPLOAD = '/media/upload?';
+	const MEDIA_UPLOAD_URL = '/media/upload?';
 	const MEDIA_GET_URL = '/media/get?';
 	const MEDIA_VIDEO_UPLOAD = '/media/uploadvideo?';
 	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
@@ -1462,7 +1462,7 @@ class Wechat
 	 */
 	public function uploadMedia($data, $type){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::UPLOAD_MEDIA_URL.self::MEDIA_UPLOAD.'access_token='.$this->access_token.'&type='.$type,$data,true);
+		$result = $this->http_post(self::UPLOAD_MEDIA_URL.self::MEDIA_UPLOAD_URL.'access_token='.$this->access_token.'&type='.$type,$data,true);
 		if ($result)
 		{
 			$json = json_decode($result,true);
