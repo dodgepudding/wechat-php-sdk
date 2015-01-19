@@ -150,7 +150,34 @@ class Wechat
 	const CARD_MOVIETICKET_UPDATEUSER     = '/card/movieticket/updateuser?';   //更新电影票(未加方法)
 	const CARD_BOARDINGPASS_CHECKIN       = '/card/boardingpass/checkin?';     //飞机票-在线选座(未加方法)
 	const CARD_LUCKYMONEY_UPDATE          = '/card/luckymoney/updateuserbalance?';     //更新红包金额
-
+	///数据分析接口
+	const DATACUBE_URL_ARR = array(        //用户分析
+	        'user' => array(
+	                '/datacube/getusersummary?',		//获取用户增减数据（getusersummary）
+	                '/datacube/getusercumulate?',		//获取累计用户数据（getusercumulate）
+	        ),
+	        'article' => array(            //图文分析
+	                '/datacube/getarticlesummary?',		//获取图文群发每日数据（getarticlesummary）
+	                '/datacube/getarticletotal?',		//获取图文群发总数据（getarticletotal）
+	                '/datacube/getuserread?',			//获取图文统计数据（getuserread）
+	                '/datacube/getuserreadhour?',		//获取图文统计分时数据（getuserreadhour）
+	                '/datacube/getusershare?',			//获取图文分享转发数据（getusershare）
+	                '/datacube/getusersharehour?',		//获取图文分享转发分时数据（getusersharehour）
+	        ),
+	        'upstreammsg' => array(        //消息分析
+	                '/datacube/getupstreammsg?',		//获取消息发送概况数据（getupstreammsg）
+					'/datacube/getupstreammsghour?',	//获取消息分送分时数据（getupstreammsghour）
+	                '/datacube/getupstreammsgweek?',	//获取消息发送周数据（getupstreammsgweek）
+	                '/datacube/getupstreammsgmonth?',	//获取消息发送月数据（getupstreammsgmonth）
+	                '/datacube/getupstreammsgdist?',	//获取消息发送分布数据（getupstreammsgdist）
+	                '/datacube/getupstreammsgdistweek?',	//获取消息发送分布周数据（getupstreammsgdistweek）
+	                '/datacube/getupstreammsgdistmonth?',	//获取消息发送分布月数据（getupstreammsgdistmonth）
+	        ),
+	        'interface' => array(        //接口分析
+	                '/datacube/getinterfacesummary?',	//获取接口分析数据（getinterfacesummary）
+	                '/datacube/getinterfacesummaryhour?',	//获取接口分析分时数据（getinterfacesummaryhour）
+	        )
+	);
 	const SEMANTIC_API_URL= '/semantic/semproxy/search?';
 
 	private $token;
@@ -1752,6 +1779,36 @@ class Wechat
 	            return false;
 	        }
 	        return $json['short_url'];
+	    }
+	    return false;
+	}
+
+	/**
+	 * 获取数据统计
+	 * @param string $type  数据大类(user|article|upstreammsg|interface)分别为(用户分析|图文分析|消息分析|接口分析)
+	 * @param string $num   数据小类，参考 DATACUBE_URL_ARR 定义部分
+	 * @param string $begin_date 开始时间
+	 * @param string $end_date   结束时间
+	 * @return boolean|array 成功返回查询结果数组，其定义请看官方文档
+	 */
+	public function getDatacube($type,$num,$begin_date,$end_date=''){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!isset(self::DATACUBE_URL_ARR[$type]) || !isset(self::DATACUBE_URL_ARR[$type][$num]))
+			return false;
+	    $data = array(
+            'begin_date'=>$begin_date,
+            'end_date'=>$end_date?$end_date:$begin_date
+	    );
+	    $result = $this->http_post(self::API_URL_PREFIX.self::DATACUBE_URL_ARR[$type][$num].'access_token='.$this->access_token,self::json_encode($data));
+	    if ($result)
+	    {
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return isset($json['list'])?$json['list']:$json;
 	    }
 	    return false;
 	}
