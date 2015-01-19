@@ -155,7 +155,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  resetAuth($appid='') 删除验证数据
  *  resetJsTicket($appid='') 删除JSAPI授权TICKET
  *  getJsTicket($appid='',$jsapi_ticket='') 获取JSAPI授权TICKET
- *  getJsSign($url, $timeStamp, $nonceStr, $appid='') 获取JsApi使用签名
+ *  getJsSign($url, $timeStamp=0, $nonceStr='', $appid='') 获取JsApi使用签名信息数组，可只提供url地址 
  *  createMenu($data) 创建菜单 $data菜单结构详见 **[自定义菜单创建接口](http://mp.weixin.qq.com/wiki/index.php?title=自定义菜单创建接口)**
  *  getServerIp() 获取微信服务器IP地址列表 返回数组array('127.0.0.1','127.0.0.1')
  *  getMenu() 获取菜单 
@@ -411,7 +411,7 @@ $options = array(
 * resetAuth($appid='') 清除记录的ACCESS_TOKEN
 * resetJsTicket($appid='') 删除JSAPI授权TICKET
 * getJsTicket($appid='',$jsapi_ticket='') 获取JSAPI授权TICKET
-* getJsSign($url, $timeStamp, $nonceStr, $appid='') 获取JsApi使用签名
+* getJsSign($url, $timeStamp=0, $nonceStr='', $appid='') 获取JsApi使用签名信息数组，可只提供url地址 
 * getSignature($arrdata,'sha1') 生成签名字串  
 * generateNonceStr($length=16) 获取随机字串  
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id

@@ -1073,7 +1073,7 @@ class Wechat
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 设置缓存，按需重载
 	 * @param string $cachename
@@ -1095,7 +1095,7 @@ class Wechat
 		//TODO: get cache implementation
 		return false;
 	}
-	
+
 	/**
 	 * 清除缓存，按需重载
 	 * @param string $cachename
@@ -1121,13 +1121,13 @@ class Wechat
 		    $this->access_token=$token;
 		    return $this->access_token;
 		}
-		
+
 		$authname = 'wechat_access_token'.$appid;
 		if ($rs = $this->getCache($authname))  {
 			$this->access_token = $rs;
 			return $rs;
 		}
-		
+
 		$result = $this->http_get(self::API_URL_PREFIX.self::AUTH_URL.'appid='.$appid.'&secret='.$appsecret);
 		if ($result)
 		{
@@ -1176,6 +1176,7 @@ class Wechat
 	 */
 	public function getJsTicket($appid='',$jsapi_ticket=''){
 		if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!$appid) $appid = $this->appid;
 		if ($jsapi_ticket) { //手动指定token，优先使用
 		    $this->jsapi_ticket = $jsapi_ticket;
 		    return $this->access_token;
@@ -1205,14 +1206,18 @@ class Wechat
 
 	/**
 	 * 获取JsApi使用签名
-	 * @param string $url 网页的URL，不包含#及其后面部分
-	 * @param string $timeStamp 当前时间戳（需与JS输出的一致）
-	 * @param string $nonceStr 随机串（需与JS输出的一致）
+	 * @param string $url 网页的URL，自动处理#及其后面部分
+	 * @param string $timeStamp 当前时间戳 (为空则自动生成)
+	 * @param string $nonceStr 随机串 (为空则自动生成)
 	 * @param string $appid 用于多个appid时使用,可空
-	 * @return string 返回签名字串
+	 * @return array|bool 返回签名字串
 	 */
-	public function getJsSign($url, $timeStamp, $nonceStr, $appid=''){
-	    if (!$this->jsapi_ticket && !$this->getJsTicket($appid)) return false;
+	public function getJsSign($url, $timeStamp=0, $nonceStr='', $appid=''){
+	    if (!$this->jsapi_ticket && !$this->getJsTicket($appid) || !$url) return false;
+	    if (!$timeStamp)
+	        $timeStamp = time();
+	    if (!$nonceStr)
+	        $nonceStr = $this->generateNonceStr();
 	    $ret = strpos($url,'#');
 	    if ($ret)
 	        $url = substr($url,0,$ret);
@@ -1220,7 +1225,17 @@ class Wechat
 	    if (empty($url))
 	        return false;
 	    $arrdata = array("timestamp" => $timeStamp, "noncestr" => $nonceStr, "url" => $url, "jsapi_ticket" => $this->jsapi_ticket);
-	    return $this->getSignature($arrdata);
+	    $sign = $this->getSignature($arrdata);
+	    if (!$sign)
+	        return false;
+	    $signPackage = array(
+	            "appId"     => $this->appid,
+	            "nonceStr"  => $nonceStr,
+	            "timestamp" => $timestamp,
+	            "url"       => $url,
+	            "signature" => $sign
+	    );
+	    return $signPackage;
 	}
 
 	/**
