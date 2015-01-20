@@ -51,6 +51,7 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 - 语义理解 **（服务号、认证权限）**
 - 获取微信服务器IP列表 **（初级权限）**  
 - 微信JSAPI授权(获取ticket、获取签名) **（初级权限）**  
+- 数据统计(用户、图文、消息、接口分析数据) **（认证权限）**  
 > 备注：  
 > 初级权限：基本权限，任何正常的公众号都有此权限  
 > 菜单权限：正常的服务号、认证后的订阅号拥有此权限  
@@ -117,37 +118,37 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 ### 预定义常量列表：
 ```php
 ////消息类型，使用实例调用getRevType()方法取得
-	const MSGTYPE_TEXT = 'text';
-	const MSGTYPE_IMAGE = 'image';
-	const MSGTYPE_LOCATION = 'location';
-	const MSGTYPE_LINK = 'link';
-	const MSGTYPE_EVENT = 'event';
-	const MSGTYPE_MUSIC = 'music';
-	const MSGTYPE_NEWS = 'news';
-	const MSGTYPE_VOICE = 'voice';
-	const MSGTYPE_VIDEO = 'video';
+const MSGTYPE_TEXT = 'text';
+const MSGTYPE_IMAGE = 'image';
+const MSGTYPE_LOCATION = 'location';
+const MSGTYPE_LINK = 'link';
+const MSGTYPE_EVENT = 'event';
+const MSGTYPE_MUSIC = 'music';
+const MSGTYPE_NEWS = 'news';
+const MSGTYPE_VOICE = 'voice';
+const MSGTYPE_VIDEO = 'video';
 ////事件类型，使用实例调用getRevEvent()方法取得
-	const EVENT_SUBSCRIBE = 'subscribe';       //订阅
-	const EVENT_UNSUBSCRIBE = 'unsubscribe';   //取消订阅
-	const EVENT_SCAN = 'SCAN';                 //扫描带参数二维码
-	const EVENT_LOCATION = 'LOCATION';         //上报地理位置
-	const EVENT_MENU_VIEW = 'VIEW';                     //菜单 - 点击菜单跳转链接
-	const EVENT_MENU_CLICK = 'CLICK';                   //菜单 - 点击菜单拉取消息
-	const EVENT_MENU_SCAN_PUSH = 'scancode_push';       //菜单 - 扫码推事件(客户端跳URL)
-	const EVENT_MENU_SCAN_WAITMSG = 'scancode_waitmsg'; //菜单 - 扫码推事件(客户端不跳URL)
-	const EVENT_MENU_PIC_SYS = 'pic_sysphoto';          //菜单 - 弹出系统拍照发图
-	const EVENT_MENU_PIC_PHOTO = 'pic_photo_or_album';  //菜单 - 弹出拍照或者相册发图
-	const EVENT_MENU_PIC_WEIXIN = 'pic_weixin';         //菜单 - 弹出微信相册发图器
-	const EVENT_MENU_LOCATION = 'location_select';      //菜单 - 弹出地理位置选择器
-	const EVENT_SEND_MASS = 'MASSSENDJOBFINISH';        //发送结果 - 高级群发完成
-	const EVENT_SEND_TEMPLATE = 'TEMPLATESENDJOBFINISH';//发送结果 - 模板消息发送结果
-	const EVENT_KF_SEESION_CREATE = 'kfcreatesession';  //多客服 - 接入会话
-	const EVENT_KF_SEESION_CLOSE = 'kfclosesession';    //多客服 - 关闭会话
-	const EVENT_KF_SEESION_SWITCH = 'kfswitchsession';  //多客服 - 转接会话
-	const EVENT_CARD_PASS = 'card_pass_check';          //卡券 - 审核通过
-	const EVENT_CARD_NOTPASS = 'card_not_pass_check';   //卡券 - 审核未通过
-	const EVENT_CARD_USER_GET = 'user_get_card';        //卡券 - 用户领取卡券
-	const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡券
+const EVENT_SUBSCRIBE = 'subscribe';       //订阅
+const EVENT_UNSUBSCRIBE = 'unsubscribe';   //取消订阅
+const EVENT_SCAN = 'SCAN';                 //扫描带参数二维码
+const EVENT_LOCATION = 'LOCATION';         //上报地理位置
+const EVENT_MENU_VIEW = 'VIEW';                     //菜单 - 点击菜单跳转链接
+const EVENT_MENU_CLICK = 'CLICK';                   //菜单 - 点击菜单拉取消息
+const EVENT_MENU_SCAN_PUSH = 'scancode_push';       //菜单 - 扫码推事件(客户端跳URL)
+const EVENT_MENU_SCAN_WAITMSG = 'scancode_waitmsg'; //菜单 - 扫码推事件(客户端不跳URL)
+const EVENT_MENU_PIC_SYS = 'pic_sysphoto';          //菜单 - 弹出系统拍照发图
+const EVENT_MENU_PIC_PHOTO = 'pic_photo_or_album';  //菜单 - 弹出拍照或者相册发图
+const EVENT_MENU_PIC_WEIXIN = 'pic_weixin';         //菜单 - 弹出微信相册发图器
+const EVENT_MENU_LOCATION = 'location_select';      //菜单 - 弹出地理位置选择器
+const EVENT_SEND_MASS = 'MASSSENDJOBFINISH';        //发送结果 - 高级群发完成
+const EVENT_SEND_TEMPLATE = 'TEMPLATESENDJOBFINISH';//发送结果 - 模板消息发送结果
+const EVENT_KF_SEESION_CREATE = 'kfcreatesession';  //多客服 - 接入会话
+const EVENT_KF_SEESION_CLOSE = 'kfclosesession';    //多客服 - 关闭会话
+const EVENT_KF_SEESION_SWITCH = 'kfswitchsession';  //多客服 - 转接会话
+const EVENT_CARD_PASS = 'card_pass_check';          //卡券 - 审核通过
+const EVENT_CARD_NOTPASS = 'card_not_pass_check';   //卡券 - 审核未通过
+const EVENT_CARD_USER_GET = 'user_get_card';        //卡券 - 用户领取卡券
+const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡券
 ```
 
 ### 主动接口方法:   
@@ -205,6 +206,30 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
  *  deleteKFAccount($account) 删除客服账号
  *  setKFHeadImg($account,$imgfile) 上传客服头像
  *  querySemantic($uid,$query,$category,$latitude=0,$longitude=0,$city="",$region="") 语义理解接口 参数含义及返回的json内容请查看 **[微信语义理解接口](http://mp.weixin.qq.com/wiki/index.php?title=语义理解)**
+ *  getDatacube($type,$num,$begin_date,$end_date='') 获取统计数据 参数需注意$type与$num的定义
+> 获取统计数据方法 参数定义
+> 
+| 数据分类 | $type值(字符串)  | 数据子分类 | $num值(整数型) | 时间跨度(天) |
+| --------- | :-------:  | --------- | :------: | ----: |
+| 用户分析 | 'user' | 获取用户增减数据 | 1 | 7 |
+| 用户分析 | 'user' | 获取累计用户数据 | 2 | 7 |
+| 图文分析 | 'article' | 获取图文群发每日数据 | 1 | 1 |
+| 图文分析 | 'article' | 获取图文群发总数据 | 2 | 1 |
+| 图文分析 | 'article' | 获取图文统计数据 | 3 | 3 |
+| 图文分析 | 'article' | 获取图文统计分时数据 | 4 | 1 |
+| 图文分析 | 'article' | 获取图文分享转发数据 | 5 | 7 |
+| 图文分析 | 'article' | 获取图文分享转发分时数据 | 6 | 1 |
+| 消息分析 | 'upstreammsg' | 获取消息发送概况数据 | 1 | 7 |
+| 消息分析 | 'upstreammsg' | 获取消息分送分时数据 | 2 | 1 |
+| 消息分析 | 'upstreammsg' | 获取消息发送周数据 | 3 | 30 |
+| 消息分析 | 'upstreammsg' | 获取消息发送月数据 | 4 | 30 |
+| 消息分析 | 'upstreammsg' | 获取消息发送分布数据 | 5 | 15 |
+| 消息分析 | 'upstreammsg' | 获取消息发送分布周数据 | 6 | 30 |
+| 消息分析 | 'upstreammsg' | 获取消息发送分布月数据 | 7 | 30 |
+| 接口分析 | 'interface' | 获取接口分析数据 | 1 | 30 |
+| 接口分析 | 'interface' | 获取接口分析分时数据 | 2 | 1 |
+需要注意 `begin_date`和`end_date`的差值需小于“最大时间跨度”（比如最大时间跨度为1时，`begin_date`和`end_date`的差值只能为0，才能小于1）
+
  *  createCard($data) 创建卡券
  *  updateCard($data) 修改卡券
  *  delCard($card_id) 删除卡券
