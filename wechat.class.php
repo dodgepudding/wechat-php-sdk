@@ -1207,30 +1207,30 @@ class Wechat
 	/**
 	 * 获取JsApi使用签名
 	 * @param string $url 网页的URL，自动处理#及其后面部分
-	 * @param string $timeStamp 当前时间戳 (为空则自动生成)
-	 * @param string $nonceStr 随机串 (为空则自动生成)
+	 * @param string $timestamp 当前时间戳 (为空则自动生成)
+	 * @param string $noncestr 随机串 (为空则自动生成)
 	 * @param string $appid 用于多个appid时使用,可空
 	 * @return array|bool 返回签名字串
 	 */
-	public function getJsSign($url, $timeStamp=0, $nonceStr='', $appid=''){
+	public function getJsSign($url, $timestamp=0, $noncestr='', $appid=''){
 	    if (!$this->jsapi_ticket && !$this->getJsTicket($appid) || !$url) return false;
-	    if (!$timeStamp)
-	        $timeStamp = time();
-	    if (!$nonceStr)
-	        $nonceStr = $this->generateNonceStr();
+	    if (!$timestamp)
+	        $timestamp = time();
+	    if (!$noncestr)
+	        $noncestr = $this->generateNonceStr();
 	    $ret = strpos($url,'#');
 	    if ($ret)
 	        $url = substr($url,0,$ret);
 	    $url = trim($url);
 	    if (empty($url))
 	        return false;
-	    $arrdata = array("timestamp" => $timeStamp, "noncestr" => $nonceStr, "url" => $url, "jsapi_ticket" => $this->jsapi_ticket);
+	    $arrdata = array("timestamp" => $timestamp, "noncestr" => $noncestr, "url" => $url, "jsapi_ticket" => $this->jsapi_ticket);
 	    $sign = $this->getSignature($arrdata);
 	    if (!$sign)
 	        return false;
 	    $signPackage = array(
-	            "appId"     => $this->appid,
-	            "nonceStr"  => $nonceStr,
+	            "appid"     => $this->appid,
+	            "noncestr"  => $noncestr,
 	            "timestamp" => $timestamp,
 	            "url"       => $url,
 	            "signature" => $sign

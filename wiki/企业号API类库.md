@@ -99,7 +99,7 @@ $options = array(
 * resetAuth($appid='') 清除记录的ACCESS_TOKEN
 * resetJsTicket($appid='') 删除JSAPI授权TICKET
 * getJsTicket($appid='',$jsapi_ticket='') 获取JSAPI授权TICKET
-* getJsSign($url, $timeStamp=0, $nonceStr='', $appid='') 获取JsApi使用签名信息数组，可只提供url地址 
+* getJsSign($url, $timestamp=0, $noncestr='', $appid='') 获取JsApi使用签名信息数组，可只提供url地址 
 * getSignature($arrdata,'sha1') 生成签名字串  
 * generateNonceStr($length=16) 获取随机字串  
 * createMenu($data,$agentid='') 创建菜单,参数:菜单内容数组,要创建菜单应用id
