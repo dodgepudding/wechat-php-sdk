@@ -206,28 +206,28 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
  *  deleteKFAccount($account) 删除客服账号
  *  setKFHeadImg($account,$imgfile) 上传客服头像
  *  querySemantic($uid,$query,$category,$latitude=0,$longitude=0,$city="",$region="") 语义理解接口 参数含义及返回的json内容请查看 **[微信语义理解接口](http://mp.weixin.qq.com/wiki/index.php?title=语义理解)**
- *  getDatacube($type,$num,$begin_date,$end_date='') 获取统计数据 参数需注意$type与$num的定义
+ *  getDatacube($type,$subtype,$begin_date,$end_date='') 获取统计数据 参数需注意$type与$subtype的定义
 > 获取统计数据方法 参数定义
 > 
-| 数据分类 | $type值(字符串)  | 数据子分类 | $num值(整数型) | 时间跨度(天) |
+| 数据分类 | $type值(字符串)  | 数据子分类 | $subtype值(字符串) | 时间跨度(天) |
 | --------- | :-------:  | --------- | :------: | ----: |
-| 用户分析 | 'user' | 获取用户增减数据 | 1 | 7 |
-| 用户分析 | 'user' | 获取累计用户数据 | 2 | 7 |
-| 图文分析 | 'article' | 获取图文群发每日数据 | 1 | 1 |
-| 图文分析 | 'article' | 获取图文群发总数据 | 2 | 1 |
-| 图文分析 | 'article' | 获取图文统计数据 | 3 | 3 |
-| 图文分析 | 'article' | 获取图文统计分时数据 | 4 | 1 |
-| 图文分析 | 'article' | 获取图文分享转发数据 | 5 | 7 |
-| 图文分析 | 'article' | 获取图文分享转发分时数据 | 6 | 1 |
-| 消息分析 | 'upstreammsg' | 获取消息发送概况数据 | 1 | 7 |
-| 消息分析 | 'upstreammsg' | 获取消息分送分时数据 | 2 | 1 |
-| 消息分析 | 'upstreammsg' | 获取消息发送周数据 | 3 | 30 |
-| 消息分析 | 'upstreammsg' | 获取消息发送月数据 | 4 | 30 |
-| 消息分析 | 'upstreammsg' | 获取消息发送分布数据 | 5 | 15 |
-| 消息分析 | 'upstreammsg' | 获取消息发送分布周数据 | 6 | 30 |
-| 消息分析 | 'upstreammsg' | 获取消息发送分布月数据 | 7 | 30 |
-| 接口分析 | 'interface' | 获取接口分析数据 | 1 | 30 |
-| 接口分析 | 'interface' | 获取接口分析分时数据 | 2 | 1 |
+| 用户分析 | 'user' | 获取用户增减数据 | 'summary' | 7 |
+| 用户分析 | 'user' | 获取累计用户数据 | 'cumulate' | 7 |
+| 图文分析 | 'article' | 获取图文群发每日数据 | 'summary' | 1 |
+| 图文分析 | 'article' | 获取图文群发总数据 | 'total' | 1 |
+| 图文分析 | 'article' | 获取图文统计数据 | 'read' | 3 |
+| 图文分析 | 'article' | 获取图文统计分时数据 | 'readhour' | 1 |
+| 图文分析 | 'article' | 获取图文分享转发数据 | 'share' | 7 |
+| 图文分析 | 'article' | 获取图文分享转发分时数据 | 'sharehour' | 1 |
+| 消息分析 | 'upstreammsg' | 获取消息发送概况数据 | 'summary' | 7 |
+| 消息分析 | 'upstreammsg' | 获取消息分送分时数据 | 'hour' | 1 |
+| 消息分析 | 'upstreammsg' | 获取消息发送周数据 | 'week' | 30 |
+| 消息分析 | 'upstreammsg' | 获取消息发送月数据 | 'month' | 30 |
+| 消息分析 | 'upstreammsg' | 获取消息发送分布数据 | 'dist' | 15 |
+| 消息分析 | 'upstreammsg' | 获取消息发送分布周数据 | 'distweek' | 30 |
+| 消息分析 | 'upstreammsg' | 获取消息发送分布月数据 | 'distmonth' | 30 |
+| 接口分析 | 'interface' | 获取接口分析数据 | 'summary' | 30 |
+| 接口分析 | 'interface' | 获取接口分析分时数据 | 'summaryhour' | 1 |
 需要注意 `begin_date`和`end_date`的差值需小于“最大时间跨度”（比如最大时间跨度为1时，`begin_date`和`end_date`的差值只能为0，才能小于1）
 
  *  createCard($data) 创建卡券
