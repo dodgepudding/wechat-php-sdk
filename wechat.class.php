@@ -2963,8 +2963,10 @@ class Wechat
      */
     public function updateCardCode($code,$code_id,$new_code) {
         $data = array(
-            'code' => $card,
-            'card_id' => $card_id,
+            //'code' => $card,
+            //'card_id' => $card_id,
+            'code'=>$code,
+            'code'=>$code_id,
             'new_code' => $new_code,
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
