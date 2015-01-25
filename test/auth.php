@@ -23,6 +23,7 @@ class wxauth {
 			if (!$this->wxuser) {
 				$this->wxuser = $_SESSION['wxuser'];
 			}
+			$this->open_id = $_SESSION['open_id'];
 			return $this->open_id;
 		}
 		else
