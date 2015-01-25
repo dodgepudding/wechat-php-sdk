@@ -1328,7 +1328,7 @@ class Wechat
 	 */
 	public function moveDepartment($data){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::DEPARTMENT_MOVE_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    $result = $this->http_post(self::API_URL_PREFIX.self::DEPARTMENT_MOVE_URL.'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -1495,7 +1495,7 @@ class Wechat
 	    if (!$userids) return false;
 	    $data = array('useridlist'=>$userids);
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_BATCHDELETE_URL.'access_token='.$this->access_token,self::json_encode($data));
+	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_BATCHDELETE_URL.'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
