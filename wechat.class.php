@@ -2831,7 +2831,7 @@ class Wechat
      * 自定义 code（use_custom_code 为 true）的优惠券，在 code 被核销时，必须调用此接口。
      *
      * @param string $code 要消耗的序列号
-     * @param string $code_id 要消耗序列号所述的 card_id，创建卡券时use_custom_code 填写 true 时必填。
+     * @param string $card_id 要消耗序列号所述的 card_id，创建卡券时use_custom_code 填写 true 时必填。
      * @return boolean|array
      * {
      *  "errcode":0,
@@ -2957,14 +2957,14 @@ class Wechat
      * 为确保转赠后的安全性，微信允许自定义code的商户对已下发的code进行更改。
      * 注：为避免用户疑惑，建议仅在发生转赠行为后（发生转赠后，微信会通过事件推送的方式告知商户被转赠的卡券code）对用户的code进行更改。
      * @param string $code      卡券的 code 编码
-     * @param string $code_id   卡券 ID
+     * @param string $card_id   卡券 ID
      * @param string $new_code  新的卡券 code 编码
      * @return boolean
      */
-    public function updateCardCode($code,$code_id,$new_code) {
+    public function updateCardCode($code,$card_id,$new_code) {
         $data = array(
             'code' => $code,
-            'code' => $code_id,
+            'card_id' => $card_id,
             'new_code' => $new_code,
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
@@ -2985,15 +2985,15 @@ class Wechat
      * 设置卡券失效
      * 设置卡券失效的操作不可逆
      * @param string $code 需要设置为失效的 code
-     * @param string $code 自定义 code 的卡券必填。非自定义 code 的卡券不填。
+     * @param string $card_id 自定义 code 的卡券必填。非自定义 code 的卡券不填。
      * @return boolean
      */
-    public function unavailableCardCode($code,$code_id='') {
+    public function unavailableCardCode($code,$card_id='') {
         $data = array(
             'code' => $code,
         );
-        if ($code_id)
-            $data['code_id'] = $code_id;
+        if ($card_id)
+            $data['card_id'] = $card_id;
         if (!$this->access_token && !$this->checkAuth()) return false;
         $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_UNAVAILABLE . 'access_token=' . $this->access_token, self::json_encode($data));
         if ($result) {

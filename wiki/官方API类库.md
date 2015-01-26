@@ -211,8 +211,8 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
  *  decryptCardCode($encrypt_code) code 解码
  *  checkCardCode($code) 获取 code 的有效性
  *  getCardIdList($data) 批量查询卡列表
- *  updateCardCode($code,$code_id,$new_code) 更改 code
- *  unavailableCardCode($code) 设置卡券失效**(不可逆)**
+ *  updateCardCode($code,$card_id,$new_code) 更改 code
+ *  unavailableCardCode($code,$card_id='') 设置卡券失效**(不可逆)**
  *  modifyCardStock($data) 库存修改
  *  activateMemberCard($data) 激活/绑定会员卡，参数结构请参看卡券开发文档(6.1.1 激活/绑定会员卡)章节
  *  updateMemberCard($data) 会员卡交易，参数结构请参看卡券开发文档(6.1.2 会员卡交易)章节
