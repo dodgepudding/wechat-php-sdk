@@ -181,6 +181,7 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
  *  createGroup($name) 新增自定分组 
  *  updateGroup($groupid,$name) 更改分组名称 
  *  updateGroupMembers($groupid,$openid) 移动用户分组  
+ *  batchUpdateGroupMembers($groupid,$openid_list) 批量移动用户分组 
  *  sendCustomMessage($data) 发送客服消息  
  *  getOauthRedirect($callback,$state,$scope) 获取网页授权oAuth跳转地址  
  *  getOauthAccessToken() 通过回调的code获取网页授权access_token  
