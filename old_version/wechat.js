@@ -1,5 +1,5 @@
 /**
- * 微信网页端调用JS
+ * 微信网页端调用JS(官方于微信6.0.2版本发布新版JSAPI接口，此接口文件废弃)
  * @author dodge
  * @contact dodgepudding@gmail.com
  * @link http://blog.4wer.com/wechat-timeline-share
@@ -66,7 +66,7 @@
 	   		alert(res.err_desc);
 	   	}
 	   	//分享到朋友圈
-	   	if (res.err_msg=='share_timeline:confirm') {
+	   	if (res.err_msg=='share_timeline:ok') {
 	   		//todo:func1();
 	   		alert(res.err_desc);
 	   	}
