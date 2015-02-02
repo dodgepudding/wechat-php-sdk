@@ -96,7 +96,7 @@ class EasyWechat extends Wechat
     private function checkDir($dir, $mode=0777) {
         if (!$dir)  return false;
         if(!is_dir($dir)) {
-            if (!file_exists() && @mkdir($dir, $mode, true))
+            if (!file_exists($dir) && @mkdir($dir, $mode, true))
                 return true;
             return false;
         }

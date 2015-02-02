@@ -1802,7 +1802,7 @@ class Wechat
             'begin_date'=>$begin_date,
             'end_date'=>$end_date?$end_date:$begin_date
 	    );
-	    $result = $this->http_post(self::API_URL_PREFIX.self::$DATACUBE_URL_ARR[$type][$subtype].'access_token='.$this->access_token,self::json_encode($data));
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::$DATACUBE_URL_ARR[$type][$subtype].'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
