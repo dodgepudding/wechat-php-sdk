@@ -1208,7 +1208,7 @@ class Wechat
 		if (!$appid) $appid = $this->appid;
 		if ($jsapi_ticket) { //手动指定token，优先使用
 		    $this->jsapi_ticket = $jsapi_ticket;
-		    return $this->access_token;
+		    return $this->jsapi_ticket;
 		}
 		$authname = 'wechat_jsapi_ticket'.$appid;
 		if ($rs = $this->getCache($authname))  {
