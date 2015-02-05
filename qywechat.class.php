@@ -2087,15 +2087,15 @@ class Prpcrypt
 {
     public $key;
 
-    /**
-     * 兼容老版本php构造函数
-     */
-    function Prpcrypt($k)
-    {
+    function __construct($k) {
         $this->key = base64_decode($k . "=");
     }
 
-    function __construct($k) {
+    /**
+     * 兼容老版本php构造函数，不能在 __construct() 方法前边，否则报错
+     */
+    function Prpcrypt($k)
+    {
         $this->key = base64_decode($k . "=");
     }
 
