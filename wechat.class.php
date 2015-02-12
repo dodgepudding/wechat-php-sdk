@@ -501,7 +501,7 @@ class Wechat
 	 */
 	public function getRevScanInfo(){
 		if (isset($this->_receive['ScanCodeInfo'])){
-		    if (!is_array($this->_receive['SendPicsInfo'])) {
+		    if (!is_array($this->_receive['ScanCodeInfo'])) {
 		        $array=(array)$this->_receive['ScanCodeInfo'];
 		        $this->_receive['ScanCodeInfo']=$array;
 		    }else {
