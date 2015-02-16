@@ -6,9 +6,9 @@
  *  @version 1.0
  *  usage:
  *      $ret=ErrCode::getErrText(40001); //错误码可以通过公众号类库的公开变量errCode得到
- *      if ($ret) 
+ *      if ($ret)
  *      	echo $ret;
- *      else 
+ *      else
  *          echo "未找到对应的内容";
  */
 class ErrCode
@@ -164,9 +164,14 @@ class ErrCode
 	        '60112'=>'成员姓名不合法',
 	        '60113'=>'身份认证信息（微信号/手机/邮箱）不能同时为空',
 	        '60114'=>'性别不合法',
+	        '60119'=>'用户已关注',
+	        '60120'=>'用户已禁用',
+	        '60121'=>'找不到该用户',
+	        '60023'=>'应用已授权予第三方，不允许通过分级管理员修改菜单',
+	        '80001'=>'可信域名没有IPC备案，后续将不能在该域名下正常使用jssdk',
 
 	);
-	
+
 	public static function getErrText($err) {
 		if (isset(self::$errCode[$err])) {
 			return self::$errCode[$err];
