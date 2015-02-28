@@ -2070,7 +2070,7 @@ class Wechat
 		if ($result)
 		{
 			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
+			if (!$json || !empty($json['errcode'])) {customer_account
 				$this->errCode = $json['errcode'];
 				$this->errMsg = $json['errmsg'];
 				return false;
@@ -2268,7 +2268,7 @@ class Wechat
 			'CreateTime'=>time(),
 			'MsgType'=>'transfer_customer_service',
 		);
-		if (!$customer_account) {
+		if ($customer_account) {
 			$msg['TransInfo'] = array('KfAccount'=>$customer_account);
 		}
 		$this->Message($msg);
