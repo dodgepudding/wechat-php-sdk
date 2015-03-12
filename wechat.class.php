@@ -110,21 +110,22 @@ class Wechat
 	const MEDIA_VIDEO_UPLOAD = '/media/uploadvideo?';
 	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
 	const OAUTH_AUTHORIZE_URL = '/authorize?';
+	///多客服相关地址
+	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
+	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
+	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
 	const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com'; //以下API接口URL需要使用此前缀
 	const OAUTH_TOKEN_URL = '/sns/oauth2/access_token?';
 	const OAUTH_REFRESH_URL = '/sns/oauth2/refresh_token?';
 	const OAUTH_USERINFO_URL = '/sns/userinfo?';
 	const OAUTH_AUTH_URL = '/sns/auth?';
 	///多客服相关地址
-	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
-	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
-	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
-	const CUSTOM_SEESSION_CREATE = '/customservice/kfsession/create?';
-	const CUSTOM_SEESSION_CLOSE = '/customservice/kfsession/close?';
-	const CUSTOM_SEESSION_SWITCH = '/customservice/kfsession/switch?';
-	const CUSTOM_SEESSION_GET = '/customservice/kfsession/getsession?';
-	const CUSTOM_SEESSION_GET_LIST = '/customservice/kfsession/getsessionlist?';
-	const CUSTOM_SEESSION_GET_WAIT = '/customservice/kfsession/getwaitcase?';
+	const CUSTOM_SESSION_CREATE = '/customservice/kfsession/create?';
+	const CUSTOM_SESSION_CLOSE = '/customservice/kfsession/close?';
+	const CUSTOM_SESSION_SWITCH = '/customservice/kfsession/switch?';
+	const CUSTOM_SESSION_GET = '/customservice/kfsession/getsession?';
+	const CUSTOM_SESSION_GET_LIST = '/customservice/kfsession/getsessionlist?';
+	const CUSTOM_SESSION_GET_WAIT = '/customservice/kfsession/getwaitcase?';
 	const CS_KF_ACCOUNT_ADD_URL = '/customservice/kfaccount/add?';
 	const CS_KF_ACCOUNT_UPDATE_URL = '/customservice/kfaccount/update?';
 	const CS_KF_ACCOUNT_DEL_URL = '/customservice/kfaccount/del?';
@@ -1758,7 +1759,7 @@ class Wechat
 	 * @return string url 返回http地址
 	 */
 	public function getQRUrl($ticket) {
-		return self::QRCODE_IMG_URL.$ticket;
+		return self::QRCODE_IMG_URL.urlencode($ticket);
 	}
 
 	/**
@@ -2342,11 +2343,11 @@ class Wechat
 	public function createKFSession($openid,$kf_account,$text=''){
 	    $data=array(
 	    	"openid" =>$openid,
-	        "nickname" => $kf_account
+	        "kf_account" => $kf_account
 	    );
 	    if ($text) $data["text"] = $text;
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEESSION_CREATE.'access_token='.$this->access_token,self::json_encode($data));
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_CREATE.'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -2379,7 +2380,7 @@ class Wechat
 	    );
 	    if ($text) $data["text"] = $text;
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEESSION_CLOSE .'access_token='.$this->access_token,self::json_encode($data));
+	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_CLOSE .'access_token='.$this->access_token,self::json_encode($data));
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -2406,7 +2407,7 @@ class Wechat
 	 */
 	public function getKFSession($openid){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET .'access_token='.$this->access_token.'&openid='.$openid);
+	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET .'access_token='.$this->access_token.'&openid='.$openid);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -2439,7 +2440,7 @@ class Wechat
 	 */
 	public function getKFSessionlist($kf_account){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET_LIST .'access_token='.$this->access_token.'&kf_account='.$kf_account);
+	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET_LIST .'access_token='.$this->access_token.'&kf_account='.$kf_account);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
@@ -2475,7 +2476,7 @@ class Wechat
 	 */
 	public function getKFSessionWait(){
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SEESSION_GET_WAIT .'access_token='.$this->access_token);
+	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET_WAIT .'access_token='.$this->access_token);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
