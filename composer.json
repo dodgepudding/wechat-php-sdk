@@ -20,7 +20,7 @@
   },
   "autoload" : {
     "psr-4" : {
-      "dodgepudding\\wechat\\sdk" : ""
+      "dodgepudding\\wechat\\sdk\\" : ""
     }
   },
   "type" : "library",
