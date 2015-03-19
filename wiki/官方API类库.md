@@ -49,7 +49,7 @@
 * getRevTo()  返回消息接收者的id（即公众号id）
 * getRevType() 返回接收消息的类型
 * getRevID() 返回消息id
-* getRevCtime() 返回消息发送事件
+* getRevCtime() 返回消息发送时间
 * getRevContent() 返回消息内容正文或语音识别结果（文本型）
 * getRevPic() 返回图片信息（图片型信息） 返回数组{'mediaid'=>'','picurl'=>''}
 * getRevLink() 接收消息链接（链接型信息） 返回数组{'url'=>'','title'=>'','description'=>''}
