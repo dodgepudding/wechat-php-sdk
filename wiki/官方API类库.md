@@ -130,8 +130,15 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
  *  getServerIp() 获取微信服务器IP地址列表 返回数组array('127.0.0.1','127.0.0.1')
  *  getMenu() 获取菜单 
  *  deleteMenu() 删除菜单 
- *  uploadMedia($data, $type) 上传多媒体文件(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
- *  getMedia() 获取接收到的音频、视频媒体文件 
+ *  uploadMedia($data, $type) 上传临时素材，有效期为3天(注意上传大文件时可能需要先调用 set_time_limit(0) 避免超时)
+ *  getMedia($media_id,$is_video=false) 获取临时素材（含接收到的音频、视频媒体文件）
+ *  uploadForeverMedia($data, $type,$is_video=false,$video_info=array()) 上传永久素材，可以在公众平台官网素材管理模块中看到
+ *  uploadForeverArticles($data) 上传永久图文素材
+ *  updateForeverArticles($media_id,$data,$index=0) 修改永久图文素材(认证后的订阅号可用)
+ *  getForeverMedia($media_id,$is_video=false) 获取永久素材
+ *  delForeverMedia($media_id) 删除永久素材
+ *  getForeverList($type,$offset,$count) 获取永久素材列表(认证后的订阅号可用)
+ *  getForeverCount() 获取永久素材总数
  *  uploadMpVideo($data) 上传视频素材，当需要群发视频时，必须使用此方法得到的MediaID，否则无法显示
  *  uploadArticles($data) 上传图文消息素材
  *  sendMassMessage($data) 高级群发消息
