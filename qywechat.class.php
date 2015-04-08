@@ -937,7 +937,7 @@ class Wechat
 		if (!$appid) $appid = $this->appid;
 		if ($jsapi_ticket) { //手动指定token，优先使用
 		    $this->jsapi_ticket = $jsapi_ticket;
-		    return $this->access_token;
+		    return $this->jsapi_ticket;
 		}
 		$authname = 'qywechat_jsapi_ticket'.$appid;
 		if ($rs = $this->getCache($authname))  {
@@ -1352,12 +1352,14 @@ class Wechat
 	 *        {
 	 *            "id": 1,
 	 *            "name": "广州研发中心",
-	 *            "parentid": 0
+	 *            "parentid": 0,
+	 *            "order": 40
 	 *        },
  	 *       {
 	 *          "id": 2
   	 *          "name": "邮箱产品部",
-  	 *          "parentid": 1
+  	 *          "parentid": 1,
+	 *          "order": 40
  	 *       }
 	 *    ]
 	 * }
@@ -2087,15 +2089,15 @@ class Prpcrypt
 {
     public $key;
 
-    /**
-     * 兼容老版本php构造函数
-     */
-    function Prpcrypt($k)
-    {
+    function __construct($k) {
         $this->key = base64_decode($k . "=");
     }
 
-    function __construct($k) {
+    /**
+     * 兼容老版本php构造函数，不能在 __construct() 方法前边，否则报错
+     */
+    function Prpcrypt($k)
+    {
         $this->key = base64_decode($k . "=");
     }
 
