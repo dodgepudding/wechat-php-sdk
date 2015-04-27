@@ -110,7 +110,6 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 * video($mediaid='',$title,$description) 设置视频型消息，参数：视频的media_id、标题、摘要
 * music($title,$desc,$musicurl,$hgmusicurl='',$thumbmediaid='') 设置回复音乐，参数：音乐标题、音乐描述、音乐链接、高音质链接、缩略图的媒体id
 * news($newsData) 设置图文型消息，参数：数组。数组结构见php文件内方法说明
-* image($mediaid) 设置图片型消息，参数：图片的media_id
 * Message($msg = '',$append = false) 设置发送的消息（一般不需要调用这个方法）
 * transfer_customer_service($customer_account = '') 转接多客服，如不指定客服可不提供参数，参数：指定客服的账号
 * reply() 将以上已经设置好的消息，回复给微信服务器
