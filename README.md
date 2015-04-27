@@ -199,6 +199,8 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
  *  setTMIndustry($id1,$id2='') 模板消息，设置所属行业
  *  addTemplateMessage($tpl_id) 模板消息，添加消息模板
  *  sendTemplateMessage($data) 发送模板消息
+ *  
+ *  多客服接口：
  *  getCustomServiceMessage($data) 获取多客服会话记录
  *  transfer_customer_service($customer_account) 转发多客服消息
  *  getCustomServiceKFlist() 获取多客服客服基本信息
@@ -212,6 +214,7 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
  *  updateKFAccount($account,$nickname,$password) 修改客服账号信息
  *  deleteKFAccount($account) 删除客服账号
  *  setKFHeadImg($account,$imgfile) 上传客服头像
+ *  
  *  querySemantic($uid,$query,$category,$latitude=0,$longitude=0,$city="",$region="") 语义理解接口 参数含义及返回的json内容请查看 **[微信语义理解接口](http://mp.weixin.qq.com/wiki/index.php?title=语义理解)**
  *  getDatacube($type,$subtype,$begin_date,$end_date='') 获取统计数据 参数需注意$type与$subtype的定义
 > 获取统计数据方法 参数定义
@@ -237,6 +240,8 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
 | 接口分析 | 'interface' | 获取接口分析分时数据 | 'summaryhour' | 1 |
 需要注意 `begin_date`和`end_date`的差值需小于“最大时间跨度”（比如最大时间跨度为1时，`begin_date`和`end_date`的差值只能为0，才能小于1）
 
+ *  
+ *  卡券接口：
  *  createCard($data) 创建卡券
  *  updateCard($data) 修改卡券
  *  delCard($card_id) 删除卡券
@@ -256,7 +261,21 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
  *  updateMemberCard($data) 会员卡交易，参数结构请参看卡券开发文档(6.1.2 会员卡交易)章节
  *  updateLuckyMoney($code,$balance,$card_id='') 更新红包金额
  *  setCardTestWhiteList($openid=array(),$user=array()) 设置卡券测试白名单
- 
+ *  
+ *  摇一摇周边接口：
+ *  applyShakeAroundDevice($data) 申请设备ID
+ *  updateShakeAroundDevice($data) 编辑设备的备注信息
+ *  searchShakeAroundDevice($data) 查询设备列表
+ *  bindLocationShakeAroundDevice($device_id,$poi_id,$uuid='',$major=0,$minor=0) 配置设备与门店的关联关系
+ *  bindPageShakeAroundDevice($device_id,$page_ids=array(),$bind=1,$append=1,$uuid='',$major=0,$minor=0) 配置设备与页面的关联关系
+ *  uploadShakeAroundMedia($data) 上传在摇一摇页面展示的图片素材
+ *  addShakeAroundPage($title,$description,$icon_url,$page_url,$comment='') 新增摇一摇出来的页面信息
+ *  updateShakeAroundPage($page_id,$title,$description,$icon_url,$page_url,$comment='') 编辑摇一摇出来的页面信息
+ *  searchShakeAroundPage($page_ids=array(),$begin=0,$count=1) 查询摇一摇已有的页面
+ *  deleteShakeAroundPage($page_ids=array()) 删除摇一摇已有的页面，必须是未与设备关联的页面
+ *  getShakeInfoShakeAroundUser($ticket) 获取摇周边的设备及用户信息
+ *  deviceShakeAroundStatistics($device_id,$begin_date,$end_date,$uuid='',$major=0,$minor=0) 以设备为维度的数据统计接口
+ *  pageShakeAroundStatistics($page_id,$begin_date,$end_date) 以页面为维度的数据统计接口
  
 ## ~~2. wechatext.class.php 非官方扩展API~~  
 **此扩展类库已经不再更新，原因是官方对公众号开放了众多接口，此类库继续维护的意义不大**  
