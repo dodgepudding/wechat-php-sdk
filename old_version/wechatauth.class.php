@@ -7,18 +7,18 @@
  *  get_login_code() 获取登陆授权码, 通过授权码才能获取二维码
  *  get_code_image($code='') 将上面获取的授权码转换为图片二维码
  *  verify_code() 鉴定是否登陆成功,返回200为最终授权成功.
- *  get_login_cookie() 鉴定成功后调用此方法即可获取用户基本信息
- *  sendNews($account,$title,$summary,$content,$pic,$srcurl='') 向一个微信账户发送图文信息
+ *  get_login_info() 鉴定成功后调用此方法即可获取用户基本信息
  *  get_avatar($url) 获取用户头像图片数据
  *  @author dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
  *  @version 1.1
  *  
  */
-include "Snoopy.class.php";
+include "snoopy.class.php";
 class Wechatauth
 {
 	private $cookie;
+	private $skey;
 	private $_cookiename;
 	private $_cookieexpired = 3600;
 	private $_account = 'test';
@@ -43,7 +43,7 @@ class Wechatauth
 	 * @return bool
 	 */
 	public function saveCookie($filename,$content){
-		return S($filename,$content,$this->_cookieexpired);
+		return file_put_contents($filename,$content);
 	}
 
 	/**
@@ -52,8 +52,12 @@ class Wechatauth
 	 * @return string cookie
 	 */
 	public function getCookie($filename){
-		$data = S($filename);
-		if ($data) $this->cookie = $data;
+		if (file_exists($filename)) {
+			$mtime = filemtime($filename);
+			if ($mtime<time()-$this->_cookieexpired) return false;
+			$data = file_get_contents($filename);
+			if ($data) $this->cookie = $data;
+		} 
 		return $this->cookie;
 	}
 	
@@ -62,7 +66,7 @@ class Wechatauth
 	 */
 	public function deleteCookie($filename) {
 		$this->cookie = '';
-		S($filename,null);
+		@unlink($filename);
 		return true;
 	}
 	
@@ -75,7 +79,7 @@ class Wechatauth
 	
 	/**
 	 * 获取登陆二维码对应的授权码
-	 */	
+	 */
 	public function get_login_code(){
 		if ($this->_logincode) return $this->_logincode;
 		$t = time().strval(mt_rand(100,999));
@@ -93,7 +97,7 @@ class Wechatauth
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * 通过授权码获取对应的二维码图片地址
 	 * @param string $code
