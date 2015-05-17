@@ -1641,7 +1641,7 @@ class Wechat
 	public function getUserId($code,$agentid=0){
 	    if (!$agentid) $agentid=$this->agentid;
 	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_GETINFO_URL.'access_token='.$this->access_token.'&code='.$code.'&agentid'.$agentid);
+	    $result = $this->http_get(self::API_URL_PREFIX.self::USER_GETINFO_URL.'access_token='.$this->access_token.'&code='.$code.'&agentid='.$agentid);
 	    if ($result)
 	    {
 	        $json = json_decode($result,true);
