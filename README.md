@@ -347,7 +347,7 @@ const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡�
  ```
 
 ## 5. errCode.php 全局返回码类
-当调用API接口失败时，可以用此类来换取失败原因的中文说明。  
+当调用API接口失败时，可以用此类来获取失败原因的中文说明。  
 注意：微信公众号引用`errCode.php`，企业号引用`qyerrCode.php`。
 
 ### 使用方法：
