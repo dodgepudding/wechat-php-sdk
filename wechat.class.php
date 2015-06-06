@@ -2598,7 +2598,7 @@ class Wechat
 	public function closeKFSession($openid,$kf_account,$text=''){
 	    $data=array(
 	    	"openid" =>$openid,
-	        "nickname" => $kf_account
+	        "kf_account" => $kf_account
 	    );
 	    if ($text) $data["text"] = $text;
 	    if (!$this->access_token && !$this->checkAuth()) return false;
