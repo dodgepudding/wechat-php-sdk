@@ -1002,6 +1002,7 @@ class Snoopy
 			curl_setopt($ch, CURLOPT_HEADER, true); 
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+			curl_setopt($ch, CURLOPT_SSLVERSION,3); 
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); 
 			curl_setopt($ch, CURLOPT_TIMEOUT, $this->read_timeout);
@@ -1220,7 +1221,7 @@ class Snoopy
 		if (count($formvars) == 0 && count($formfiles) == 0)
 			return;
 		if (is_string($formvars)) return $formvars;
-		if(count($formvars) == 1) return $formvars[0];
+		if((count($formvars) == 1) && isset($formvars[0])) return $formvars[0];
 		switch ($this->_submit_type) {
 			case "application/x-www-form-urlencoded":
 				reset($formvars);
