@@ -5,12 +5,12 @@
 	include("../wechatauth.class.php");
 	session_start();
 	function logdebug($text){
-		file_put_contents('../data/logwechat.txt',$text."\n",FILE_APPEND);		
+		file_put_contents('../log/logwechat.txt',$text."\n",FILE_APPEND);		
 	};
 	$sid  = session_id();
 	$options = array(
 		'account'=>$sid,
-		'datapath'=>'../data/cookiecode_',
+		'datapath'=>'../log/cookiecode_',
 			'debug'=>true,
 			'logcallback'=>'logdebug'	
 	); 
