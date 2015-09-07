@@ -782,6 +782,7 @@ class Wechat
 	        $array['CardId'] = $this->_receive['CardId'];
 	    if (isset($this->_receive['IsGiveByFriend']))    //是否为转赠，1 代表是，0 代表否。
 	        $array['IsGiveByFriend'] = $this->_receive['IsGiveByFriend'];
+	        $array['OldUserCardCode'] = $this->_receive['OldUserCardCode'];
 	    if (isset($this->_receive['UserCardCode']) && !empty($this->_receive['UserCardCode'])) //code 序列号。自定义 code 及非自定义 code的卡券被领取后都支持事件推送。
 	        $array['UserCardCode'] = $this->_receive['UserCardCode'];
 	    if (isset($array) && count($array) > 0) {
