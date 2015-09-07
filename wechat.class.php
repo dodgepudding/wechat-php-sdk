@@ -1359,6 +1359,23 @@ class Wechat
 	}
 
 	/**
+	 * 获取微信卡券签名
+	 * @param array $arrdata 签名数组
+	 * @param string $method 签名方法
+	 * @return boolean|string 签名值
+	 */
+	public function getTicketSignature($arrdata,$method="sha1") {
+		if (!function_exists($method)) return false;
+		$newArray = array();
+		foreach($arrdata as $key => $value)
+		{
+			array_push($newArray,(string)$value);
+		}
+		sort($newArray,SORT_STRING);
+		return $method(implode($newArray));
+	}
+
+	/**
 	 * 生成随机字串
 	 * @param number $length 长度，默认为16，最长为32字节
 	 * @return string
