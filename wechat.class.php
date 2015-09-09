@@ -3126,22 +3126,22 @@ class Wechat
      */
     public function createCardQrcode($card_id,$code='',$openid='',$expire_seconds=0,$is_unique_code=false,$balance='') {
         $card = array(
-                'card_id' => $card_id
+            'card_id' => $card_id
+        );
+        $data = array(
+            'action_name' => "QR_CARD"
         );
         if ($code)
             $card['code'] = $code;
         if ($openid)
             $card['openid'] = $openid;
-        if ($expire_seconds)
-            $card['expire_seconds'] = $expire_seconds;
         if ($is_unique_code)
             $card['is_unique_code'] = $is_unique_code;
         if ($balance)
             $card['balance'] = $balance;
-        $data = array(
-            'action_name' => "QR_CARD",
-            'action_info' => array('card' => $card)
-        );
+        if ($expire_seconds)
+            $data['expire_seconds'] = $expire_seconds;
+        $data['action_info'] = array('card' => $card);
         if (!$this->access_token && !$this->checkAuth()) return false;
         $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_QRCODE_CREATE . 'access_token=' . $this->access_token, self::json_encode($data));
         if ($result) {
