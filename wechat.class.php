@@ -1733,12 +1733,16 @@ class Wechat
         {
             if (is_string($result)) {
                 $json = json_decode($result,true);
-                if (isset($json['errcode'])) {
-                    $this->errCode = $json['errcode'];
-                    $this->errMsg = $json['errmsg'];
-                    return false;
+                if ($json) {
+                    if (isset($json['errcode'])) {
+                        $this->errCode = $json['errcode'];
+                        $this->errMsg = $json['errmsg'];
+                        return false;
+                    }
+                    return $json;
+                } else {
+                    return $result;
                 }
-                return $json;
             }
             return $result;
         }
