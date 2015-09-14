@@ -106,6 +106,7 @@ class Wechat
 	const MASS_QUERY_URL = '/message/mass/get?';
 	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
 	const MEDIA_UPLOAD_URL = '/media/upload?';
+	const MEDIA_UPLOADIMG_URL = '/media/uploadimg?';//图片上传接口
 	const MEDIA_GET_URL = '/media/get?';
 	const MEDIA_VIDEO_UPLOAD = '/media/uploadvideo?';
     const MEDIA_FOREVER_UPLOAD_URL = '/material/add_material?';
@@ -154,6 +155,7 @@ class Wechat
 	const CARD_CODE_UPDATE                = '/card/code/update?';
 	const CARD_CODE_UNAVAILABLE           = '/card/code/unavailable?';
 	const CARD_TESTWHILELIST_SET          = '/card/testwhitelist/set?';
+	const CARD_MEETINGCARD_UPDATEUSER      = '/card/meetingticket/updateuser?';    //更新会议门票
 	const CARD_MEMBERCARD_ACTIVATE        = '/card/membercard/activate?';      //激活会员卡
 	const CARD_MEMBERCARD_UPDATEUSER      = '/card/membercard/updateuser?';    //更新会员卡
 	const CARD_MOVIETICKET_UPDATEUSER     = '/card/movieticket/updateuser?';   //更新电影票(未加方法)
@@ -780,6 +782,7 @@ class Wechat
 	        $array['CardId'] = $this->_receive['CardId'];
 	    if (isset($this->_receive['IsGiveByFriend']))    //是否为转赠，1 代表是，0 代表否。
 	        $array['IsGiveByFriend'] = $this->_receive['IsGiveByFriend'];
+	        $array['OldUserCardCode'] = $this->_receive['OldUserCardCode'];
 	    if (isset($this->_receive['UserCardCode']) && !empty($this->_receive['UserCardCode'])) //code 序列号。自定义 code 及非自定义 code的卡券被领取后都支持事件推送。
 	        $array['UserCardCode'] = $this->_receive['UserCardCode'];
 	    if (isset($array) && count($array) > 0) {
@@ -1358,6 +1361,57 @@ class Wechat
 	}
 
 	/**
+	 * 获取微信卡券api_ticket
+	 * @param string $appid 用于多个appid时使用,可空
+	 * @param string $jsapi_ticket 手动指定jsapi_ticket，非必要情况不建议用
+	 */
+	public function getJsCardTicket($appid='',$jsapi_ticket=''){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!$appid) $appid = $this->appid;
+		if ($jsapi_ticket) { //手动指定token，优先使用
+		    $this->jsapi_ticket = $jsapi_ticket;
+		    return $this->jsapi_ticket;
+		}
+		$authname = 'wechat_jsapi_ticket_wxcard'.$appid;
+		if ($rs = $this->getCache($authname))  {
+			$this->jsapi_ticket = $rs;
+			return $rs;
+		}
+		$result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=wx_card');
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			$this->jsapi_ticket = $json['ticket'];
+			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
+			$this->setCache($authname,$this->jsapi_ticket,$expire);
+			return $this->jsapi_ticket;
+		}
+		return false;
+	}
+
+	/**
+	 * 获取微信卡券签名
+	 * @param array $arrdata 签名数组
+	 * @param string $method 签名方法
+	 * @return boolean|string 签名值
+	 */
+	public function getTicketSignature($arrdata,$method="sha1") {
+		if (!function_exists($method)) return false;
+		$newArray = array();
+		foreach($arrdata as $key => $value)
+		{
+			array_push($newArray,(string)$value);
+		}
+		sort($newArray,SORT_STRING);
+		return $method(implode($newArray));
+	}
+
+	/**
 	 * 生成随机字串
 	 * @param number $length 长度，默认为16，最长为32字节
 	 * @return string
@@ -1555,6 +1609,31 @@ class Wechat
 		return false;
 	}
 
+	/**
+	 * 上传图片，本接口所上传的图片不占用公众号的素材库中图片数量的5000个的限制。图片仅支持jpg/png格式，大小必须在1MB以下。 (认证后的订阅号可用)
+	 * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
+	 * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义      
+	 * @param array $data {"media":'@Path\filename.jpg'}
+	 * 
+	 * @return boolean|array
+	 */
+	public function uploadImg($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		//原先的上传多媒体文件接口使用 self::UPLOAD_MEDIA_URL 前缀
+		$result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_UPLOADIMG_URL.'access_token='.$this->access_token,$data,true);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+
 
     /**
      * 上传永久素材(认证后的订阅号可用)
@@ -1654,12 +1733,16 @@ class Wechat
         {
             if (is_string($result)) {
                 $json = json_decode($result,true);
-                if (isset($json['errcode'])) {
-                    $this->errCode = $json['errcode'];
-                    $this->errMsg = $json['errmsg'];
-                    return false;
+                if ($json) {
+                    if (isset($json['errcode'])) {
+                        $this->errCode = $json['errcode'];
+                        $this->errMsg = $json['errmsg'];
+                        return false;
+                    }
+                    return $json;
+                } else {
+                    return $result;
                 }
-                return $json;
             }
             return $result;
         }
@@ -3047,22 +3130,22 @@ class Wechat
      */
     public function createCardQrcode($card_id,$code='',$openid='',$expire_seconds=0,$is_unique_code=false,$balance='') {
         $card = array(
-                'card_id' => $card_id
+            'card_id' => $card_id
+        );
+        $data = array(
+            'action_name' => "QR_CARD"
         );
         if ($code)
             $card['code'] = $code;
         if ($openid)
             $card['openid'] = $openid;
-        if ($expire_seconds)
-            $card['expire_seconds'] = $expire_seconds;
         if ($is_unique_code)
             $card['is_unique_code'] = $is_unique_code;
         if ($balance)
             $card['balance'] = $balance;
-        $data = array(
-            'action_name' => "QR_CARD",
-            'action_info' => array('card' => $card)
-        );
+        if ($expire_seconds)
+            $data['expire_seconds'] = $expire_seconds;
+        $data['action_info'] = array('card' => $card);
         if (!$this->access_token && !$this->checkAuth()) return false;
         $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_QRCODE_CREATE . 'access_token=' . $this->access_token, self::json_encode($data));
         if ($result) {
@@ -3267,6 +3350,26 @@ class Wechat
     public function modifyCardStock($data) {
         if (!$this->access_token && !$this->checkAuth()) return false;
         $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MODIFY_STOCK . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 更新门票
+     * @param string $data
+     * @return boolean
+     */
+    public function updateMeetingCard($data) {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEETINGCARD_UPDATEUSER . 'access_token=' . $this->access_token, self::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
