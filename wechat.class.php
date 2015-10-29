@@ -212,6 +212,7 @@ class Wechat
 	private $appsecret;
 	private $access_token;
 	private $jsapi_ticket;
+	private $api_ticket;
 	private $user_token;
 	private $partnerid;
 	private $partnerkey;
@@ -1363,18 +1364,18 @@ class Wechat
 	/**
 	 * 获取微信卡券api_ticket
 	 * @param string $appid 用于多个appid时使用,可空
-	 * @param string $jsapi_ticket 手动指定jsapi_ticket，非必要情况不建议用
+	 * @param string $api_ticket 手动指定api_ticket，非必要情况不建议用
 	 */
-	public function getJsCardTicket($appid='',$jsapi_ticket=''){
+	public function getJsCardTicket($appid='',$api_ticket=''){
 		if (!$this->access_token && !$this->checkAuth()) return false;
 		if (!$appid) $appid = $this->appid;
-		if ($jsapi_ticket) { //手动指定token，优先使用
-		    $this->jsapi_ticket = $jsapi_ticket;
-		    return $this->jsapi_ticket;
+		if ($api_ticket) { //手动指定token，优先使用
+		    $this->api_ticket = $api_ticket;
+		    return $this->api_ticket;
 		}
-		$authname = 'wechat_jsapi_ticket_wxcard'.$appid;
+		$authname = 'wechat_api_ticket_wxcard'.$appid;
 		if ($rs = $this->getCache($authname))  {
-			$this->jsapi_ticket = $rs;
+			$this->api_ticket = $rs;
 			return $rs;
 		}
 		$result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=wx_card');
@@ -1386,10 +1387,10 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			$this->jsapi_ticket = $json['ticket'];
+			$this->api_ticket = $json['ticket'];
 			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
-			$this->setCache($authname,$this->jsapi_ticket,$expire);
-			return $this->jsapi_ticket;
+			$this->setCache($authname,$this->api_ticket,$expire);
+			return $this->api_ticket;
 		}
 		return false;
 	}
