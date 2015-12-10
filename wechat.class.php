@@ -2145,13 +2145,14 @@ class Wechat
 
 	/**
 	 * 获取关注者详细信息
-	 * @param string $openid
+     * @param string $openid
+	 * @param string $lang 返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
 	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
 	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
 	 */
-	public function getUserInfo($openid){
+	public function getUserInfo($openid, $lang = 'zh_CN'){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::USER_INFO_URL.'access_token='.$this->access_token.'&openid='.$openid);
+		$result = $this->http_get(self::API_URL_PREFIX.self::USER_INFO_URL.'access_token='.$this->access_token.'&openid='.$openid.'&lang='.$lang);
 		if ($result)
 		{
 			$json = json_decode($result,true);
