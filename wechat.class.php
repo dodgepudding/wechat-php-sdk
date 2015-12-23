@@ -2030,24 +2030,50 @@ class Wechat
 	/**
 	 * 创建二维码ticket
 	 * @param int|string $scene_id 自定义追踪id,临时二维码只能用数值型
-	 * @param int $type 0:临时二维码；1:永久二维码(此时expire参数无效)；2:永久二维码(此时expire参数无效)
+	 * @param int $type 0:临时二维码；1:数值型永久二维码(此时expire参数无效)；2:字符串型永久二维码(此时expire参数无效)
 	 * @param int $expire 临时二维码有效期，最大为604800秒
 	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>604800,'url'=>'二维码图片解析后的地址')
 	 */
 	public function getQRCode($scene_id,$type=0,$expire=604800){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$type = ($type && is_string($scene_id))?2:$type;
+		if (!isset($scene_id)) return false;
+		switch ($type) {
+			case '0':
+				if (!is_numeric($scene_id))
+					return false;
+				$action_name = 'QR_SCENE';
+				$action_info = array('scene'=>(array('scene_id'=>$scene_id)));
+				break;
+
+			case '1':
+				if (!is_numeric($scene_id))
+					return false;
+				$action_name = 'QR_LIMIT_SCENE';
+				$action_info = array('scene'=>(array('scene_id'=>$scene_id)));
+				break;
+
+			case '2':
+				if (!is_string($scene_id))
+					return false;
+				$action_name = 'QR_LIMIT_STR_SCENE';
+				$action_info = array('scene'=>(array('scene_str'=>$scene_id)));
+				break;
+
+			default:
+				return false;
+		}
+
 		$data = array(
-			'action_name'=>$type?($type == 2?"QR_LIMIT_STR_SCENE":"QR_LIMIT_SCENE"):"QR_SCENE",
-			'expire_seconds'=>$expire,
-			'action_info'=>array('scene'=>($type == 2?array('scene_str'=>$scene_id):array('scene_id'=>$scene_id)))
+			'action_name'    => $action_name,
+			'expire_seconds' => $expire,
+			'action_info'    => $action_info
 		);
-		if ($type == 1) {
+		if ($type) {
 			unset($data['expire_seconds']);
 		}
+
 		$result = $this->http_post(self::API_URL_PREFIX.self::QRCODE_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
+		if ($result) {
 			$json = json_decode($result,true);
 			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
