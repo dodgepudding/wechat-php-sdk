@@ -204,6 +204,11 @@ class Wechat
 	const SHAKEAROUND_USER_GETSHAKEINFO = '/shakearound/user/getshakeinfo?';//获取摇周边的设备及用户信息
 	const SHAKEAROUND_STATISTICS_DEVICE = '/shakearound/statistics/device?';//以设备为维度的数据统计接口
     const SHAKEAROUND_STATISTICS_PAGE = '/shakearound/statistics/page?';//以页面为维度的数据统计接口
+	///微信小店相关接口
+	const MERCHANT_ORDER_GETBYID = '/merchant/order/getbyid?';//根据订单ID获取订单详情
+	const MERCHANT_ORDER_GETBYFILTER = '/merchant/order/getbyfilter?';//根据订单状态/创建时间获取订单详情
+	const MERCHANT_ORDER_SETDELIVERY = '/merchant/order/setdelivery?';//设置订单发货信息
+	const MERCHANT_ORDER_CLOSE = '/merchant/order/close?';//关闭订单
 
 	private $token;
 	private $encodingAesKey;
@@ -1297,6 +1302,7 @@ class Wechat
 	 * @param array $arr
 	 */
 	static function json_encode($arr) {
+		if (count($arr) == 0) return "[]";
 		$parts = array ();
 		$is_list = false;
 		//Find out if the given array is a numerical array
@@ -4228,6 +4234,132 @@ class Wechat
         }
         return false;
     }
+
+	/**
+	 * 根据订单ID获取订单详情
+	 * @param string $order_id 订单ID
+	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
+	 */
+	public function getOrderByID($order_id){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!$order_id) return false;
+
+		$data = array(
+			'order_id'=>$order_id
+		);
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_GETBYID.'access_token='.$this->access_token, self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode']) && $json['errcode']) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+
+	/**
+	 * 根据订单状态/创建时间获取订单详情
+	 * @param int $status 订单状态(不带该字段-全部状态, 2-待发货, 3-已发货, 5-已完成, 8-维权中, )
+	 * @param int $begintime 订单创建时间起始时间(不带该字段则不按照时间做筛选)
+	 * @param int $endtime 订单创建时间终止时间(不带该字段则不按照时间做筛选)
+	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
+	 */
+	public function getOrderByFilter($status = null, $begintime = null, $endtime = null){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+
+		$data = [];
+
+		$valid_status = array(2, 3, 5, 8);
+		if (is_numeric($status) && in_array($status, $valid_status)) {
+			$data['status'] = $status;
+		}
+
+		if (is_numeric($begintime) && is_numeric($endtime)) {
+			$data['begintime'] = $begintime;
+			$data['endtime'] = $endtime;
+		}
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_GETBYFILTER.'access_token='.$this->access_token, self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode']) && $json['errcode']) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+
+	/**
+	 * 设置订单发货信息
+	 * @param string $order_id 订单 ID
+	 * @param int $need_delivery 商品是否需要物流(0-不需要，1-需要)
+	 * @param string $delivery_company 物流公司 ID
+	 * @param string $delivery_track_no 运单 ID
+	 * @param int $is_others 是否为 6.4.5 表之外的其它物流公司(0-否，1-是)
+	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
+	 */
+	public function setOrderDelivery($order_id, $need_delivery = 0, $delivery_company = null, $delivery_track_no = null, $is_others = 0){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!$order_id) return false;
+
+		$data = [];
+		$data['order_id'] = $order_id;
+		if ($need_delivery) {
+			$data['delivery_company'] = $delivery_company;
+			$data['delivery_track_no'] = $delivery_track_no;
+			$data['is_others'] = $is_others;
+		}
+		else {
+			$data['need_delivery'] = $need_delivery;
+		}
+
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_SETDELIVERY.'access_token='.$this->access_token, self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode']) && $json['errcode']) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+
+	/**
+	 * 关闭订单
+	 * @param string $order_id 订单 ID
+	 * @return bool
+	 */
+	public function closeOrder($order_id){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!$order_id) return false;
+
+		$data = array(
+			'order_id'=>$order_id
+		);
+
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_CLOSE.'access_token='.$this->access_token, self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode']) && $json['errcode']) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
 }
 /**
  * PKCS7Encoder class
