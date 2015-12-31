@@ -73,6 +73,7 @@ class Wechat
 	const EVENT_CARD_NOTPASS = 'card_not_pass_check';   //卡券 - 审核未通过
 	const EVENT_CARD_USER_GET = 'user_get_card';        //卡券 - 用户领取卡券
 	const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡券
+	const EVENT_MERCHANT_ORDER = 'merchant_order';        //微信小店 - 订单付款通知
 	const API_URL_PREFIX = 'https://api.weixin.qq.com/cgi-bin';
 	const AUTH_URL = '/token?grant_type=client_credential&';
 	const MENU_CREATE_URL = '/menu/create?';
@@ -813,6 +814,18 @@ class Wechat
 	    } else {
 	        return false;
 	    }
+	}
+
+	/**
+	 * 获取订单ID - 订单付款通知
+	 * 当Event为 merchant_order(订单付款通知)
+	 * @return orderId|boolean
+	 */
+	public function getRevOrderId(){
+		if (isset($this->_receive['OrderId']))     //订单 ID
+			return $this->_receive['OrderId'];
+		else
+			return false;
 	}
 
 	public static function xmlSafeStr($str)
@@ -4238,7 +4251,7 @@ class Wechat
 	/**
 	 * 根据订单ID获取订单详情
 	 * @param string $order_id 订单ID
-	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
+	 * @return order array|bool
 	 */
 	public function getOrderByID($order_id){
 		if (!$this->access_token && !$this->checkAuth()) return false;
@@ -4256,7 +4269,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $json;
+			return $json['order'];
 		}
 		return false;
 	}
@@ -4266,7 +4279,7 @@ class Wechat
 	 * @param int $status 订单状态(不带该字段-全部状态, 2-待发货, 3-已发货, 5-已完成, 8-维权中, )
 	 * @param int $begintime 订单创建时间起始时间(不带该字段则不按照时间做筛选)
 	 * @param int $endtime 订单创建时间终止时间(不带该字段则不按照时间做筛选)
-	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
+	 * @return order list array|bool
 	 */
 	public function getOrderByFilter($status = null, $begintime = null, $endtime = null){
 		if (!$this->access_token && !$this->checkAuth()) return false;
@@ -4291,7 +4304,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $json;
+			return $json['order_list'];
 		}
 		return false;
 	}
@@ -4303,7 +4316,7 @@ class Wechat
 	 * @param string $delivery_company 物流公司 ID
 	 * @param string $delivery_track_no 运单 ID
 	 * @param int $is_others 是否为 6.4.5 表之外的其它物流公司(0-否，1-是)
-	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
+	 * @return bool
 	 */
 	public function setOrderDelivery($order_id, $need_delivery = 0, $delivery_company = null, $delivery_track_no = null, $is_others = 0){
 		if (!$this->access_token && !$this->checkAuth()) return false;
@@ -4329,7 +4342,7 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			return $json;
+			return true;
 		}
 		return false;
 	}
@@ -4359,6 +4372,31 @@ class Wechat
 			return true;
 		}
 		return false;
+	}
+
+	private function parseSkuInfo($skuInfo) {
+		$skuInfo = str_replace("\$", "", $skuInfo);
+		$matches = explode(";", $skuInfo);
+
+		$result = [];
+		foreach ($matches as $matche) {
+			$arrs = explode(":", $matche);
+			$result[$arrs[0]] = $arrs[1];
+		}
+
+		return $result;
+	}
+
+	/**
+	 * 获取订单SkuInfo - 订单付款通知
+	 * 当Event为 merchant_order(订单付款通知)
+	 * @return array|boolean
+	 */
+	public function getRevOrderSkuInfo(){
+		if (isset($this->_receive['SkuInfo']))     //订单 SkuInfo
+			return $this->parseSkuInfo($this->_receive['SkuInfo']);
+		else
+			return false;
 	}
 }
 /**
