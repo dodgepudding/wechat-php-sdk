@@ -202,7 +202,7 @@ class Wechat
 	            elseif ($value === true)
 	            $str .= 'true';
 	            else
-	                $str .= '"' . addslashes ( $value ) . '"'; //All other things
+	                $str .= '"' .addcslashes($value, "\\\"\n\r\t/"). '"'; //All other things
 	            // :TODO: Is there any more datatype we should be in the lookout for? (Object?)
 	            $parts [] = $str;
 	        }
