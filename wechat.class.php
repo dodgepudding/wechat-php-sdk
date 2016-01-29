@@ -4284,7 +4284,7 @@ class Wechat
 	public function getOrderByFilter($status = null, $begintime = null, $endtime = null){
 		if (!$this->access_token && !$this->checkAuth()) return false;
 
-		$data = [];
+		$data = array();
 
 		$valid_status = array(2, 3, 5, 8);
 		if (is_numeric($status) && in_array($status, $valid_status)) {
@@ -4322,7 +4322,7 @@ class Wechat
 		if (!$this->access_token && !$this->checkAuth()) return false;
 		if (!$order_id) return false;
 
-		$data = [];
+		$data = array();
 		$data['order_id'] = $order_id;
 		if ($need_delivery) {
 			$data['delivery_company'] = $delivery_company;
