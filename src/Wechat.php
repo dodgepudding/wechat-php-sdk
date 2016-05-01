@@ -1,4 +1,5 @@
 <?php
+namespace dodgepudding\wechat\sdk;
 /**
  *	微信公众平台PHP-SDK, 官方API部分
  *  @author  dodge <dodgepudding@gmail.com>

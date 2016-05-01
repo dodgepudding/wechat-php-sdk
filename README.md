@@ -33,6 +33,37 @@ https://mp.weixin.qq.com/cgi-bin/readtemplate?t=business/course2_tmpl&lang=zh_CN
 ## 1. wechat.class.php 官方API类库
 调用官方API，具有更灵活的消息分类响应方式，支持链式调用操作 ； 
 
+### 如何引入wechat-php-sdk
+
+1. 使用 [composer](https://getcomposer.org/).
+
+在项目里面创建 `composer.json`
+
+内容如下:
+
+```js
+{
+    "name": "yourproject/youproject",
+    "type": "project",
+    "require": {
+        "dodgepudding/wechat-php-sdk": "*"
+    }
+}
+```
+
+安装命令：  `composer update`
+
+引用示例：
+  ```php   
+  require "vendor/autoload.php";
+  use dedgepudding\wechat\sdk\Wechat;
+  use dedgepudding\wechat\sdk\ErrorCode;
+  ```
+
+2. 直接使用 `composer` 安装
+
+	composer require dodgepudding/wechat-php-sdk
+
 ### 主要功能 
 - 接入验证 **（初级权限）**
 - 自动回复（文本、图片、语音、视频、音乐、图文） **（初级权限）**
