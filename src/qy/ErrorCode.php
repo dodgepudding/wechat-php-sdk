@@ -1,4 +1,5 @@
 <?php
+namespace dodgepudding\wechat\qy\sdk;
 /**
  *	微信公众平台企业号PHP-SDK, 全局返回码类
  *  @author  binsee <binsee@163.com>
@@ -11,7 +12,7 @@
  *      else
  *          echo "未找到对应的内容";
  */
-class ErrCode
+class ErrorCode
 {
 	public static $errCode=array(
 	        '-1'=>'系统繁忙',

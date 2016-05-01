@@ -11,7 +11,11 @@
   }, {
     "name" : "binsee",
     "email" : "binsee@163.com"
-  } ],
+  } , {
+    "name" : "sndnvaps",
+    "email" : "sndnvaps@gmail.com"
+  } 
+	],
   "keywords" : [ "wechat", "weixin", "thinkphp", "sample" ],
   "support" : {
     "issues" : "https://github.com/dodgepudding/wechat-php-sdk/issues",
@@ -20,7 +24,8 @@
   },
   "autoload" : {
     "psr-4" : {
-      "dodgepudding\\wechat\\sdk\\" : ""
+	"dodgepudding\\wechat\\sdk\\" : "src/",
+	"dodgepudding\\wechat\\qy\\sdk\\" : "src/qy/",
     }
   },
   "type" : "library",
