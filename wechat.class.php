@@ -52,6 +52,7 @@ class Wechat
 	const MSGTYPE_NEWS = 'news';
 	const MSGTYPE_VOICE = 'voice';
 	const MSGTYPE_VIDEO = 'video';
+	const MSGTYPE_SHORTVIDEO = 'shortvideo';
 	const EVENT_SUBSCRIBE = 'subscribe';       //订阅
 	const EVENT_UNSUBSCRIBE = 'unsubscribe';   //取消订阅
 	const EVENT_SCAN = 'SCAN';                 //扫描带参数二维码
