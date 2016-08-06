@@ -73,11 +73,15 @@ class Wechat
 	const EVENT_CARD_NOTPASS = 'card_not_pass_check';   //卡券 - 审核未通过
 	const EVENT_CARD_USER_GET = 'user_get_card';        //卡券 - 用户领取卡券
 	const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡券
+	const EVENT_MERCHANT_ORDER = 'merchant_order';        //微信小店 - 订单付款通知
 	const API_URL_PREFIX = 'https://api.weixin.qq.com/cgi-bin';
 	const AUTH_URL = '/token?grant_type=client_credential&';
 	const MENU_CREATE_URL = '/menu/create?';
 	const MENU_GET_URL = '/menu/get?';
 	const MENU_DELETE_URL = '/menu/delete?';
+	const MENU_ADDCONDITIONAL_URL = '/menu/addconditional?';
+	const MENU_DELCONDITIONAL_URL = '/menu/delconditional?';
+	const MENU_TRYMATCH_URL = '/menu/trymatch?';
 	const GET_TICKET_URL = '/ticket/getticket?';
 	const CALLBACKSERVER_GET_URL = '/getcallbackip?';
 	const QRCODE_CREATE_URL='/qrcode/create?';
@@ -87,6 +91,7 @@ class Wechat
 	const SHORT_URL='/shorturl?';
 	const USER_GET_URL='/user/get?';
 	const USER_INFO_URL='/user/info?';
+	const USERS_INFO_URL='/user/info/batchget?';
 	const USER_UPDATEREMARK_URL='/user/info/updateremark?';
 	const GROUP_GET_URL='/groups/get?';
 	const USER_GROUP_URL='/groups/getid?';
@@ -97,8 +102,8 @@ class Wechat
 	const CUSTOM_SEND_URL='/message/custom/send?';
 	const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
 	const MASS_SEND_URL = '/message/mass/send?';
-	const TEMPLATE_SET_INDUSTRY_URL = '/message/template/api_set_industry?';
-	const TEMPLATE_ADD_TPL_URL = '/message/template/api_add_template?';
+	const TEMPLATE_SET_INDUSTRY_URL = '/template/api_set_industry?';
+	const TEMPLATE_ADD_TPL_URL = '/template/api_add_template?';
 	const TEMPLATE_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
@@ -143,7 +148,8 @@ class Wechat
 	const CARD_DELETE                     = '/card/delete?';
 	const CARD_UPDATE                     = '/card/update?';
 	const CARD_GET                        = '/card/get?';
-	const CARD_BATCHGET                   = '/card/batchget?';
+        const CARD_USER_GETCARDLIST         = '/card/user/getcardlist?';
+        const CARD_BATCHGET                   = '/card/batchget?';
 	const CARD_MODIFY_STOCK               = '/card/modifystock?';
 	const CARD_LOCATION_BATCHADD          = '/card/location/batchadd?';
 	const CARD_LOCATION_BATCHGET          = '/card/location/batchget?';
@@ -204,6 +210,11 @@ class Wechat
 	const SHAKEAROUND_USER_GETSHAKEINFO = '/shakearound/user/getshakeinfo?';//获取摇周边的设备及用户信息
 	const SHAKEAROUND_STATISTICS_DEVICE = '/shakearound/statistics/device?';//以设备为维度的数据统计接口
     const SHAKEAROUND_STATISTICS_PAGE = '/shakearound/statistics/page?';//以页面为维度的数据统计接口
+	///微信小店相关接口
+	const MERCHANT_ORDER_GETBYID = '/merchant/order/getbyid?';//根据订单ID获取订单详情
+	const MERCHANT_ORDER_GETBYFILTER = '/merchant/order/getbyfilter?';//根据订单状态/创建时间获取订单详情
+	const MERCHANT_ORDER_SETDELIVERY = '/merchant/order/setdelivery?';//设置订单发货信息
+	const MERCHANT_ORDER_CLOSE = '/merchant/order/close?';//关闭订单
 
 	private $token;
 	private $encodingAesKey;
@@ -212,6 +223,7 @@ class Wechat
 	private $appsecret;
 	private $access_token;
 	private $jsapi_ticket;
+	private $api_ticket;
 	private $user_token;
 	private $partnerid;
 	private $partnerkey;
@@ -809,6 +821,18 @@ class Wechat
 	    }
 	}
 
+	/**
+	 * 获取订单ID - 订单付款通知
+	 * 当Event为 merchant_order(订单付款通知)
+	 * @return orderId|boolean
+	 */
+	public function getRevOrderId(){
+		if (isset($this->_receive['OrderId']))     //订单 ID
+			return $this->_receive['OrderId'];
+		else
+			return false;
+	}
+
 	public static function xmlSafeStr($str)
 	{
 		return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';
@@ -1291,11 +1315,43 @@ class Wechat
 	    return $signPackage;
 	}
 
+    /**
+     * 获取卡券签名cardSign
+     * @param string $card_type 卡券的类型，不可为空，官方jssdk文档说这个值可空，但签名验证工具又必填这个值，官方文档到处是坑，
+     * @param string $card_id 卡券的ID，可空
+     * @param string $location_id 卡券的适用门店ID，可空
+     * @param string $timestamp 当前时间戳 (为空则自动生成)
+     * @param string $noncestr 随机串 (为空则自动生成)
+     * @param string $appid 用于多个appid时使用,可空
+     * @return array|bool 返回签名字串
+     */
+    public function getCardSign($card_type='',$card_id='',$code='',$location_id='',$timestamp=0, $noncestr='', $appid=''){
+        if (!$this->api_ticket && !$this->getJsCardTicket($appid)) return false;
+        if (!$timestamp)
+            $timestamp = time();
+        if (!$noncestr)
+            $noncestr = $this->generateNonceStr();
+        $arrdata = array("api_ticket" => $this->api_ticket,"app_id" => $this->appid,"card_id" => $card_id,"code" => $code,"card_type" => $card_type,"location_id" => $location_id,"timestamp" => $timestamp, "noncestr" => $noncestr );
+        $sign = $this->getTicketSignature($arrdata);
+        if (!$sign)
+            return false;
+        $signPackage = array(
+            "cardType"     => $card_type,
+            "cardId"       => $card_id,
+            "shopId"       => $location_id,         //location_id就是shopId
+            "nonceStr"  => $noncestr,
+            "timestamp" => $timestamp,
+            "cardSign" => $sign
+        );
+        return $signPackage;
+    }
+
 	/**
 	 * 微信api不支持中文转义的json结构
 	 * @param array $arr
 	 */
 	static function json_encode($arr) {
+		if (count($arr) == 0) return "[]";
 		$parts = array ();
 		$is_list = false;
 		//Find out if the given array is a numerical array
@@ -1363,18 +1419,18 @@ class Wechat
 	/**
 	 * 获取微信卡券api_ticket
 	 * @param string $appid 用于多个appid时使用,可空
-	 * @param string $jsapi_ticket 手动指定jsapi_ticket，非必要情况不建议用
+	 * @param string $api_ticket 手动指定api_ticket，非必要情况不建议用
 	 */
-	public function getJsCardTicket($appid='',$jsapi_ticket=''){
+	public function getJsCardTicket($appid='',$api_ticket=''){
 		if (!$this->access_token && !$this->checkAuth()) return false;
 		if (!$appid) $appid = $this->appid;
-		if ($jsapi_ticket) { //手动指定token，优先使用
-		    $this->jsapi_ticket = $jsapi_ticket;
-		    return $this->jsapi_ticket;
+		if ($api_ticket) { //手动指定token，优先使用
+		    $this->api_ticket = $api_ticket;
+		    return $this->api_ticket;
 		}
-		$authname = 'wechat_jsapi_ticket_wxcard'.$appid;
+		$authname = 'wechat_api_ticket_wxcard'.$appid;
 		if ($rs = $this->getCache($authname))  {
-			$this->jsapi_ticket = $rs;
+			$this->api_ticket = $rs;
 			return $rs;
 		}
 		$result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=wx_card');
@@ -1386,10 +1442,10 @@ class Wechat
 				$this->errMsg = $json['errmsg'];
 				return false;
 			}
-			$this->jsapi_ticket = $json['ticket'];
+			$this->api_ticket = $json['ticket'];
 			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
-			$this->setCache($authname,$this->jsapi_ticket,$expire);
-			return $this->jsapi_ticket;
+			$this->setCache($authname,$this->api_ticket,$expire);
+			return $this->api_ticket;
 		}
 		return false;
 	}
@@ -1552,6 +1608,72 @@ class Wechat
 				return false;
 			}
 			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 创建个性化菜单(认证后的订阅号可用)
+	 * @param array $data
+	 * @return bool
+	 *
+	 */
+	public function addconditionalMenu($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::MENU_ADDCONDITIONAL_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 删除个性化菜单(认证后的订阅号可用)
+	 * @param $data {"menuid":"208379533"}
+	 *
+	 * @return bool
+	 */
+	public function delconditionalMenu($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::MENU_DELCONDITIONAL_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 测试个性化菜单匹配结果(认证后的订阅号可用)
+	 * @param $data {"user_id":"weixin"} user_id可以是粉丝的OpenID，也可以是粉丝的微信号
+	 *
+	 * @return bool|array('button'=>array(....s))
+	 */
+	public function trymatchMenu($data){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::MENU_TRYMATCH_URL.'access_token='.$this->access_token,self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (!$json || !empty($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
 		}
 		return false;
 	}
@@ -2029,24 +2151,50 @@ class Wechat
 	/**
 	 * 创建二维码ticket
 	 * @param int|string $scene_id 自定义追踪id,临时二维码只能用数值型
-	 * @param int $type 0:临时二维码；1:永久二维码(此时expire参数无效)；2:永久二维码(此时expire参数无效)
-	 * @param int $expire 临时二维码有效期，最大为1800秒
-	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>1800,'url'=>'二维码图片解析后的地址')
+	 * @param int $type 0:临时二维码；1:数值型永久二维码(此时expire参数无效)；2:字符串型永久二维码(此时expire参数无效)
+	 * @param int $expire 临时二维码有效期，最大为604800秒
+	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>604800,'url'=>'二维码图片解析后的地址')
 	 */
-	public function getQRCode($scene_id,$type=0,$expire=1800){
+	public function getQRCode($scene_id,$type=0,$expire=604800){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$type = ($type && is_string($scene_id))?2:$type;
+		if (!isset($scene_id)) return false;
+		switch ($type) {
+			case '0':
+				if (!is_numeric($scene_id))
+					return false;
+				$action_name = 'QR_SCENE';
+				$action_info = array('scene'=>(array('scene_id'=>$scene_id)));
+				break;
+
+			case '1':
+				if (!is_numeric($scene_id))
+					return false;
+				$action_name = 'QR_LIMIT_SCENE';
+				$action_info = array('scene'=>(array('scene_id'=>$scene_id)));
+				break;
+
+			case '2':
+				if (!is_string($scene_id))
+					return false;
+				$action_name = 'QR_LIMIT_STR_SCENE';
+				$action_info = array('scene'=>(array('scene_str'=>$scene_id)));
+				break;
+
+			default:
+				return false;
+		}
+
 		$data = array(
-			'action_name'=>$type?($type == 2?"QR_LIMIT_STR_SCENE":"QR_LIMIT_SCENE"):"QR_SCENE",
-			'expire_seconds'=>$expire,
-			'action_info'=>array('scene'=>($type == 2?array('scene_str'=>$scene_id):array('scene_id'=>$scene_id)))
+			'action_name'    => $action_name,
+			'expire_seconds' => $expire,
+			'action_info'    => $action_info
 		);
-		if ($type == 1) {
+		if ($type) {
 			unset($data['expire_seconds']);
 		}
+
 		$result = $this->http_post(self::API_URL_PREFIX.self::QRCODE_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
+		if ($result) {
 			$json = json_decode($result,true);
 			if (!$json || !empty($json['errcode'])) {
 				$this->errCode = $json['errcode'];
@@ -2145,12 +2293,34 @@ class Wechat
 	/**
 	 * 获取关注者详细信息
 	 * @param string $openid
+	 * @param string $lang 返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
 	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
 	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
 	 */
-	public function getUserInfo($openid){
+	public function getUserInfo($openid, $lang = 'zh_CN'){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::USER_INFO_URL.'access_token='.$this->access_token.'&openid='.$openid);
+		$result = $this->http_get(self::API_URL_PREFIX.self::USER_INFO_URL.'access_token='.$this->access_token.'&openid='.$openid.'&lang='.$lang);
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode'])) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json;
+		}
+		return false;
+	}
+	/**
+	 * 批量获取关注者详细信息
+	 * @param array $openids user_list{{'openid:xxxxxx'},{},{}}
+	 * @return array user_info_list{subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}{}{}...
+	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
+	 */
+	public function getUsersInfo($openids){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		$result = $this->http_post(self::API_URL_PREFIX.self::USERS_INFO_URL.'access_token='.$this->access_token,json_encode($openids));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -3037,6 +3207,40 @@ class Wechat
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
         $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_GET . 'access_token=' . $this->access_token, self::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg  = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 获取用户已领取卡券接口
+     * @param string $openid
+     * @param string $card_id
+     * @return boolean|array    返回数组信息比较复杂，请参看卡券接口文档
+     * 成功返回结果
+     *  {
+     * "errcode":0,
+     * "errmsg":"ok",
+     * "card_list": [
+     * {"code": "xxx1434079154", "card_id": "xxxxxxxxxx"},
+     * {"code": "xxx1434079155", "card_id": "xxxxxxxxxx"}
+     * ]
+     * }
+     */
+    public function getUserCardList($openid,$card_id) {
+        $data = array(
+            'openid' => $openid,
+            'card_id' => $card_id
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_USER_GETCARDLIST . 'access_token=' . $this->access_token, self::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -4201,6 +4405,157 @@ class Wechat
         }
         return false;
     }
+
+	/**
+	 * 根据订单ID获取订单详情
+	 * @param string $order_id 订单ID
+	 * @return order array|bool
+	 */
+	public function getOrderByID($order_id){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!$order_id) return false;
+
+		$data = array(
+			'order_id'=>$order_id
+		);
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_GETBYID.'access_token='.$this->access_token, self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode']) && $json['errcode']) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json['order'];
+		}
+		return false;
+	}
+
+	/**
+	 * 根据订单状态/创建时间获取订单详情
+	 * @param int $status 订单状态(不带该字段-全部状态, 2-待发货, 3-已发货, 5-已完成, 8-维权中, )
+	 * @param int $begintime 订单创建时间起始时间(不带该字段则不按照时间做筛选)
+	 * @param int $endtime 订单创建时间终止时间(不带该字段则不按照时间做筛选)
+	 * @return order list array|bool
+	 */
+	public function getOrderByFilter($status = null, $begintime = null, $endtime = null){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+
+		$data = array();
+
+		$valid_status = array(2, 3, 5, 8);
+		if (is_numeric($status) && in_array($status, $valid_status)) {
+			$data['status'] = $status;
+		}
+
+		if (is_numeric($begintime) && is_numeric($endtime)) {
+			$data['begintime'] = $begintime;
+			$data['endtime'] = $endtime;
+		}
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_GETBYFILTER.'access_token='.$this->access_token, self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode']) && $json['errcode']) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return $json['order_list'];
+		}
+		return false;
+	}
+
+	/**
+	 * 设置订单发货信息
+	 * @param string $order_id 订单 ID
+	 * @param int $need_delivery 商品是否需要物流(0-不需要，1-需要)
+	 * @param string $delivery_company 物流公司 ID
+	 * @param string $delivery_track_no 运单 ID
+	 * @param int $is_others 是否为 6.4.5 表之外的其它物流公司(0-否，1-是)
+	 * @return bool
+	 */
+	public function setOrderDelivery($order_id, $need_delivery = 0, $delivery_company = null, $delivery_track_no = null, $is_others = 0){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!$order_id) return false;
+
+		$data = array();
+		$data['order_id'] = $order_id;
+		if ($need_delivery) {
+			$data['delivery_company'] = $delivery_company;
+			$data['delivery_track_no'] = $delivery_track_no;
+			$data['is_others'] = $is_others;
+		}
+		else {
+			$data['need_delivery'] = $need_delivery;
+		}
+
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_SETDELIVERY.'access_token='.$this->access_token, self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode']) && $json['errcode']) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 关闭订单
+	 * @param string $order_id 订单 ID
+	 * @return bool
+	 */
+	public function closeOrder($order_id){
+		if (!$this->access_token && !$this->checkAuth()) return false;
+		if (!$order_id) return false;
+
+		$data = array(
+			'order_id'=>$order_id
+		);
+
+		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_CLOSE.'access_token='.$this->access_token, self::json_encode($data));
+		if ($result)
+		{
+			$json = json_decode($result,true);
+			if (isset($json['errcode']) && $json['errcode']) {
+				$this->errCode = $json['errcode'];
+				$this->errMsg = $json['errmsg'];
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private function parseSkuInfo($skuInfo) {
+		$skuInfo = str_replace("\$", "", $skuInfo);
+		$matches = explode(";", $skuInfo);
+
+		$result = array();
+		foreach ($matches as $matche) {
+			$arrs = explode(":", $matche);
+			$result[$arrs[0]] = $arrs[1];
+		}
+
+		return $result;
+	}
+
+	/**
+	 * 获取订单SkuInfo - 订单付款通知
+	 * 当Event为 merchant_order(订单付款通知)
+	 * @return array|boolean
+	 */
+	public function getRevOrderSkuInfo(){
+		if (isset($this->_receive['SkuInfo']))     //订单 SkuInfo
+			return $this->parseSkuInfo($this->_receive['SkuInfo']);
+		else
+			return false;
+	}
 }
 /**
  * PKCS7Encoder class
