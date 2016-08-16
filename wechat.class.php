@@ -1129,7 +1129,24 @@ class Wechat
 			curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, false);
 			curl_setopt($oCurl, CURLOPT_SSLVERSION, 1); //CURL_SSLVERSION_TLSv1
 		}
-		if (is_string($param) || $post_file) {
+	        if (PHP_VERSION_ID >= 50500 && class_exists('\CURLFile')) {
+	            	$is_curlFile = true;
+	        } else {
+	        	$is_curlFile = false;
+	            	if (defined('CURLOPT_SAFE_UPLOAD')) {
+	                	curl_setopt($oCurl, CURLOPT_SAFE_UPLOAD, false);
+	            	}
+	        }
+		if (is_string($param)) {
+	            	$strPOST = $param;
+	        }elseif($post_file) {
+	            	if($is_curlFile) {
+		                foreach ($param as $key => $val) {
+		                    	if (substr($val, 0, 1) == '@') {
+		                        	$param[$key] = new \CURLFile(realpath(substr($val,1)));
+		                    	}
+		                }
+	            	}
 			$strPOST = $param;
 		} else {
 			$aPOST = array();
@@ -1142,9 +1159,6 @@ class Wechat
 		curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt($oCurl, CURLOPT_POST,true);
 		curl_setopt($oCurl, CURLOPT_POSTFIELDS,$strPOST);
-		if(PHP_VERSION_ID >= 50500){
-			curl_setopt($oCurl, CURLOPT_SAFE_UPLOAD, FALSE);
-		}
 		$sContent = curl_exec($oCurl);
 		$aStatus = curl_getinfo($oCurl);
 		curl_close($oCurl);
