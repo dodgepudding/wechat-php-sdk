@@ -9,8 +9,10 @@
  *			'token'=>'tokenaccesskey', //填写你设定的key
  *			'encodingaeskey'=>'encodingaeskey', //填写加密用的EncodingAESKey
  *			'appid'=>'wxdk1234567890', //填写高级调用功能的app id
- *			'appsecret'=>'xxxxxxxxxxxxxxxxxxx' //填写高级调用功能的密钥
- *		);
+ *			'appsecret'=>'xxxxxxxxxxxxxxxxxxx', //填写高级调用功能的密钥
+ *			'mch_id'=>'xxxxxxxxxxxxxxxxxxx', //微信支付商户号
+ *			'key'=>'xxxxxxxxxxxxxxxxxxx' //微信支付API密钥
+		);
  *	 $weObj = new Wechat($options);
  *   $weObj->valid();
  *   $type = $weObj->getRev()->getRevType();
@@ -239,12 +241,27 @@ class Wechat
 	public $errMsg = "no access";
 	public $logcallback;
 
+	/**
+	 * 微信支付(公众号JSSDK支付)
+	 * 
+	 * 官方文档：http://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html
+	 * 微信支付：http://pay.weixin.qq.com/wiki/doc/api/index.php?chapter=9_1#
+	 * 官方示例：http://demo.open.weixin.qq.com/jssdk/sample.zip
+	 * 
+	 */
+	const PAY_PREFIX = 'https://api.mch.weixin.qq.com';
+	const PAY_UNIFIEDORDER = '/pay/unifiedorder?';
+	private $mch_id;
+	private $key;
+	
 	public function __construct($options)
 	{
 		$this->token = isset($options['token'])?$options['token']:'';
 		$this->encodingAesKey = isset($options['encodingaeskey'])?$options['encodingaeskey']:'';
 		$this->appid = isset($options['appid'])?$options['appid']:'';
 		$this->appsecret = isset($options['appsecret'])?$options['appsecret']:'';
+		$this->mch_id = isset($options['mch_id'])?$options['mch_id']:'';
+		$this->key = isset($options['key'])?$options['key']:'';
 		$this->debug = isset($options['debug'])?$options['debug']:false;
 		$this->logcallback = isset($options['logcallback'])?$options['logcallback']:false;
 	}
@@ -4573,6 +4590,124 @@ class Wechat
 			return $this->parseSkuInfo($this->_receive['SkuInfo']);
 		else
 			return false;
+	}
+	/**
+	 * 微信支付(公众号JSSDK支付)
+	 */
+	 
+	/**
+	 * 公众号支付签名
+	 * @param array $arr  需要签名的数据
+	 * @return array|bool 返回签名字串
+	 */
+	public function getPaySign($arr=array()){
+	    if (empty($arr)) return false;
+		$arr['appid'] = $this->appid;
+		$arr['mch_id'] = $this->mch_id;
+		$arr['nonce_str'] = $this->generateNonceStr();
+		$paySign = $this->getPaySignature($arr);
+		$arr['sign'] = $paySign;
+		return $arr;
+	}
+	
+	/**
+	 * 公众号支付JSSDK签名
+	 * @param array $arr  需要签名的数据
+	 * @return array|bool 返回签名字串
+	 */
+	public function getPayJssdkSign($str){
+	    if (empty($str)) return false;
+		$arr=array();
+		$arr['appId'] = $this->appid;
+		$arr['timeStamp'] = " ".time();
+		$arr['nonceStr'] = $this->generateNonceStr();
+		$arr['package'] = "prepay_id=" . $str;
+		$arr['signType'] = "MD5";
+		$paySign = $this->getPaySignature($arr);
+		$arr['paySign'] = $paySign;
+		return $arr;
+	}
+	/**
+	 * 公众号支付 统一下单接口 （默认交易类型JSAPI）
+	 * @param array $arr 请求下单参数
+	 * @param boolean $jsSign false返回下单参数，ture返回H5签名
+	 * @return boolean|array
+	 * 
+     * 字段说明:
+	 * 商品描述   body
+	 * 商户订单号 out_trade_no
+	 * 总金额     total_fee
+	 * 终端IP     spbill_create_ip
+	 * 通知地址   notify_url
+	 * 用户标识   openid
+	 *
+	 *   $options = array(
+	 *			'appid'=>'wxdk1234567890', //填写高级调用功能的app id
+	 *			'mch_id'=>'xxxxxxxxxxxxxxxxxxx', //微信支付商户号
+	 *			'key'=>'xxxxxxxxxxxxxxxxxxx' //微信支付API密钥
+	 *		);
+	 *	 $weObj = new Wechat($options);
+	 *
+	 *   $arr=array();
+	 *   $arr['spbill_create_ip'] = '终端IP';
+	 *   $arr['out_trade_no'] = '商户订单号';
+	 *   $arr['total_fee'] = '总金( 135 = 1.35元)';
+	 *   $arr['notify_url'] = "http://xxxx/PayNotify.php";
+	 *   $arr['body'] = '商品描述';
+	 *   $arr['openid'] = '用户标识';
+	 *   $ret = $weObj->PayUnifiedOrder($arr,true);
+	 *
+	 */
+	public function PayUnifiedOrder($arr=array(), $jsSign=false){
+	    if (empty($arr)) return false;
+		$arr['device_info'] = isset($arr['device_info'])?$arr['device_info']:"WEB";
+		$arr['fee_type'] = isset($arr['fee_type'])?$arr['fee_type']:"CNY";
+		$arr['trade_type'] = isset($arr['trade_type'])?$arr['trade_type']:"JSAPI";
+		$arrdata = $this->getPaySign($arr);
+		$xmldata =  $this->xml_encode($arrdata);
+		$result = $this->http_post(self::PAY_PREFIX.self::PAY_UNIFIEDORDER,$xmldata);
+		if ($result)
+		{
+			$json = (array)simplexml_load_string($result, 'SimpleXMLElement', LIBXML_NOCDATA);
+			
+			if ($json['return_code'] != "SUCCESS") { //通信失败
+				$this->errCode = $json['return_code'];
+				$this->errMsg = $json['return_msg'];
+				return false;
+			} else if ($json['result_code'] != "SUCCESS") { //下单失败
+				$this->errCode = $json['err_code'];
+				$this->errMsg = $json['err_code_des'];
+				return false;
+			}
+			//生成微信签名
+			return $jsSign==false?$json:$this->getPayJssdkSign($json['prepay_id']);
+		}
+		return false;
+	}
+
+	/**
+	 * 拼接微信支付签名
+	 * @param array  $arrdata 签名数组
+	 * @param string $method  签名方法
+	 * @param string $key     商户key
+	 * @return boolean|string 签名值
+	 */
+	public function getPaySignature($arrdata,$method="md5") {
+		ksort($arrdata);
+		$paramstring = "";
+		foreach($arrdata as $key => $value)
+		{
+			if(!$value) continue;
+			if(strlen($paramstring) == 0)
+				$paramstring .= $key . "=" . $value;
+			else
+				$paramstring .= "&" . $key . "=" . $value;
+		}
+		
+		$paramstring = $paramstring."&key=".$this->key;
+		$Sign = $method($paramstring);
+		$Sign = strtoupper($Sign);
+		return $Sign;
 	}
 }
 /**
