@@ -127,6 +127,7 @@ class Wechat
     const MEDIA_FOREVER_BATCHGET_URL = '/material/batchget_material?';
     const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
     const OAUTH_AUTHORIZE_URL = '/authorize?';
+    const CURRENT_AUTOREPLY_INFO = '/get_current_autoreply_info?'; //获取公众号的自动回复规则
     ///多客服相关地址
     const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
     const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
@@ -2757,6 +2758,25 @@ class Wechat
     public function getAllTemplate() {
         if (!$this->access_token && !$this->checkAuth()) return false;
         $result = $this->http_get(self::API_URL_PREFIX.self::TEMPLATE_GET_ALL_PRIVATE_URL.'access_token='.$this->access_token);
+        if ($result) {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+
+    /**
+     * 获取公众号的自动回复规则
+     * @return bool|mixed
+     */
+    public function getCurrentAutoreplyInfo() {
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::CURRENT_AUTOREPLY_INFO.'access_token='.$this->access_token);
         if ($result) {
             $json = json_decode($result,true);
             if (!$json || !empty($json['errcode'])) {
