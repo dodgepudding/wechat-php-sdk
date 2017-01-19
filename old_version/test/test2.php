@@ -44,7 +44,7 @@
 		    file_put_contents($img,$imgdata);
 		    //上传图片
 		    $fileid = $wechat->uploadFile($img);
-		    echo 'fileid:'.$fileid;
+		    echo 'fileid:',$fileid;
 		    //if ($fileid) $re = $wechat->sendImage($user['id'],$fileid);
 		    //发送图文信息
 		    $re = $wechat->sendPreview($userdata['user_name'],$content,$content,$content,$fileid,'http://github.com/dodgepudding/wechat-php-sdk');
