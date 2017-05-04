@@ -1361,6 +1361,33 @@ class Wechat
 	    return $signPackage;
 	}
 
+	/**
+	 * 生成JsApiConfig配置项
+	 * @param string $url 网页的URL，自动处理#及其后面部分
+	 * @param bool $debug 是否是调试模式
+	 * @param array $jsApiList 需要使用的JS接口列表 (为空则使用全部) 例:array('openLocation','getLocation');
+	 * @param string $timestamp 当前时间戳 (为空则自动生成)
+	 * @param string $noncestr 随机串 (为空则自动生成)
+	 * @param string $appid 用于多个appid时使用,可空
+	 * @return string|bool 返回微信jsApiConfig字符串
+	 */
+    public function getJsConfig($url, $debug=false, $jsApiList=array(), $timestamp=0, $noncestr='', $appid=''){
+        $sign = $this->getJsSign($url, $timestamp, $noncestr, $appid);
+        if(!$sign)
+            return false;
+        if(empty($jsApiList)){
+            $jsAPI = "checkJsApi','onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ','onMenuShareWeibo','hideMenuItems','showMenuItems','hideAllNonBaseMenuItem','showAllNonBaseMenuItem','translateVoice','startRecord','stopRecord','onRecordEnd','playVoice','pauseVoice','stopVoice','uploadVoice','downloadVoice','chooseImage','previewImage','uploadImage','downloadImage','getNetworkType','openLocation','getLocation','hideOptionMenu','showOptionMenu','closeWindow','scanQRCode','chooseWXPay','openProductSpecificView','addCard','chooseCard','openCard";
+        }else{
+            $jsAPI = implode("','",$jsApiList);
+        }
+        $wxConfig = "appId: '" . $sign['appid'] . "',timestamp:'" . $sign['timestamp'] . "',nonceStr:'" . $sign['noncestr'] . "',signature:'" . $sign['signature'] . "',jsApiList: ['".$jsAPI."']";
+        if (!$debug) {
+            return "wx.config({" . $wxConfig . "});";
+        } else {
+            return "wx.config({debug: true," . $wxConfig . "});";
+        }
+    }
+
     /**
      * 获取卡券签名cardSign
      * @param string $card_type 卡券的类型，不可为空，官方jssdk文档说这个值可空，但签名验证工具又必填这个值，官方文档到处是坑，
