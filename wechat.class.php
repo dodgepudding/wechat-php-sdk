@@ -107,6 +107,8 @@ class Wechat
 	const MASS_SEND_URL = '/message/mass/send?';
 	const TEMPLATE_SET_INDUSTRY_URL = '/template/api_set_industry?';
 	const TEMPLATE_ADD_TPL_URL = '/template/api_add_template?';
+	const TEMPLATE_DEL_TPL_URL = '/template/del_private_template?';
+	const TEMPLATE_GET_TPL_ALL = '/template/get_all_private_template?';
 	const TEMPLATE_SEND_URL = '/message/template/send?';
 	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
 	const MASS_DELETE_URL = '/message/mass/delete?';
@@ -151,8 +153,8 @@ class Wechat
 	const CARD_DELETE                     = '/card/delete?';
 	const CARD_UPDATE                     = '/card/update?';
 	const CARD_GET                        = '/card/get?';
-        const CARD_USER_GETCARDLIST         = '/card/user/getcardlist?';
-        const CARD_BATCHGET                   = '/card/batchget?';
+	const CARD_USER_GETCARDLIST         = '/card/user/getcardlist?';
+	const CARD_BATCHGET                   = '/card/batchget?';
 	const CARD_MODIFY_STOCK               = '/card/modifystock?';
 	const CARD_LOCATION_BATCHADD          = '/card/location/batchadd?';
 	const CARD_LOCATION_BATCHGET          = '/card/location/batchget?';
@@ -1195,6 +1197,9 @@ class Wechat
 	 */
 	protected function setCache($cachename,$value,$expired){
 		//TODO: set cache implementation
+		$file_path = $cachename.".txt";
+		$value = date("Y-m-d H:i:s").'|##|'.$value.'|##|'.(time()+6000);
+		file_put_contents($file_path,$value);
 		return false;
 	}
 
@@ -1205,6 +1210,12 @@ class Wechat
 	 */
 	protected function getCache($cachename){
 		//TODO: get cache implementation
+		$file_path = $cachename.".txt";
+		if(file_exists($file_path)) {
+			$value = file_get_contents($file_path);//将整个文件内容读入到一个字符串中
+			$r=explode('|##|',$value);
+			if($r[2]>time()) return $r[1];
+		}
 		return false;
 	}
 
@@ -2700,7 +2711,48 @@ class Wechat
 	    }
 	    return false;
 	}
+	
+	/**
+	 * 模板消息 删除模板
+	 * 成功返回消息模板的调用id
+	 * @param string $template_id 模板ID
+	 * @return boolean|string
+	 */
+	public function delTemplateMessage($template_id){
+	    $data = array ('template_id' =>$template_id);
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_DEL_TPL_URL.'access_token='.$this->access_token,json_encode($data));
+	    if($result){
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json ;
+	    }
+	    return false;
+	}
 
+	/**
+	 * 模板消息 获取模板列表
+	 * @return boolean|array
+	 */
+	public function getTemplateAllList(){
+	    if (!$this->access_token && !$this->checkAuth()) return false;
+	    $result = $this->http_get(self::API_URL_PREFIX.self::TEMPLATE_GET_TPL_ALL.'access_token='.$this->access_token);
+	    if($result){
+	        $json = json_decode($result,true);
+	        if (!$json || !empty($json['errcode'])) {
+	            $this->errCode = $json['errcode'];
+	            $this->errMsg = $json['errmsg'];
+	            return false;
+	        }
+	        return $json ;
+	    }
+	    return false;
+	}
+	
 	/**
 	 * 发送模板消息
 	 * @param array $data 消息结构
