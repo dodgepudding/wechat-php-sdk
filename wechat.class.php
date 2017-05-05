@@ -1380,7 +1380,7 @@ class Wechat
         }else{
             $jsAPI = implode("','",$jsApiList);
         }
-        $wxConfig = "appId: '" . $sign['appid'] . "',timestamp:'" . $sign['timestamp'] . "',nonceStr:'" . $sign['noncestr'] . "',signature:'" . $sign['signature'] . "',jsApiList: ['".$jsAPI."']";
+        $wxConfig = "appId: '" . $sign['appId'] . "',timestamp:'" . $sign['timestamp'] . "',nonceStr:'" . $sign['nonceStr'] . "',signature:'" . $sign['signature'] . "',jsApiList: ['".$jsAPI."'],url: '" . $sign['url'] . "'";
         if (!$debug) {
             return "wx.config({" . $wxConfig . "});";
         } else {
