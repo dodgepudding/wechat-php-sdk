@@ -238,6 +238,7 @@ class Wechat
 	private $_funcflag = false;
 	private $_receive;
 	private $_text_filter = true;
+	private $tokenCachePath;
 	public $debug =  false;
 	public $errCode = 40001;
 	public $errMsg = "no access";
@@ -265,6 +266,7 @@ class Wechat
 		$this->mch_id = isset($options['mch_id'])?$options['mch_id']:'';
 		$this->key = isset($options['key'])?$options['key']:'';
 		$this->debug = isset($options['debug'])?$options['debug']:false;
+		$this->tokenCachePath = isset($options['tokenCachePath'])?$options['tokenCachePath']:dirname(__FILE__).'/tokenCache/';
 		$this->logcallback = isset($options['logcallback'])?$options['logcallback']:false;
 	}
 
@@ -1197,9 +1199,10 @@ class Wechat
 	 */
 	protected function setCache($cachename,$value,$expired){
 		//TODO: set cache implementation
-		$file_path = $cachename.".txt";
+		
+		$tokenCachePath = $this->tokenCachePath.$cachename.'.txt';
 		$value = date("Y-m-d H:i:s").'|##|'.$value.'|##|'.(time()+6000);
-		file_put_contents($file_path,$value);
+		file_put_contents($tokenCachePath,$value);
 		return false;
 	}
 
@@ -1210,11 +1213,15 @@ class Wechat
 	 */
 	protected function getCache($cachename){
 		//TODO: get cache implementation
-		$file_path = $cachename.".txt";
-		if(file_exists($file_path)) {
-			$value = file_get_contents($file_path);//将整个文件内容读入到一个字符串中
+		
+		$tokenCachePath = $this->tokenCachePath.$cachename.'.txt';
+		if(file_exists($tokenCachePath)){
+			$value = file_get_contents($tokenCachePath);//将整个文件内容读入到一个字符串中
 			$r=explode('|##|',$value);
-			if($r[2]>time()) return $r[1];
+			if($r[2]>time())
+			{
+				return $r[1];
+			}
 		}
 		return false;
 	}
