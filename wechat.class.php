@@ -1143,38 +1143,41 @@ class Wechat
 	 * @param boolean $post_file 是否文件上传
 	 * @return string content
 	 */
-	private function http_post($url,$param,$post_file=false){
+	public function http_post($url,$param,$post_file=false){
 		$oCurl = curl_init();
 		if(stripos($url,"https://")!==FALSE){
 			curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, false);
 			curl_setopt($oCurl, CURLOPT_SSLVERSION, 1); //CURL_SSLVERSION_TLSv1
 		}
-	        if (PHP_VERSION_ID >= 50500 && class_exists('\CURLFile')) {
-	            	$is_curlFile = true;
-	        } else {
-	        	$is_curlFile = false;
-	            	if (defined('CURLOPT_SAFE_UPLOAD')) {
-	                	curl_setopt($oCurl, CURLOPT_SAFE_UPLOAD, false);
-	            	}
-	        }
+		if (PHP_VERSION_ID >= 50500 && class_exists('\CURLFile')) {
+			$is_curlFile = true;
+		} else {
+			$is_curlFile = false;
+				if (defined('CURLOPT_SAFE_UPLOAD')) {
+					curl_setopt($oCurl, CURLOPT_SAFE_UPLOAD, false);
+				}
+		}
 		if (is_string($param)) {
-	            	$strPOST = $param;
-	        }elseif($post_file) {
-	            	if($is_curlFile) {
-		                foreach ($param as $key => $val) {
-		                    	if (substr($val, 0, 1) == '@') {
-		                        	$param[$key] = new \CURLFile(realpath(substr($val,1)));
-		                    	}
-		                }
-	            	}
+			$strPOST = $param;
+		}elseif($post_file) {
+			if($is_curlFile) {
+				foreach ($param as $key => $val) {
+					if (substr($val, 0, 1) == '@') {
+						$param[$key] = new \CURLFile(realpath(substr($val,1)));
+					}
+				}
+			}
 			$strPOST = $param;
 		} else {
+			/*
 			$aPOST = array();
 			foreach($param as $key=>$val){
 				$aPOST[] = $key."=".urlencode($val);
 			}
 			$strPOST =  join("&", $aPOST);
+			*/
+			$strPOST=http_build_query($param);
 		}
 		curl_setopt($oCurl, CURLOPT_URL, $url);
 		curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
