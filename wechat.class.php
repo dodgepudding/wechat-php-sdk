@@ -2595,7 +2595,7 @@ class Wechat
 	 */
 	public function sendCustomMessage($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEND_URL.'access_token='.$this->access_token,json_encode($data));
+		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEND_URL.'access_token='.$this->access_token,json_encode($data, JSON_UNESCAPED_UNICODE));
 		if ($result)
 		{
 			$json = json_decode($result,true);
@@ -2821,7 +2821,7 @@ class Wechat
 	 */
 	public function sendTemplateMessage($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SEND_URL.'access_token='.$this->access_token,json_encode($data));
+		$result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SEND_URL.'access_token='.$this->access_token,json_encode($data, JSON_UNESCAPED_UNICODE));
 		if($result){
 			$json = json_decode($result,true);
 			if (!$json || !empty($json['errcode'])) {
@@ -2841,7 +2841,7 @@ class Wechat
 	 */
 	public function getCustomServiceMessage($data){
 		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_RECORD.'access_token='.$this->access_token,json_encode($data));
+		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_RECORD.'access_token='.$this->access_token,json_encode($data, JSON_UNESCAPED_UNICODE));
 		if ($result)
 		{
 			$json = json_decode($result,true);
