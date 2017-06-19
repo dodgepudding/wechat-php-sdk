@@ -33,7 +33,7 @@ class Wechat
     const EVENT_LOCATION 	= 'LOCATION';       //上报地理位置
     const EVENT_ENTER_AGENT = 'enter_agent';   	//用户进入应用
 
-    const EVENT_MENU_VIEW 			= 'VIEW'; 				//菜单 - 点击菜单跳转链接
+    const EVENT_MENU_VIEW 			= 'view'; 				//菜单 - 点击菜单跳转链接
     const EVENT_MENU_CLICK 			= 'CLICK';              //菜单 - 点击菜单拉取消息
     const EVENT_MENU_SCAN_PUSH 		= 'scancode_push';      //菜单 - 扫码推事件(客户端跳URL)
     const EVENT_MENU_SCAN_WAITMSG 	= 'scancode_waitmsg'; 	//菜单 - 扫码推事件(客户端不跳URL)
