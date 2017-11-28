@@ -1,120 +1,120 @@
 <?php
 /**
- *	微信公众平台PHP-SDK, 官方API部分
+ *  微信公众平台PHP-SDK, 官方API部分
  *  @author  dodge <dodgepudding@gmail.com>
  *  @link https://github.com/dodgepudding/wechat-php-sdk
  *  @version 1.2
  *  usage:
  *   $options = array(
- *			'token'=>'tokenaccesskey', //填写你设定的key
- *			'encodingaeskey'=>'encodingaeskey', //填写加密用的EncodingAESKey
- *			'appid'=>'wxdk1234567890', //填写高级调用功能的app id
- *			'appsecret'=>'xxxxxxxxxxxxxxxxxxx' //填写高级调用功能的密钥
- *		);
- *	 $weObj = new Wechat($options);
+ *          'token'=>'tokenaccesskey', //填写你设定的key
+ *          'encodingaeskey'=>'encodingaeskey', //填写加密用的EncodingAESKey
+ *          'appid'=>'wxdk1234567890', //填写高级调用功能的app id
+ *          'appsecret'=>'xxxxxxxxxxxxxxxxxxx' //填写高级调用功能的密钥
+ *      );
+ *   $weObj = new Wechat($options);
  *   $weObj->valid();
  *   $type = $weObj->getRev()->getRevType();
  *   switch($type) {
- *   		case Wechat::MSGTYPE_TEXT:
- *   			$weObj->text("hello, I'm wechat")->reply();
- *   			exit;
- *   			break;
- *   		case Wechat::MSGTYPE_EVENT:
- *   			....
- *   			break;
- *   		case Wechat::MSGTYPE_IMAGE:
- *   			...
- *   			break;
- *   		default:
- *   			$weObj->text("help info")->reply();
+ *          case Wechat::MSGTYPE_TEXT:
+ *              $weObj->text("hello, I'm wechat")->reply();
+ *              exit;
+ *              break;
+ *          case Wechat::MSGTYPE_EVENT:
+ *              ....
+ *              break;
+ *          case Wechat::MSGTYPE_IMAGE:
+ *              ...
+ *              break;
+ *          default:
+ *              $weObj->text("help info")->reply();
  *   }
  *
  *   //获取菜单操作:
  *   $menu = $weObj->getMenu();
  *   //设置菜单
  *   $newmenu =  array(
- *   		"button"=>
- *   			array(
- *   				array('type'=>'click','name'=>'最新消息','key'=>'MENU_KEY_NEWS'),
- *   				array('type'=>'view','name'=>'我要搜索','url'=>'http://www.baidu.com'),
- *   				)
- *  		);
+ *          "button"=>
+ *              array(
+ *                  array('type'=>'click','name'=>'最新消息','key'=>'MENU_KEY_NEWS'),
+ *                  array('type'=>'view','name'=>'我要搜索','url'=>'http://www.baidu.com'),
+ *                  )
+ *          );
  *   $result = $weObj->createMenu($newmenu);
  */
 class Wechat
 {
-	const MSGTYPE_TEXT = 'text';
-	const MSGTYPE_IMAGE = 'image';
-	const MSGTYPE_LOCATION = 'location';
-	const MSGTYPE_LINK = 'link';
-	const MSGTYPE_EVENT = 'event';
-	const MSGTYPE_MUSIC = 'music';
-	const MSGTYPE_NEWS = 'news';
-	const MSGTYPE_VOICE = 'voice';
-	const MSGTYPE_VIDEO = 'video';
-	const MSGTYPE_SHORTVIDEO = 'shortvideo';
-	const EVENT_SUBSCRIBE = 'subscribe';       //订阅
-	const EVENT_UNSUBSCRIBE = 'unsubscribe';   //取消订阅
-	const EVENT_SCAN = 'SCAN';                 //扫描带参数二维码
-	const EVENT_LOCATION = 'LOCATION';         //上报地理位置
-	const EVENT_MENU_VIEW = 'VIEW';                     //菜单 - 点击菜单跳转链接
-	const EVENT_MENU_CLICK = 'CLICK';                   //菜单 - 点击菜单拉取消息
-	const EVENT_MENU_SCAN_PUSH = 'scancode_push';       //菜单 - 扫码推事件(客户端跳URL)
-	const EVENT_MENU_SCAN_WAITMSG = 'scancode_waitmsg'; //菜单 - 扫码推事件(客户端不跳URL)
-	const EVENT_MENU_PIC_SYS = 'pic_sysphoto';          //菜单 - 弹出系统拍照发图
-	const EVENT_MENU_PIC_PHOTO = 'pic_photo_or_album';  //菜单 - 弹出拍照或者相册发图
-	const EVENT_MENU_PIC_WEIXIN = 'pic_weixin';         //菜单 - 弹出微信相册发图器
-	const EVENT_MENU_LOCATION = 'location_select';      //菜单 - 弹出地理位置选择器
-	const EVENT_SEND_MASS = 'MASSSENDJOBFINISH';        //发送结果 - 高级群发完成
-	const EVENT_SEND_TEMPLATE = 'TEMPLATESENDJOBFINISH';//发送结果 - 模板消息发送结果
-	const EVENT_KF_SEESION_CREATE = 'kfcreatesession';  //多客服 - 接入会话
-	const EVENT_KF_SEESION_CLOSE = 'kfclosesession';    //多客服 - 关闭会话
-	const EVENT_KF_SEESION_SWITCH = 'kfswitchsession';  //多客服 - 转接会话
-	const EVENT_CARD_PASS = 'card_pass_check';          //卡券 - 审核通过
-	const EVENT_CARD_NOTPASS = 'card_not_pass_check';   //卡券 - 审核未通过
-	const EVENT_CARD_USER_GET = 'user_get_card';        //卡券 - 用户领取卡券
-	const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡券
-	const EVENT_MERCHANT_ORDER = 'merchant_order';        //微信小店 - 订单付款通知
-	const API_URL_PREFIX = 'https://api.weixin.qq.com/cgi-bin';
-	const AUTH_URL = '/token?grant_type=client_credential&';
-	const MENU_CREATE_URL = '/menu/create?';
-	const MENU_GET_URL = '/menu/get?';
-	const MENU_DELETE_URL = '/menu/delete?';
-	const MENU_ADDCONDITIONAL_URL = '/menu/addconditional?';
-	const MENU_DELCONDITIONAL_URL = '/menu/delconditional?';
-	const MENU_TRYMATCH_URL = '/menu/trymatch?';
-	const GET_TICKET_URL = '/ticket/getticket?';
-	const CALLBACKSERVER_GET_URL = '/getcallbackip?';
-	const QRCODE_CREATE_URL='/qrcode/create?';
-	const QR_SCENE = 0;
-	const QR_LIMIT_SCENE = 1;
-	const QRCODE_IMG_URL='https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=';
-	const SHORT_URL='/shorturl?';
-	const USER_GET_URL='/user/get?';
-	const USER_INFO_URL='/user/info?';
-	const USERS_INFO_URL='/user/info/batchget?';
-	const USER_UPDATEREMARK_URL='/user/info/updateremark?';
-	const GROUP_GET_URL='/groups/get?';
-	const USER_GROUP_URL='/groups/getid?';
-	const GROUP_CREATE_URL='/groups/create?';
-	const GROUP_UPDATE_URL='/groups/update?';
-	const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
-	const GROUP_MEMBER_BATCHUPDATE_URL='/groups/members/batchupdate?';
-	const CUSTOM_SEND_URL='/message/custom/send?';
-	const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
-	const MASS_SEND_URL = '/message/mass/send?';
-	const TEMPLATE_SET_INDUSTRY_URL = '/template/api_set_industry?';
-	const TEMPLATE_ADD_TPL_URL = '/template/api_add_template?';
-	const TEMPLATE_SEND_URL = '/message/template/send?';
-	const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
-	const MASS_DELETE_URL = '/message/mass/delete?';
-	const MASS_PREVIEW_URL = '/message/mass/preview?';
-	const MASS_QUERY_URL = '/message/mass/get?';
-	const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
-	const MEDIA_UPLOAD_URL = '/media/upload?';
-	const MEDIA_UPLOADIMG_URL = '/media/uploadimg?';//图片上传接口
-	const MEDIA_GET_URL = '/media/get?';
-	const MEDIA_VIDEO_UPLOAD = '/media/uploadvideo?';
+    const MSGTYPE_TEXT = 'text';
+    const MSGTYPE_IMAGE = 'image';
+    const MSGTYPE_LOCATION = 'location';
+    const MSGTYPE_LINK = 'link';
+    const MSGTYPE_EVENT = 'event';
+    const MSGTYPE_MUSIC = 'music';
+    const MSGTYPE_NEWS = 'news';
+    const MSGTYPE_VOICE = 'voice';
+    const MSGTYPE_VIDEO = 'video';
+    const MSGTYPE_SHORTVIDEO = 'shortvideo';
+    const EVENT_SUBSCRIBE = 'subscribe';       //订阅
+    const EVENT_UNSUBSCRIBE = 'unsubscribe';   //取消订阅
+    const EVENT_SCAN = 'SCAN';                 //扫描带参数二维码
+    const EVENT_LOCATION = 'LOCATION';         //上报地理位置
+    const EVENT_MENU_VIEW = 'VIEW';                     //菜单 - 点击菜单跳转链接
+    const EVENT_MENU_CLICK = 'CLICK';                   //菜单 - 点击菜单拉取消息
+    const EVENT_MENU_SCAN_PUSH = 'scancode_push';       //菜单 - 扫码推事件(客户端跳URL)
+    const EVENT_MENU_SCAN_WAITMSG = 'scancode_waitmsg'; //菜单 - 扫码推事件(客户端不跳URL)
+    const EVENT_MENU_PIC_SYS = 'pic_sysphoto';          //菜单 - 弹出系统拍照发图
+    const EVENT_MENU_PIC_PHOTO = 'pic_photo_or_album';  //菜单 - 弹出拍照或者相册发图
+    const EVENT_MENU_PIC_WEIXIN = 'pic_weixin';         //菜单 - 弹出微信相册发图器
+    const EVENT_MENU_LOCATION = 'location_select';      //菜单 - 弹出地理位置选择器
+    const EVENT_SEND_MASS = 'MASSSENDJOBFINISH';        //发送结果 - 高级群发完成
+    const EVENT_SEND_TEMPLATE = 'TEMPLATESENDJOBFINISH';//发送结果 - 模板消息发送结果
+    const EVENT_KF_SEESION_CREATE = 'kfcreatesession';  //多客服 - 接入会话
+    const EVENT_KF_SEESION_CLOSE = 'kfclosesession';    //多客服 - 关闭会话
+    const EVENT_KF_SEESION_SWITCH = 'kfswitchsession';  //多客服 - 转接会话
+    const EVENT_CARD_PASS = 'card_pass_check';          //卡券 - 审核通过
+    const EVENT_CARD_NOTPASS = 'card_not_pass_check';   //卡券 - 审核未通过
+    const EVENT_CARD_USER_GET = 'user_get_card';        //卡券 - 用户领取卡券
+    const EVENT_CARD_USER_DEL = 'user_del_card';        //卡券 - 用户删除卡券
+    const EVENT_MERCHANT_ORDER = 'merchant_order';        //微信小店 - 订单付款通知
+    const API_URL_PREFIX = 'https://api.weixin.qq.com/cgi-bin';
+    const AUTH_URL = '/token?grant_type=client_credential&';
+    const MENU_CREATE_URL = '/menu/create?';
+    const MENU_GET_URL = '/menu/get?';
+    const MENU_DELETE_URL = '/menu/delete?';
+    const MENU_ADDCONDITIONAL_URL = '/menu/addconditional?';
+    const MENU_DELCONDITIONAL_URL = '/menu/delconditional?';
+    const MENU_TRYMATCH_URL = '/menu/trymatch?';
+    const GET_TICKET_URL = '/ticket/getticket?';
+    const CALLBACKSERVER_GET_URL = '/getcallbackip?';
+    const QRCODE_CREATE_URL='/qrcode/create?';
+    const QR_SCENE = 0;
+    const QR_LIMIT_SCENE = 1;
+    const QRCODE_IMG_URL='https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=';
+    const SHORT_URL='/shorturl?';
+    const USER_GET_URL='/user/get?';
+    const USER_INFO_URL='/user/info?';
+    const USERS_INFO_URL='/user/info/batchget?';
+    const USER_UPDATEREMARK_URL='/user/info/updateremark?';
+    const GROUP_GET_URL='/groups/get?';
+    const USER_GROUP_URL='/groups/getid?';
+    const GROUP_CREATE_URL='/groups/create?';
+    const GROUP_UPDATE_URL='/groups/update?';
+    const GROUP_MEMBER_UPDATE_URL='/groups/members/update?';
+    const GROUP_MEMBER_BATCHUPDATE_URL='/groups/members/batchupdate?';
+    const CUSTOM_SEND_URL='/message/custom/send?';
+    const MEDIA_UPLOADNEWS_URL = '/media/uploadnews?';
+    const MASS_SEND_URL = '/message/mass/send?';
+    const TEMPLATE_SET_INDUSTRY_URL = '/template/api_set_industry?';
+    const TEMPLATE_ADD_TPL_URL = '/template/api_add_template?';
+    const TEMPLATE_SEND_URL = '/message/template/send?';
+    const MASS_SEND_GROUP_URL = '/message/mass/sendall?';
+    const MASS_DELETE_URL = '/message/mass/delete?';
+    const MASS_PREVIEW_URL = '/message/mass/preview?';
+    const MASS_QUERY_URL = '/message/mass/get?';
+    const UPLOAD_MEDIA_URL = 'http://file.api.weixin.qq.com/cgi-bin';
+    const MEDIA_UPLOAD_URL = '/media/upload?';
+    const MEDIA_UPLOADIMG_URL = '/media/uploadimg?';//图片上传接口
+    const MEDIA_GET_URL = '/media/get?';
+    const MEDIA_VIDEO_UPLOAD = '/media/uploadvideo?';
     const MEDIA_FOREVER_UPLOAD_URL = '/material/add_material?';
     const MEDIA_FOREVER_NEWS_UPLOAD_URL = '/material/add_news?';
     const MEDIA_FOREVER_NEWS_UPDATE_URL = '/material/update_news?';
@@ -122,161 +122,161 @@ class Wechat
     const MEDIA_FOREVER_DEL_URL = '/material/del_material?';
     const MEDIA_FOREVER_COUNT_URL = '/material/get_materialcount?';
     const MEDIA_FOREVER_BATCHGET_URL = '/material/batchget_material?';
-	const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
-	const OAUTH_AUTHORIZE_URL = '/authorize?';
-	///多客服相关地址
-	const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
-	const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
-	const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
-	const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com'; //以下API接口URL需要使用此前缀
-	const OAUTH_TOKEN_URL = '/sns/oauth2/access_token?';
-	const OAUTH_REFRESH_URL = '/sns/oauth2/refresh_token?';
-	const OAUTH_USERINFO_URL = '/sns/userinfo?';
-	const OAUTH_AUTH_URL = '/sns/auth?';
-	///多客服相关地址
-	const CUSTOM_SESSION_CREATE = '/customservice/kfsession/create?';
-	const CUSTOM_SESSION_CLOSE = '/customservice/kfsession/close?';
-	const CUSTOM_SESSION_SWITCH = '/customservice/kfsession/switch?';
-	const CUSTOM_SESSION_GET = '/customservice/kfsession/getsession?';
-	const CUSTOM_SESSION_GET_LIST = '/customservice/kfsession/getsessionlist?';
-	const CUSTOM_SESSION_GET_WAIT = '/customservice/kfsession/getwaitcase?';
-	const CS_KF_ACCOUNT_ADD_URL = '/customservice/kfaccount/add?';
-	const CS_KF_ACCOUNT_UPDATE_URL = '/customservice/kfaccount/update?';
-	const CS_KF_ACCOUNT_DEL_URL = '/customservice/kfaccount/del?';
-	const CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL = '/customservice/kfaccount/uploadheadimg?';
-	///卡券相关地址
-	const CARD_CREATE                     = '/card/create?';
-	const CARD_DELETE                     = '/card/delete?';
-	const CARD_UPDATE                     = '/card/update?';
-	const CARD_GET                        = '/card/get?';
+    const OAUTH_PREFIX = 'https://open.weixin.qq.com/connect/oauth2';
+    const OAUTH_AUTHORIZE_URL = '/authorize?';
+    ///多客服相关地址
+    const CUSTOM_SERVICE_GET_RECORD = '/customservice/getrecord?';
+    const CUSTOM_SERVICE_GET_KFLIST = '/customservice/getkflist?';
+    const CUSTOM_SERVICE_GET_ONLINEKFLIST = '/customservice/getonlinekflist?';
+    const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com'; //以下API接口URL需要使用此前缀
+    const OAUTH_TOKEN_URL = '/sns/oauth2/access_token?';
+    const OAUTH_REFRESH_URL = '/sns/oauth2/refresh_token?';
+    const OAUTH_USERINFO_URL = '/sns/userinfo?';
+    const OAUTH_AUTH_URL = '/sns/auth?';
+    ///多客服相关地址
+    const CUSTOM_SESSION_CREATE = '/customservice/kfsession/create?';
+    const CUSTOM_SESSION_CLOSE = '/customservice/kfsession/close?';
+    const CUSTOM_SESSION_SWITCH = '/customservice/kfsession/switch?';
+    const CUSTOM_SESSION_GET = '/customservice/kfsession/getsession?';
+    const CUSTOM_SESSION_GET_LIST = '/customservice/kfsession/getsessionlist?';
+    const CUSTOM_SESSION_GET_WAIT = '/customservice/kfsession/getwaitcase?';
+    const CS_KF_ACCOUNT_ADD_URL = '/customservice/kfaccount/add?';
+    const CS_KF_ACCOUNT_UPDATE_URL = '/customservice/kfaccount/update?';
+    const CS_KF_ACCOUNT_DEL_URL = '/customservice/kfaccount/del?';
+    const CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL = '/customservice/kfaccount/uploadheadimg?';
+    ///卡券相关地址
+    const CARD_CREATE                     = '/card/create?';
+    const CARD_DELETE                     = '/card/delete?';
+    const CARD_UPDATE                     = '/card/update?';
+    const CARD_GET                        = '/card/get?';
         const CARD_USER_GETCARDLIST         = '/card/user/getcardlist?';
         const CARD_BATCHGET                   = '/card/batchget?';
-	const CARD_MODIFY_STOCK               = '/card/modifystock?';
-	const CARD_LOCATION_BATCHADD          = '/card/location/batchadd?';
-	const CARD_LOCATION_BATCHGET          = '/card/location/batchget?';
-	const CARD_GETCOLORS                  = '/card/getcolors?';
-	const CARD_QRCODE_CREATE              = '/card/qrcode/create?';
-	const CARD_CODE_CONSUME               = '/card/code/consume?';
-	const CARD_CODE_DECRYPT               = '/card/code/decrypt?';
-	const CARD_CODE_GET                   = '/card/code/get?';
-	const CARD_CODE_UPDATE                = '/card/code/update?';
-	const CARD_CODE_UNAVAILABLE           = '/card/code/unavailable?';
-	const CARD_TESTWHILELIST_SET          = '/card/testwhitelist/set?';
-	const CARD_MEETINGCARD_UPDATEUSER      = '/card/meetingticket/updateuser?';    //更新会议门票
-	const CARD_MEMBERCARD_ACTIVATE        = '/card/membercard/activate?';      //激活会员卡
-	const CARD_MEMBERCARD_UPDATEUSER      = '/card/membercard/updateuser?';    //更新会员卡
-	const CARD_MOVIETICKET_UPDATEUSER     = '/card/movieticket/updateuser?';   //更新电影票(未加方法)
-	const CARD_BOARDINGPASS_CHECKIN       = '/card/boardingpass/checkin?';     //飞机票-在线选座(未加方法)
-	const CARD_LUCKYMONEY_UPDATE          = '/card/luckymoney/updateuserbalance?';     //更新红包金额
-	const SEMANTIC_API_URL = '/semantic/semproxy/search?'; //语义理解
-	///数据分析接口
-	static $DATACUBE_URL_ARR = array(        //用户分析
-	        'user' => array(
-	                'summary' => '/datacube/getusersummary?',		//获取用户增减数据（getusersummary）
-	                'cumulate' => '/datacube/getusercumulate?',		//获取累计用户数据（getusercumulate）
-	        ),
-	        'article' => array(            //图文分析
-	                'summary' => '/datacube/getarticlesummary?',		//获取图文群发每日数据（getarticlesummary）
-	                'total' => '/datacube/getarticletotal?',		//获取图文群发总数据（getarticletotal）
-	                'read' => '/datacube/getuserread?',			//获取图文统计数据（getuserread）
-	                'readhour' => '/datacube/getuserreadhour?',		//获取图文统计分时数据（getuserreadhour）
-	                'share' => '/datacube/getusershare?',			//获取图文分享转发数据（getusershare）
-	                'sharehour' => '/datacube/getusersharehour?',		//获取图文分享转发分时数据（getusersharehour）
-	        ),
-	        'upstreammsg' => array(        //消息分析
-	                'summary' => '/datacube/getupstreammsg?',		//获取消息发送概况数据（getupstreammsg）
-					'hour' => '/datacube/getupstreammsghour?',	//获取消息分送分时数据（getupstreammsghour）
-	                'week' => '/datacube/getupstreammsgweek?',	//获取消息发送周数据（getupstreammsgweek）
-	                'month' => '/datacube/getupstreammsgmonth?',	//获取消息发送月数据（getupstreammsgmonth）
-	                'dist' => '/datacube/getupstreammsgdist?',	//获取消息发送分布数据（getupstreammsgdist）
-	                'distweek' => '/datacube/getupstreammsgdistweek?',	//获取消息发送分布周数据（getupstreammsgdistweek）
-	               	'distmonth' => '/datacube/getupstreammsgdistmonth?',	//获取消息发送分布月数据（getupstreammsgdistmonth）
-	        ),
-	        'interface' => array(        //接口分析
-	                'summary' => '/datacube/getinterfacesummary?',	//获取接口分析数据（getinterfacesummary）
-	                'summaryhour' => '/datacube/getinterfacesummaryhour?',	//获取接口分析分时数据（getinterfacesummaryhour）
-	        )
-	);
-	///微信摇一摇周边
-	const SHAKEAROUND_DEVICE_APPLYID = '/shakearound/device/applyid?';//申请设备ID
+    const CARD_MODIFY_STOCK               = '/card/modifystock?';
+    const CARD_LOCATION_BATCHADD          = '/card/location/batchadd?';
+    const CARD_LOCATION_BATCHGET          = '/card/location/batchget?';
+    const CARD_GETCOLORS                  = '/card/getcolors?';
+    const CARD_QRCODE_CREATE              = '/card/qrcode/create?';
+    const CARD_CODE_CONSUME               = '/card/code/consume?';
+    const CARD_CODE_DECRYPT               = '/card/code/decrypt?';
+    const CARD_CODE_GET                   = '/card/code/get?';
+    const CARD_CODE_UPDATE                = '/card/code/update?';
+    const CARD_CODE_UNAVAILABLE           = '/card/code/unavailable?';
+    const CARD_TESTWHILELIST_SET          = '/card/testwhitelist/set?';
+    const CARD_MEETINGCARD_UPDATEUSER      = '/card/meetingticket/updateuser?';    //更新会议门票
+    const CARD_MEMBERCARD_ACTIVATE        = '/card/membercard/activate?';      //激活会员卡
+    const CARD_MEMBERCARD_UPDATEUSER      = '/card/membercard/updateuser?';    //更新会员卡
+    const CARD_MOVIETICKET_UPDATEUSER     = '/card/movieticket/updateuser?';   //更新电影票(未加方法)
+    const CARD_BOARDINGPASS_CHECKIN       = '/card/boardingpass/checkin?';     //飞机票-在线选座(未加方法)
+    const CARD_LUCKYMONEY_UPDATE          = '/card/luckymoney/updateuserbalance?';     //更新红包金额
+    const SEMANTIC_API_URL = '/semantic/semproxy/search?'; //语义理解
+    ///数据分析接口
+    static $DATACUBE_URL_ARR = array(        //用户分析
+            'user' => array(
+                    'summary' => '/datacube/getusersummary?',       //获取用户增减数据（getusersummary）
+                    'cumulate' => '/datacube/getusercumulate?',     //获取累计用户数据（getusercumulate）
+            ),
+            'article' => array(            //图文分析
+                    'summary' => '/datacube/getarticlesummary?',        //获取图文群发每日数据（getarticlesummary）
+                    'total' => '/datacube/getarticletotal?',        //获取图文群发总数据（getarticletotal）
+                    'read' => '/datacube/getuserread?',         //获取图文统计数据（getuserread）
+                    'readhour' => '/datacube/getuserreadhour?',     //获取图文统计分时数据（getuserreadhour）
+                    'share' => '/datacube/getusershare?',           //获取图文分享转发数据（getusershare）
+                    'sharehour' => '/datacube/getusersharehour?',       //获取图文分享转发分时数据（getusersharehour）
+            ),
+            'upstreammsg' => array(        //消息分析
+                    'summary' => '/datacube/getupstreammsg?',       //获取消息发送概况数据（getupstreammsg）
+                    'hour' => '/datacube/getupstreammsghour?',  //获取消息分送分时数据（getupstreammsghour）
+                    'week' => '/datacube/getupstreammsgweek?',  //获取消息发送周数据（getupstreammsgweek）
+                    'month' => '/datacube/getupstreammsgmonth?',    //获取消息发送月数据（getupstreammsgmonth）
+                    'dist' => '/datacube/getupstreammsgdist?',  //获取消息发送分布数据（getupstreammsgdist）
+                    'distweek' => '/datacube/getupstreammsgdistweek?',  //获取消息发送分布周数据（getupstreammsgdistweek）
+                    'distmonth' => '/datacube/getupstreammsgdistmonth?',    //获取消息发送分布月数据（getupstreammsgdistmonth）
+            ),
+            'interface' => array(        //接口分析
+                    'summary' => '/datacube/getinterfacesummary?',  //获取接口分析数据（getinterfacesummary）
+                    'summaryhour' => '/datacube/getinterfacesummaryhour?',  //获取接口分析分时数据（getinterfacesummaryhour）
+            )
+    );
+    ///微信摇一摇周边
+    const SHAKEAROUND_DEVICE_APPLYID = '/shakearound/device/applyid?';//申请设备ID
     const SHAKEAROUND_DEVICE_UPDATE = '/shakearound/device/update?';//编辑设备信息
-	const SHAKEAROUND_DEVICE_SEARCH = '/shakearound/device/search?';//查询设备列表
-	const SHAKEAROUND_DEVICE_BINDLOCATION = '/shakearound/device/bindlocation?';//配置设备与门店ID的关系
-	const SHAKEAROUND_DEVICE_BINDPAGE = '/shakearound/device/bindpage?';//配置设备与页面的绑定关系
+    const SHAKEAROUND_DEVICE_SEARCH = '/shakearound/device/search?';//查询设备列表
+    const SHAKEAROUND_DEVICE_BINDLOCATION = '/shakearound/device/bindlocation?';//配置设备与门店ID的关系
+    const SHAKEAROUND_DEVICE_BINDPAGE = '/shakearound/device/bindpage?';//配置设备与页面的绑定关系
     const SHAKEAROUND_MATERIAL_ADD = '/shakearound/material/add?';//上传摇一摇图片素材
-	const SHAKEAROUND_PAGE_ADD = '/shakearound/page/add?';//增加页面
-	const SHAKEAROUND_PAGE_UPDATE = '/shakearound/page/update?';//编辑页面
-	const SHAKEAROUND_PAGE_SEARCH = '/shakearound/page/search?';//查询页面列表
-	const SHAKEAROUND_PAGE_DELETE = '/shakearound/page/delete?';//删除页面
-	const SHAKEAROUND_USER_GETSHAKEINFO = '/shakearound/user/getshakeinfo?';//获取摇周边的设备及用户信息
-	const SHAKEAROUND_STATISTICS_DEVICE = '/shakearound/statistics/device?';//以设备为维度的数据统计接口
+    const SHAKEAROUND_PAGE_ADD = '/shakearound/page/add?';//增加页面
+    const SHAKEAROUND_PAGE_UPDATE = '/shakearound/page/update?';//编辑页面
+    const SHAKEAROUND_PAGE_SEARCH = '/shakearound/page/search?';//查询页面列表
+    const SHAKEAROUND_PAGE_DELETE = '/shakearound/page/delete?';//删除页面
+    const SHAKEAROUND_USER_GETSHAKEINFO = '/shakearound/user/getshakeinfo?';//获取摇周边的设备及用户信息
+    const SHAKEAROUND_STATISTICS_DEVICE = '/shakearound/statistics/device?';//以设备为维度的数据统计接口
     const SHAKEAROUND_STATISTICS_PAGE = '/shakearound/statistics/page?';//以页面为维度的数据统计接口
-	///微信小店相关接口
-	const MERCHANT_ORDER_GETBYID = '/merchant/order/getbyid?';//根据订单ID获取订单详情
-	const MERCHANT_ORDER_GETBYFILTER = '/merchant/order/getbyfilter?';//根据订单状态/创建时间获取订单详情
-	const MERCHANT_ORDER_SETDELIVERY = '/merchant/order/setdelivery?';//设置订单发货信息
-	const MERCHANT_ORDER_CLOSE = '/merchant/order/close?';//关闭订单
+    ///微信小店相关接口
+    const MERCHANT_ORDER_GETBYID = '/merchant/order/getbyid?';//根据订单ID获取订单详情
+    const MERCHANT_ORDER_GETBYFILTER = '/merchant/order/getbyfilter?';//根据订单状态/创建时间获取订单详情
+    const MERCHANT_ORDER_SETDELIVERY = '/merchant/order/setdelivery?';//设置订单发货信息
+    const MERCHANT_ORDER_CLOSE = '/merchant/order/close?';//关闭订单
 
-	private $token;
-	private $encodingAesKey;
-	private $encrypt_type;
-	private $appid;
-	private $appsecret;
-	private $access_token;
-	private $jsapi_ticket;
-	private $api_ticket;
-	private $user_token;
-	private $partnerid;
-	private $partnerkey;
-	private $paysignkey;
-	private $postxml;
-	private $_msg;
-	private $_funcflag = false;
-	private $_receive;
-	private $_text_filter = true;
-	public $debug =  false;
-	public $errCode = 40001;
-	public $errMsg = "no access";
-	public $logcallback;
+    private $token;
+    private $encodingAesKey;
+    private $encrypt_type;
+    private $appid;
+    private $appsecret;
+    private $access_token;
+    private $jsapi_ticket;
+    private $api_ticket;
+    private $user_token;
+    private $partnerid;
+    private $partnerkey;
+    private $paysignkey;
+    private $postxml;
+    private $_msg;
+    private $_funcflag = false;
+    private $_receive;
+    private $_text_filter = true;
+    public $debug =  false;
+    public $errCode = 40001;
+    public $errMsg = "no access";
+    public $logcallback;
 
-	public function __construct($options)
-	{
-		$this->token = isset($options['token'])?$options['token']:'';
-		$this->encodingAesKey = isset($options['encodingaeskey'])?$options['encodingaeskey']:'';
-		$this->appid = isset($options['appid'])?$options['appid']:'';
-		$this->appsecret = isset($options['appsecret'])?$options['appsecret']:'';
-		$this->debug = isset($options['debug'])?$options['debug']:false;
-		$this->logcallback = isset($options['logcallback'])?$options['logcallback']:false;
-	}
+    public function __construct($options)
+    {
+        $this->token = isset($options['token'])?$options['token']:'';
+        $this->encodingAesKey = isset($options['encodingaeskey'])?$options['encodingaeskey']:'';
+        $this->appid = isset($options['appid'])?$options['appid']:'';
+        $this->appsecret = isset($options['appsecret'])?$options['appsecret']:'';
+        $this->debug = isset($options['debug'])?$options['debug']:false;
+        $this->logcallback = isset($options['logcallback'])?$options['logcallback']:false;
+    }
 
-	/**
-	 * For weixin server validation
-	 */
-	private function checkSignature($str='')
-	{
+    /**
+     * For weixin server validation
+     */
+    private function checkSignature($str='')
+    {
         $signature = isset($_GET["signature"])?$_GET["signature"]:'';
-	    $signature = isset($_GET["msg_signature"])?$_GET["msg_signature"]:$signature; //如果存在加密验证则用加密验证段
+        $signature = isset($_GET["msg_signature"])?$_GET["msg_signature"]:$signature; //如果存在加密验证则用加密验证段
         $timestamp = isset($_GET["timestamp"])?$_GET["timestamp"]:'';
         $nonce = isset($_GET["nonce"])?$_GET["nonce"]:'';
 
-		$token = $this->token;
-		$tmpArr = array($token, $timestamp, $nonce,$str);
-		sort($tmpArr, SORT_STRING);
-		$tmpStr = implode( $tmpArr );
-		$tmpStr = sha1( $tmpStr );
+        $token = $this->token;
+        $tmpArr = array($token, $timestamp, $nonce,$str);
+        sort($tmpArr, SORT_STRING);
+        $tmpStr = implode( $tmpArr );
+        $tmpStr = sha1( $tmpStr );
 
-		if( $tmpStr == $signature ){
-			return true;
-		}else{
-			return false;
-		}
-	}
+        if( $tmpStr == $signature ){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
-	/**
-	 * For weixin server validation
-	 * @param bool $return 是否返回
-	 */
-	public function valid($return=false)
+    /**
+     * For weixin server validation
+     * @param bool $return 是否返回
+     */
+    public function valid($return=false)
     {
         $encryptStr="";
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
@@ -285,71 +285,71 @@ class Wechat
             $this->encrypt_type = isset($_GET["encrypt_type"]) ? $_GET["encrypt_type"]: '';
             if ($this->encrypt_type == 'aes') { //aes加密
                 $this->log($postStr);
-            	$encryptStr = $array['Encrypt'];
-            	$pc = new Prpcrypt($this->encodingAesKey);
-            	$array = $pc->decrypt($encryptStr,$this->appid);
-            	if (!isset($array[0]) || ($array[0] != 0)) {
-            	    if (!$return) {
-            	        die('decrypt error!');
-            	    } else {
-            	        return false;
-            	    }
-            	}
-            	$this->postxml = $array[1];
-            	if (!$this->appid)
-            	    $this->appid = $array[2];//为了没有appid的订阅号。
+                $encryptStr = $array['Encrypt'];
+                $pc = new Prpcrypt($this->encodingAesKey);
+                $array = $pc->decrypt($encryptStr,$this->appid);
+                if (!isset($array[0]) || ($array[0] != 0)) {
+                    if (!$return) {
+                        die('decrypt error!');
+                    } else {
+                        return false;
+                    }
+                }
+                $this->postxml = $array[1];
+                if (!$this->appid)
+                    $this->appid = $array[2];//为了没有appid的订阅号。
             } else {
                 $this->postxml = $postStr;
             }
         } elseif (isset($_GET["echostr"])) {
-        	$echoStr = $_GET["echostr"];
-        	if ($return) {
-        		if ($this->checkSignature())
-        			return $echoStr;
-        		else
-        			return false;
-        	} else {
-        		if ($this->checkSignature())
-        			die($echoStr);
-        		else
-        			die('no access');
-        	}
+            $echoStr = $_GET["echostr"];
+            if ($return) {
+                if ($this->checkSignature())
+                    return $echoStr;
+                else
+                    return false;
+            } else {
+                if ($this->checkSignature())
+                    die($echoStr);
+                else
+                    die('no access');
+            }
         }
 
         if (!$this->checkSignature($encryptStr)) {
-        	if ($return)
-        		return false;
-        	else
-        		die('no access');
+            if ($return)
+                return false;
+            else
+                die('no access');
         }
         return true;
     }
 
-	/**
-	 * 设置发送消息
-	 * @param array $msg 消息数组
-	 * @param bool $append 是否在原消息数组追加
-	 */
+    /**
+     * 设置发送消息
+     * @param array $msg 消息数组
+     * @param bool $append 是否在原消息数组追加
+     */
     public function Message($msg = '',$append = false){
-    		if (is_null($msg)) {
-    			$this->_msg =array();
-    		}elseif (is_array($msg)) {
-    			if ($append)
-    				$this->_msg = array_merge($this->_msg,$msg);
-    			else
-    				$this->_msg = $msg;
-    			return $this->_msg;
-    		} else {
-    			return $this->_msg;
-    		}
+            if (is_null($msg)) {
+                $this->_msg =array();
+            }elseif (is_array($msg)) {
+                if ($append)
+                    $this->_msg = array_merge($this->_msg,$msg);
+                else
+                    $this->_msg = $msg;
+                return $this->_msg;
+            } else {
+                return $this->_msg;
+            }
     }
 
     /**
      * 设置消息的星标标志，官方已取消对此功能的支持
      */
     public function setFuncFlag($flag) {
-    		$this->_funcflag = $flag;
-    		return $this;
+            $this->_funcflag = $flag;
+            return $this;
     }
 
     /**
@@ -358,980 +358,980 @@ class Wechat
      * @return mixed
      */
     protected function log($log){
-    		if ($this->debug && function_exists($this->logcallback)) {
-    			if (is_array($log)) $log = print_r($log,true);
-    			return call_user_func($this->logcallback,$log);
-    		}
+            if ($this->debug && function_exists($this->logcallback)) {
+                if (is_array($log)) $log = print_r($log,true);
+                return call_user_func($this->logcallback,$log);
+            }
     }
 
     /**
      * 获取微信服务器发来的信息
      */
-	public function getRev()
-	{
-		if ($this->_receive) return $this;
-		$postStr = !empty($this->postxml)?$this->postxml:file_get_contents("php://input");
-		//兼顾使用明文又不想调用valid()方法的情况
-		$this->log($postStr);
-		if (!empty($postStr)) {
-			$this->_receive = (array)simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
-		}
-		return $this;
-	}
+    public function getRev()
+    {
+        if ($this->_receive) return $this;
+        $postStr = !empty($this->postxml)?$this->postxml:file_get_contents("php://input");
+        //兼顾使用明文又不想调用valid()方法的情况
+        $this->log($postStr);
+        if (!empty($postStr)) {
+            $this->_receive = (array)simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
+        }
+        return $this;
+    }
 
-	/**
-	 * 获取微信服务器发来的信息
-	 */
-	public function getRevData()
-	{
-		return $this->_receive;
-	}
+    /**
+     * 获取微信服务器发来的信息
+     */
+    public function getRevData()
+    {
+        return $this->_receive;
+    }
 
-	/**
-	 * 获取消息发送者
-	 */
-	public function getRevFrom() {
-		if (isset($this->_receive['FromUserName']))
-			return $this->_receive['FromUserName'];
-		else
-			return false;
-	}
+    /**
+     * 获取消息发送者
+     */
+    public function getRevFrom() {
+        if (isset($this->_receive['FromUserName']))
+            return $this->_receive['FromUserName'];
+        else
+            return false;
+    }
 
-	/**
-	 * 获取消息接受者
-	 */
-	public function getRevTo() {
-		if (isset($this->_receive['ToUserName']))
-			return $this->_receive['ToUserName'];
-		else
-			return false;
-	}
+    /**
+     * 获取消息接受者
+     */
+    public function getRevTo() {
+        if (isset($this->_receive['ToUserName']))
+            return $this->_receive['ToUserName'];
+        else
+            return false;
+    }
 
-	/**
-	 * 获取接收消息的类型
-	 */
-	public function getRevType() {
-		if (isset($this->_receive['MsgType']))
-			return $this->_receive['MsgType'];
-		else
-			return false;
-	}
+    /**
+     * 获取接收消息的类型
+     */
+    public function getRevType() {
+        if (isset($this->_receive['MsgType']))
+            return $this->_receive['MsgType'];
+        else
+            return false;
+    }
 
-	/**
-	 * 获取消息ID
-	 */
-	public function getRevID() {
-		if (isset($this->_receive['MsgId']))
-			return $this->_receive['MsgId'];
-		else
-			return false;
-	}
+    /**
+     * 获取消息ID
+     */
+    public function getRevID() {
+        if (isset($this->_receive['MsgId']))
+            return $this->_receive['MsgId'];
+        else
+            return false;
+    }
 
-	/**
-	 * 获取消息发送时间
-	 */
-	public function getRevCtime() {
-		if (isset($this->_receive['CreateTime']))
-			return $this->_receive['CreateTime'];
-		else
-			return false;
-	}
+    /**
+     * 获取消息发送时间
+     */
+    public function getRevCtime() {
+        if (isset($this->_receive['CreateTime']))
+            return $this->_receive['CreateTime'];
+        else
+            return false;
+    }
 
-	/**
-	 * 获取接收消息内容正文
-	 */
-	public function getRevContent(){
-		if (isset($this->_receive['Content']))
-			return $this->_receive['Content'];
-		else if (isset($this->_receive['Recognition'])) //获取语音识别文字内容，需申请开通
-			return $this->_receive['Recognition'];
-		else
-			return false;
-	}
+    /**
+     * 获取接收消息内容正文
+     */
+    public function getRevContent(){
+        if (isset($this->_receive['Content']))
+            return $this->_receive['Content'];
+        else if (isset($this->_receive['Recognition'])) //获取语音识别文字内容，需申请开通
+            return $this->_receive['Recognition'];
+        else
+            return false;
+    }
 
-	/**
-	 * 获取接收消息图片
-	 */
-	public function getRevPic(){
-		if (isset($this->_receive['PicUrl']))
-			return array(
-				'mediaid'=>$this->_receive['MediaId'],
-				'picurl'=>(string)$this->_receive['PicUrl'],    //防止picurl为空导致解析出错
-			);
-		else
-			return false;
-	}
+    /**
+     * 获取接收消息图片
+     */
+    public function getRevPic(){
+        if (isset($this->_receive['PicUrl']))
+            return array(
+                'mediaid'=>$this->_receive['MediaId'],
+                'picurl'=>(string)$this->_receive['PicUrl'],    //防止picurl为空导致解析出错
+            );
+        else
+            return false;
+    }
 
-	/**
-	 * 获取接收消息链接
-	 */
-	public function getRevLink(){
-		if (isset($this->_receive['Url'])){
-			return array(
-				'url'=>$this->_receive['Url'],
-				'title'=>$this->_receive['Title'],
-				'description'=>$this->_receive['Description']
-			);
-		} else
-			return false;
-	}
+    /**
+     * 获取接收消息链接
+     */
+    public function getRevLink(){
+        if (isset($this->_receive['Url'])){
+            return array(
+                'url'=>$this->_receive['Url'],
+                'title'=>$this->_receive['Title'],
+                'description'=>$this->_receive['Description']
+            );
+        } else
+            return false;
+    }
 
-	/**
-	 * 获取接收地理位置
-	 */
-	public function getRevGeo(){
-		if (isset($this->_receive['Location_X'])){
-			return array(
-				'x'=>$this->_receive['Location_X'],
-				'y'=>$this->_receive['Location_Y'],
-				'scale'=>$this->_receive['Scale'],
-				'label'=>$this->_receive['Label']
-			);
-		} else
-			return false;
-	}
+    /**
+     * 获取接收地理位置
+     */
+    public function getRevGeo(){
+        if (isset($this->_receive['Location_X'])){
+            return array(
+                'x'=>$this->_receive['Location_X'],
+                'y'=>$this->_receive['Location_Y'],
+                'scale'=>$this->_receive['Scale'],
+                'label'=>$this->_receive['Label']
+            );
+        } else
+            return false;
+    }
 
-	/**
-	 * 获取上报地理位置事件
-	 */
-	public function getRevEventGeo(){
-        	if (isset($this->_receive['Latitude'])){
-        		 return array(
-				'x'=>$this->_receive['Latitude'],
-				'y'=>$this->_receive['Longitude'],
-				'precision'=>$this->_receive['Precision'],
-			);
-		} else
-			return false;
-	}
+    /**
+     * 获取上报地理位置事件
+     */
+    public function getRevEventGeo(){
+            if (isset($this->_receive['Latitude'])){
+                 return array(
+                'x'=>$this->_receive['Latitude'],
+                'y'=>$this->_receive['Longitude'],
+                'precision'=>$this->_receive['Precision'],
+            );
+        } else
+            return false;
+    }
 
-	/**
-	 * 获取接收事件推送
-	 */
-	public function getRevEvent(){
-		if (isset($this->_receive['Event'])){
-			$array['event'] = $this->_receive['Event'];
-		}
-		if (isset($this->_receive['EventKey'])){
-			$array['key'] = $this->_receive['EventKey'];
-		}
-		if (isset($array) && count($array) > 0) {
-			return $array;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * 获取接收事件推送
+     */
+    public function getRevEvent(){
+        if (isset($this->_receive['Event'])){
+            $array['event'] = $this->_receive['Event'];
+        }
+        if (isset($this->_receive['EventKey'])){
+            $array['key'] = $this->_receive['EventKey'];
+        }
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 获取自定义菜单的扫码推事件信息
-	 *
-	 * 事件类型为以下两种时则调用此方法有效
-	 * Event	 事件类型，scancode_push
-	 * Event	 事件类型，scancode_waitmsg
-	 *
-	 * @return: array | false
-	 * array (
-	 *     'ScanType'=>'qrcode',
-	 *     'ScanResult'=>'123123'
-	 * )
-	 */
-	public function getRevScanInfo(){
-		if (isset($this->_receive['ScanCodeInfo'])){
-		    if (!is_array($this->_receive['ScanCodeInfo'])) {
-		        $array=(array)$this->_receive['ScanCodeInfo'];
-		        $this->_receive['ScanCodeInfo']=$array;
-		    }else {
-		        $array=$this->_receive['ScanCodeInfo'];
-		    }
-		}
-		if (isset($array) && count($array) > 0) {
-			return $array;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * 获取自定义菜单的扫码推事件信息
+     *
+     * 事件类型为以下两种时则调用此方法有效
+     * Event     事件类型，scancode_push
+     * Event     事件类型，scancode_waitmsg
+     *
+     * @return: array | false
+     * array (
+     *     'ScanType'=>'qrcode',
+     *     'ScanResult'=>'123123'
+     * )
+     */
+    public function getRevScanInfo(){
+        if (isset($this->_receive['ScanCodeInfo'])){
+            if (!is_array($this->_receive['ScanCodeInfo'])) {
+                $array=(array)$this->_receive['ScanCodeInfo'];
+                $this->_receive['ScanCodeInfo']=$array;
+            }else {
+                $array=$this->_receive['ScanCodeInfo'];
+            }
+        }
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 获取自定义菜单的图片发送事件信息
-	 *
-	 * 事件类型为以下三种时则调用此方法有效
-	 * Event	 事件类型，pic_sysphoto        弹出系统拍照发图的事件推送
-	 * Event	 事件类型，pic_photo_or_album  弹出拍照或者相册发图的事件推送
-	 * Event	 事件类型，pic_weixin          弹出微信相册发图器的事件推送
-	 *
-	 * @return: array | false
-	 * array (
-	 *   'Count' => '2',
-	 *   'PicList' =>array (
-	 *         'item' =>array (
-	 *             0 =>array ('PicMd5Sum' => 'aaae42617cf2a14342d96005af53624c'),
-	 *             1 =>array ('PicMd5Sum' => '149bd39e296860a2adc2f1bb81616ff8'),
-	 *         ),
-	 *   ),
-	 * )
-	 *
-	 */
-	public function getRevSendPicsInfo(){
-		if (isset($this->_receive['SendPicsInfo'])){
-		    if (!is_array($this->_receive['SendPicsInfo'])) {
-		        $array=(array)$this->_receive['SendPicsInfo'];
-		        if (isset($array['PicList'])){
-		            $array['PicList']=(array)$array['PicList'];
-		            $item=$array['PicList']['item'];
-		            $array['PicList']['item']=array();
-		            foreach ( $item as $key => $value ){
-		                $array['PicList']['item'][$key]=(array)$value;
-		            }
-		        }
-		        $this->_receive['SendPicsInfo']=$array;
-		    } else {
-		        $array=$this->_receive['SendPicsInfo'];
-		    }
-		}
-		if (isset($array) && count($array) > 0) {
-			return $array;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * 获取自定义菜单的图片发送事件信息
+     *
+     * 事件类型为以下三种时则调用此方法有效
+     * Event     事件类型，pic_sysphoto        弹出系统拍照发图的事件推送
+     * Event     事件类型，pic_photo_or_album  弹出拍照或者相册发图的事件推送
+     * Event     事件类型，pic_weixin          弹出微信相册发图器的事件推送
+     *
+     * @return: array | false
+     * array (
+     *   'Count' => '2',
+     *   'PicList' =>array (
+     *         'item' =>array (
+     *             0 =>array ('PicMd5Sum' => 'aaae42617cf2a14342d96005af53624c'),
+     *             1 =>array ('PicMd5Sum' => '149bd39e296860a2adc2f1bb81616ff8'),
+     *         ),
+     *   ),
+     * )
+     *
+     */
+    public function getRevSendPicsInfo(){
+        if (isset($this->_receive['SendPicsInfo'])){
+            if (!is_array($this->_receive['SendPicsInfo'])) {
+                $array=(array)$this->_receive['SendPicsInfo'];
+                if (isset($array['PicList'])){
+                    $array['PicList']=(array)$array['PicList'];
+                    $item=$array['PicList']['item'];
+                    $array['PicList']['item']=array();
+                    foreach ( $item as $key => $value ){
+                        $array['PicList']['item'][$key]=(array)$value;
+                    }
+                }
+                $this->_receive['SendPicsInfo']=$array;
+            } else {
+                $array=$this->_receive['SendPicsInfo'];
+            }
+        }
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 获取自定义菜单的地理位置选择器事件推送
-	 *
-	 * 事件类型为以下时则可以调用此方法有效
-	 * Event	 事件类型，location_select        弹出地理位置选择器的事件推送
-	 *
-	 * @return: array | false
-	 * array (
-	 *   'Location_X' => '33.731655000061',
-	 *   'Location_Y' => '113.29955200008047',
-	 *   'Scale' => '16',
-	 *   'Label' => '某某市某某区某某路',
-	 *   'Poiname' => '',
-	 * )
-	 *
-	 */
-	public function getRevSendGeoInfo(){
-	    if (isset($this->_receive['SendLocationInfo'])){
-	        if (!is_array($this->_receive['SendLocationInfo'])) {
-	            $array=(array)$this->_receive['SendLocationInfo'];
-	            if (empty($array['Poiname'])) {
-	                $array['Poiname']="";
-	            }
-	            if (empty($array['Label'])) {
-	                $array['Label']="";
-	            }
-	            $this->_receive['SendLocationInfo']=$array;
-	        } else {
-	            $array=$this->_receive['SendLocationInfo'];
-	        }
-	    }
-	    if (isset($array) && count($array) > 0) {
-	        return $array;
-	    } else {
-	        return false;
-	    }
-	}
+    /**
+     * 获取自定义菜单的地理位置选择器事件推送
+     *
+     * 事件类型为以下时则可以调用此方法有效
+     * Event     事件类型，location_select        弹出地理位置选择器的事件推送
+     *
+     * @return: array | false
+     * array (
+     *   'Location_X' => '33.731655000061',
+     *   'Location_Y' => '113.29955200008047',
+     *   'Scale' => '16',
+     *   'Label' => '某某市某某区某某路',
+     *   'Poiname' => '',
+     * )
+     *
+     */
+    public function getRevSendGeoInfo(){
+        if (isset($this->_receive['SendLocationInfo'])){
+            if (!is_array($this->_receive['SendLocationInfo'])) {
+                $array=(array)$this->_receive['SendLocationInfo'];
+                if (empty($array['Poiname'])) {
+                    $array['Poiname']="";
+                }
+                if (empty($array['Label'])) {
+                    $array['Label']="";
+                }
+                $this->_receive['SendLocationInfo']=$array;
+            } else {
+                $array=$this->_receive['SendLocationInfo'];
+            }
+        }
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 获取接收语音推送
-	 */
-	public function getRevVoice(){
-		if (isset($this->_receive['MediaId'])){
-			return array(
-				'mediaid'=>$this->_receive['MediaId'],
-				'format'=>$this->_receive['Format'],
-			);
-		} else
-			return false;
-	}
+    /**
+     * 获取接收语音推送
+     */
+    public function getRevVoice(){
+        if (isset($this->_receive['MediaId'])){
+            return array(
+                'mediaid'=>$this->_receive['MediaId'],
+                'format'=>$this->_receive['Format'],
+            );
+        } else
+            return false;
+    }
 
-	/**
-	 * 获取接收视频推送
-	 */
-	public function getRevVideo(){
-		if (isset($this->_receive['MediaId'])){
-			return array(
-					'mediaid'=>$this->_receive['MediaId'],
-					'thumbmediaid'=>$this->_receive['ThumbMediaId']
-			);
-		} else
-			return false;
-	}
+    /**
+     * 获取接收视频推送
+     */
+    public function getRevVideo(){
+        if (isset($this->_receive['MediaId'])){
+            return array(
+                    'mediaid'=>$this->_receive['MediaId'],
+                    'thumbmediaid'=>$this->_receive['ThumbMediaId']
+            );
+        } else
+            return false;
+    }
 
-	/**
-	 * 获取接收TICKET
-	 */
-	public function getRevTicket(){
-		if (isset($this->_receive['Ticket'])){
-			return $this->_receive['Ticket'];
-		} else
-			return false;
-	}
+    /**
+     * 获取接收TICKET
+     */
+    public function getRevTicket(){
+        if (isset($this->_receive['Ticket'])){
+            return $this->_receive['Ticket'];
+        } else
+            return false;
+    }
 
-	/**
-	* 获取二维码的场景值
-	*/
-	public function getRevSceneId (){
-		if (isset($this->_receive['EventKey'])){
-			return str_replace('qrscene_','',$this->_receive['EventKey']);
-		} else{
-			return false;
-		}
-	}
+    /**
+    * 获取二维码的场景值
+    */
+    public function getRevSceneId (){
+        if (isset($this->_receive['EventKey'])){
+            return str_replace('qrscene_','',$this->_receive['EventKey']);
+        } else{
+            return false;
+        }
+    }
 
-	/**
-	* 获取主动推送的消息ID
-	* 经过验证，这个和普通的消息MsgId不一样
-	* 当Event为 MASSSENDJOBFINISH 或 TEMPLATESENDJOBFINISH
-	*/
-	public function getRevTplMsgID(){
-		if (isset($this->_receive['MsgID'])){
-			return $this->_receive['MsgID'];
-		} else
-			return false;
-	}
+    /**
+    * 获取主动推送的消息ID
+    * 经过验证，这个和普通的消息MsgId不一样
+    * 当Event为 MASSSENDJOBFINISH 或 TEMPLATESENDJOBFINISH
+    */
+    public function getRevTplMsgID(){
+        if (isset($this->_receive['MsgID'])){
+            return $this->_receive['MsgID'];
+        } else
+            return false;
+    }
 
-	/**
-	* 获取模板消息发送状态
-	*/
-	public function getRevStatus(){
-		if (isset($this->_receive['Status'])){
-			return $this->_receive['Status'];
-		} else
-			return false;
-	}
+    /**
+    * 获取模板消息发送状态
+    */
+    public function getRevStatus(){
+        if (isset($this->_receive['Status'])){
+            return $this->_receive['Status'];
+        } else
+            return false;
+    }
 
-	/**
-	* 获取群发或模板消息发送结果
-	* 当Event为 MASSSENDJOBFINISH 或 TEMPLATESENDJOBFINISH，即高级群发/模板消息
-	*/
-	public function getRevResult(){
-		if (isset($this->_receive['Status'])) //发送是否成功，具体的返回值请参考 高级群发/模板消息 的事件推送说明
-			$array['Status'] = $this->_receive['Status'];
-		if (isset($this->_receive['MsgID'])) //发送的消息id
-			$array['MsgID'] = $this->_receive['MsgID'];
+    /**
+    * 获取群发或模板消息发送结果
+    * 当Event为 MASSSENDJOBFINISH 或 TEMPLATESENDJOBFINISH，即高级群发/模板消息
+    */
+    public function getRevResult(){
+        if (isset($this->_receive['Status'])) //发送是否成功，具体的返回值请参考 高级群发/模板消息 的事件推送说明
+            $array['Status'] = $this->_receive['Status'];
+        if (isset($this->_receive['MsgID'])) //发送的消息id
+            $array['MsgID'] = $this->_receive['MsgID'];
 
-		//以下仅当群发消息时才会有的事件内容
-		if (isset($this->_receive['TotalCount']))     //分组或openid列表内粉丝数量
-			$array['TotalCount'] = $this->_receive['TotalCount'];
-		if (isset($this->_receive['FilterCount']))    //过滤（过滤是指特定地区、性别的过滤、用户设置拒收的过滤，用户接收已超4条的过滤）后，准备发送的粉丝数
-			$array['FilterCount'] = $this->_receive['FilterCount'];
-		if (isset($this->_receive['SentCount']))     //发送成功的粉丝数
-			$array['SentCount'] = $this->_receive['SentCount'];
-		if (isset($this->_receive['ErrorCount']))    //发送失败的粉丝数
-			$array['ErrorCount'] = $this->_receive['ErrorCount'];
-		if (isset($array) && count($array) > 0) {
-		    return $array;
-		} else {
-		    return false;
-		}
-	}
+        //以下仅当群发消息时才会有的事件内容
+        if (isset($this->_receive['TotalCount']))     //分组或openid列表内粉丝数量
+            $array['TotalCount'] = $this->_receive['TotalCount'];
+        if (isset($this->_receive['FilterCount']))    //过滤（过滤是指特定地区、性别的过滤、用户设置拒收的过滤，用户接收已超4条的过滤）后，准备发送的粉丝数
+            $array['FilterCount'] = $this->_receive['FilterCount'];
+        if (isset($this->_receive['SentCount']))     //发送成功的粉丝数
+            $array['SentCount'] = $this->_receive['SentCount'];
+        if (isset($this->_receive['ErrorCount']))    //发送失败的粉丝数
+            $array['ErrorCount'] = $this->_receive['ErrorCount'];
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 获取多客服会话状态推送事件 - 接入会话
-	 * 当Event为 kfcreatesession 即接入会话
-	 * @return string | boolean  返回分配到的客服
-	 */
-	public function getRevKFCreate(){
-		if (isset($this->_receive['KfAccount'])){
-			return $this->_receive['KfAccount'];
-		} else
-			return false;
-	}
+    /**
+     * 获取多客服会话状态推送事件 - 接入会话
+     * 当Event为 kfcreatesession 即接入会话
+     * @return string | boolean  返回分配到的客服
+     */
+    public function getRevKFCreate(){
+        if (isset($this->_receive['KfAccount'])){
+            return $this->_receive['KfAccount'];
+        } else
+            return false;
+    }
 
-	/**
-	 * 获取多客服会话状态推送事件 - 关闭会话
-	 * 当Event为 kfclosesession 即关闭会话
-	 * @return string | boolean  返回分配到的客服
-	 */
-	public function getRevKFClose(){
-	    if (isset($this->_receive['KfAccount'])){
-	        return $this->_receive['KfAccount'];
-	    } else
-	        return false;
-	}
+    /**
+     * 获取多客服会话状态推送事件 - 关闭会话
+     * 当Event为 kfclosesession 即关闭会话
+     * @return string | boolean  返回分配到的客服
+     */
+    public function getRevKFClose(){
+        if (isset($this->_receive['KfAccount'])){
+            return $this->_receive['KfAccount'];
+        } else
+            return false;
+    }
 
-	/**
-	 * 获取多客服会话状态推送事件 - 转接会话
-	 * 当Event为 kfswitchsession 即转接会话
-	 * @return array | boolean  返回分配到的客服
-	 * {
-	 *     'FromKfAccount' => '',      //原接入客服
-	 *     'ToKfAccount' => ''            //转接到客服
-	 * }
-	 */
-	public function getRevKFSwitch(){
-	    if (isset($this->_receive['FromKfAccount']))     //原接入客服
-	        $array['FromKfAccount'] = $this->_receive['FromKfAccount'];
-	    if (isset($this->_receive['ToKfAccount']))    //转接到客服
-	        $array['ToKfAccount'] = $this->_receive['ToKfAccount'];
-	    if (isset($array) && count($array) > 0) {
-	        return $array;
-	    } else {
-	        return false;
-	    }
-	}
+    /**
+     * 获取多客服会话状态推送事件 - 转接会话
+     * 当Event为 kfswitchsession 即转接会话
+     * @return array | boolean  返回分配到的客服
+     * {
+     *     'FromKfAccount' => '',      //原接入客服
+     *     'ToKfAccount' => ''            //转接到客服
+     * }
+     */
+    public function getRevKFSwitch(){
+        if (isset($this->_receive['FromKfAccount']))     //原接入客服
+            $array['FromKfAccount'] = $this->_receive['FromKfAccount'];
+        if (isset($this->_receive['ToKfAccount']))    //转接到客服
+            $array['ToKfAccount'] = $this->_receive['ToKfAccount'];
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 获取卡券事件推送 - 卡卷审核是否通过
-	 * 当Event为 card_pass_check(审核通过) 或 card_not_pass_check(未通过)
-	 * @return string|boolean  返回卡券ID
-	 */
-	public function getRevCardPass(){
-	    if (isset($this->_receive['CardId']))
-	        return $this->_receive['CardId'];
-	    else
-	        return false;
-	}
+    /**
+     * 获取卡券事件推送 - 卡卷审核是否通过
+     * 当Event为 card_pass_check(审核通过) 或 card_not_pass_check(未通过)
+     * @return string|boolean  返回卡券ID
+     */
+    public function getRevCardPass(){
+        if (isset($this->_receive['CardId']))
+            return $this->_receive['CardId'];
+        else
+            return false;
+    }
 
-	/**
-	 * 获取卡券事件推送 - 领取卡券
-	 * 当Event为 user_get_card(用户领取卡券)
-	 * @return array|boolean
-	 */
-	public function getRevCardGet(){
-	    if (isset($this->_receive['CardId']))     //卡券 ID
-	        $array['CardId'] = $this->_receive['CardId'];
-	    if (isset($this->_receive['IsGiveByFriend']))    //是否为转赠，1 代表是，0 代表否。
-	        $array['IsGiveByFriend'] = $this->_receive['IsGiveByFriend'];
-	        $array['OldUserCardCode'] = $this->_receive['OldUserCardCode'];
-	    if (isset($this->_receive['UserCardCode']) && !empty($this->_receive['UserCardCode'])) //code 序列号。自定义 code 及非自定义 code的卡券被领取后都支持事件推送。
-	        $array['UserCardCode'] = $this->_receive['UserCardCode'];
-	    if (isset($array) && count($array) > 0) {
-	        return $array;
-	    } else {
-	        return false;
-	    }
-	}
+    /**
+     * 获取卡券事件推送 - 领取卡券
+     * 当Event为 user_get_card(用户领取卡券)
+     * @return array|boolean
+     */
+    public function getRevCardGet(){
+        if (isset($this->_receive['CardId']))     //卡券 ID
+            $array['CardId'] = $this->_receive['CardId'];
+        if (isset($this->_receive['IsGiveByFriend']))    //是否为转赠，1 代表是，0 代表否。
+            $array['IsGiveByFriend'] = $this->_receive['IsGiveByFriend'];
+            $array['OldUserCardCode'] = $this->_receive['OldUserCardCode'];
+        if (isset($this->_receive['UserCardCode']) && !empty($this->_receive['UserCardCode'])) //code 序列号。自定义 code 及非自定义 code的卡券被领取后都支持事件推送。
+            $array['UserCardCode'] = $this->_receive['UserCardCode'];
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 获取卡券事件推送 - 删除卡券
-	 * 当Event为 user_del_card(用户删除卡券)
-	 * @return array|boolean
-	 */
-	public function getRevCardDel(){
-	    if (isset($this->_receive['CardId']))     //卡券 ID
-	        $array['CardId'] = $this->_receive['CardId'];
-	    if (isset($this->_receive['UserCardCode']) && !empty($this->_receive['UserCardCode'])) //code 序列号。自定义 code 及非自定义 code的卡券被领取后都支持事件推送。
-	        $array['UserCardCode'] = $this->_receive['UserCardCode'];
-	    if (isset($array) && count($array) > 0) {
-	        return $array;
-	    } else {
-	        return false;
-	    }
-	}
+    /**
+     * 获取卡券事件推送 - 删除卡券
+     * 当Event为 user_del_card(用户删除卡券)
+     * @return array|boolean
+     */
+    public function getRevCardDel(){
+        if (isset($this->_receive['CardId']))     //卡券 ID
+            $array['CardId'] = $this->_receive['CardId'];
+        if (isset($this->_receive['UserCardCode']) && !empty($this->_receive['UserCardCode'])) //code 序列号。自定义 code 及非自定义 code的卡券被领取后都支持事件推送。
+            $array['UserCardCode'] = $this->_receive['UserCardCode'];
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 获取订单ID - 订单付款通知
-	 * 当Event为 merchant_order(订单付款通知)
-	 * @return orderId|boolean
-	 */
-	public function getRevOrderId(){
-		if (isset($this->_receive['OrderId']))     //订单 ID
-			return $this->_receive['OrderId'];
-		else
-			return false;
-	}
+    /**
+     * 获取订单ID - 订单付款通知
+     * 当Event为 merchant_order(订单付款通知)
+     * @return orderId|boolean
+     */
+    public function getRevOrderId(){
+        if (isset($this->_receive['OrderId']))     //订单 ID
+            return $this->_receive['OrderId'];
+        else
+            return false;
+    }
 
-	public static function xmlSafeStr($str)
-	{
-		return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';
-	}
+    public static function xmlSafeStr($str)
+    {
+        return '<![CDATA['.preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/",'',$str).']]>';
+    }
 
-	/**
-	 * 数据XML编码
-	 * @param mixed $data 数据
-	 * @return string
-	 */
-	public static function data_to_xml($data) {
-	    $xml = '';
-	    foreach ($data as $key => $val) {
-	        is_numeric($key) && $key = "item id=\"$key\"";
-	        $xml    .=  "<$key>";
-	        $xml    .=  ( is_array($val) || is_object($val)) ? self::data_to_xml($val)  : self::xmlSafeStr($val);
-	        list($key, ) = explode(' ', $key);
-	        $xml    .=  "</$key>";
-	    }
-	    return $xml;
-	}
+    /**
+     * 数据XML编码
+     * @param mixed $data 数据
+     * @return string
+     */
+    public static function data_to_xml($data) {
+        $xml = '';
+        foreach ($data as $key => $val) {
+            is_numeric($key) && $key = "item id=\"$key\"";
+            $xml    .=  "<$key>";
+            $xml    .=  ( is_array($val) || is_object($val)) ? self::data_to_xml($val)  : self::xmlSafeStr($val);
+            list($key, ) = explode(' ', $key);
+            $xml    .=  "</$key>";
+        }
+        return $xml;
+    }
 
-	/**
-	 * XML编码
-	 * @param mixed $data 数据
-	 * @param string $root 根节点名
-	 * @param string $item 数字索引的子节点名
-	 * @param string $attr 根节点属性
-	 * @param string $id   数字索引子节点key转换的属性名
-	 * @param string $encoding 数据编码
-	 * @return string
-	*/
-	public function xml_encode($data, $root='xml', $item='item', $attr='', $id='id', $encoding='utf-8') {
-	    if(is_array($attr)){
-	        $_attr = array();
-	        foreach ($attr as $key => $value) {
-	            $_attr[] = "{$key}=\"{$value}\"";
-	        }
-	        $attr = implode(' ', $_attr);
-	    }
-	    $attr   = trim($attr);
-	    $attr   = empty($attr) ? '' : " {$attr}";
-	    $xml   = "<{$root}{$attr}>";
-	    $xml   .= self::data_to_xml($data, $item, $id);
-	    $xml   .= "</{$root}>";
-	    return $xml;
-	}
+    /**
+     * XML编码
+     * @param mixed $data 数据
+     * @param string $root 根节点名
+     * @param string $item 数字索引的子节点名
+     * @param string $attr 根节点属性
+     * @param string $id   数字索引子节点key转换的属性名
+     * @param string $encoding 数据编码
+     * @return string
+    */
+    public function xml_encode($data, $root='xml', $item='item', $attr='', $id='id', $encoding='utf-8') {
+        if(is_array($attr)){
+            $_attr = array();
+            foreach ($attr as $key => $value) {
+                $_attr[] = "{$key}=\"{$value}\"";
+            }
+            $attr = implode(' ', $_attr);
+        }
+        $attr   = trim($attr);
+        $attr   = empty($attr) ? '' : " {$attr}";
+        $xml   = "<{$root}{$attr}>";
+        $xml   .= self::data_to_xml($data, $item, $id);
+        $xml   .= "</{$root}>";
+        return $xml;
+    }
 
-	/**
-	 * 过滤文字回复\r\n换行符
-	 * @param string $text
-	 * @return string|mixed
-	 */
-	private function _auto_text_filter($text) {
-		if (!$this->_text_filter) return $text;
-		return str_replace("\r\n", "\n", $text);
-	}
+    /**
+     * 过滤文字回复\r\n换行符
+     * @param string $text
+     * @return string|mixed
+     */
+    private function _auto_text_filter($text) {
+        if (!$this->_text_filter) return $text;
+        return str_replace("\r\n", "\n", $text);
+    }
 
-	/**
-	 * 设置回复消息
-	 * Example: $obj->text('hello')->reply();
-	 * @param string $text
-	 */
-	public function text($text='')
-	{
-		$FuncFlag = $this->_funcflag ? 1 : 0;
-		$msg = array(
-			'ToUserName' => $this->getRevFrom(),
-			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_TEXT,
-			'Content'=>$this->_auto_text_filter($text),
-			'CreateTime'=>time(),
-			'FuncFlag'=>$FuncFlag
-		);
-		$this->Message($msg);
-		return $this;
-	}
-	/**
-	 * 设置回复消息
-	 * Example: $obj->image('media_id')->reply();
-	 * @param string $mediaid
-	 */
-	public function image($mediaid='')
-	{
-		$FuncFlag = $this->_funcflag ? 1 : 0;
-		$msg = array(
-			'ToUserName' => $this->getRevFrom(),
-			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_IMAGE,
-			'Image'=>array('MediaId'=>$mediaid),
-			'CreateTime'=>time(),
-			'FuncFlag'=>$FuncFlag
-		);
-		$this->Message($msg);
-		return $this;
-	}
+    /**
+     * 设置回复消息
+     * Example: $obj->text('hello')->reply();
+     * @param string $text
+     */
+    public function text($text='')
+    {
+        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName'=>$this->getRevTo(),
+            'MsgType'=>self::MSGTYPE_TEXT,
+            'Content'=>$this->_auto_text_filter($text),
+            'CreateTime'=>time(),
+            'FuncFlag'=>$FuncFlag
+        );
+        $this->Message($msg);
+        return $this;
+    }
+    /**
+     * 设置回复消息
+     * Example: $obj->image('media_id')->reply();
+     * @param string $mediaid
+     */
+    public function image($mediaid='')
+    {
+        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName'=>$this->getRevTo(),
+            'MsgType'=>self::MSGTYPE_IMAGE,
+            'Image'=>array('MediaId'=>$mediaid),
+            'CreateTime'=>time(),
+            'FuncFlag'=>$FuncFlag
+        );
+        $this->Message($msg);
+        return $this;
+    }
 
-	/**
-	 * 设置回复消息
-	 * Example: $obj->voice('media_id')->reply();
-	 * @param string $mediaid
-	 */
-	public function voice($mediaid='')
-	{
-		$FuncFlag = $this->_funcflag ? 1 : 0;
-		$msg = array(
-			'ToUserName' => $this->getRevFrom(),
-			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_VOICE,
-			'Voice'=>array('MediaId'=>$mediaid),
-			'CreateTime'=>time(),
-			'FuncFlag'=>$FuncFlag
-		);
-		$this->Message($msg);
-		return $this;
-	}
+    /**
+     * 设置回复消息
+     * Example: $obj->voice('media_id')->reply();
+     * @param string $mediaid
+     */
+    public function voice($mediaid='')
+    {
+        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName'=>$this->getRevTo(),
+            'MsgType'=>self::MSGTYPE_VOICE,
+            'Voice'=>array('MediaId'=>$mediaid),
+            'CreateTime'=>time(),
+            'FuncFlag'=>$FuncFlag
+        );
+        $this->Message($msg);
+        return $this;
+    }
 
-	/**
-	 * 设置回复消息
-	 * Example: $obj->video('media_id','title','description')->reply();
-	 * @param string $mediaid
-	 */
-	public function video($mediaid='',$title='',$description='')
-	{
-		$FuncFlag = $this->_funcflag ? 1 : 0;
-		$msg = array(
-			'ToUserName' => $this->getRevFrom(),
-			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_VIDEO,
-			'Video'=>array(
-			        'MediaId'=>$mediaid,
-			        'Title'=>$title,
-			        'Description'=>$description
-			),
-			'CreateTime'=>time(),
-			'FuncFlag'=>$FuncFlag
-		);
-		$this->Message($msg);
-		return $this;
-	}
+    /**
+     * 设置回复消息
+     * Example: $obj->video('media_id','title','description')->reply();
+     * @param string $mediaid
+     */
+    public function video($mediaid='',$title='',$description='')
+    {
+        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName'=>$this->getRevTo(),
+            'MsgType'=>self::MSGTYPE_VIDEO,
+            'Video'=>array(
+                    'MediaId'=>$mediaid,
+                    'Title'=>$title,
+                    'Description'=>$description
+            ),
+            'CreateTime'=>time(),
+            'FuncFlag'=>$FuncFlag
+        );
+        $this->Message($msg);
+        return $this;
+    }
 
-	/**
-	 * 设置回复音乐
-	 * @param string $title
-	 * @param string $desc
-	 * @param string $musicurl
-	 * @param string $hgmusicurl
-	 * @param string $thumbmediaid 音乐图片缩略图的媒体id，非必须
-	 */
-	public function music($title,$desc,$musicurl,$hgmusicurl='',$thumbmediaid='') {
-		$FuncFlag = $this->_funcflag ? 1 : 0;
-		$msg = array(
-			'ToUserName' => $this->getRevFrom(),
-			'FromUserName'=>$this->getRevTo(),
-			'CreateTime'=>time(),
-			'MsgType'=>self::MSGTYPE_MUSIC,
-			'Music'=>array(
-				'Title'=>$title,
-				'Description'=>$desc,
-				'MusicUrl'=>$musicurl,
-				'HQMusicUrl'=>$hgmusicurl
-			),
-			'FuncFlag'=>$FuncFlag
-		);
-		if ($thumbmediaid) {
-			$msg['Music']['ThumbMediaId'] = $thumbmediaid;
-		}
-		$this->Message($msg);
-		return $this;
-	}
+    /**
+     * 设置回复音乐
+     * @param string $title
+     * @param string $desc
+     * @param string $musicurl
+     * @param string $hgmusicurl
+     * @param string $thumbmediaid 音乐图片缩略图的媒体id，非必须
+     */
+    public function music($title,$desc,$musicurl,$hgmusicurl='',$thumbmediaid='') {
+        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName'=>$this->getRevTo(),
+            'CreateTime'=>time(),
+            'MsgType'=>self::MSGTYPE_MUSIC,
+            'Music'=>array(
+                'Title'=>$title,
+                'Description'=>$desc,
+                'MusicUrl'=>$musicurl,
+                'HQMusicUrl'=>$hgmusicurl
+            ),
+            'FuncFlag'=>$FuncFlag
+        );
+        if ($thumbmediaid) {
+            $msg['Music']['ThumbMediaId'] = $thumbmediaid;
+        }
+        $this->Message($msg);
+        return $this;
+    }
 
-	/**
-	 * 设置回复图文
-	 * @param array $newsData
-	 * 数组结构:
-	 *  array(
-	 *  	"0"=>array(
-	 *  		'Title'=>'msg title',
-	 *  		'Description'=>'summary text',
-	 *  		'PicUrl'=>'http://www.domain.com/1.jpg',
-	 *  		'Url'=>'http://www.domain.com/1.html'
-	 *  	),
-	 *  	"1"=>....
-	 *  )
-	 */
-	public function news($newsData=array())
-	{
-		$FuncFlag = $this->_funcflag ? 1 : 0;
-		$count = count($newsData);
+    /**
+     * 设置回复图文
+     * @param array $newsData
+     * 数组结构:
+     *  array(
+     *      "0"=>array(
+     *          'Title'=>'msg title',
+     *          'Description'=>'summary text',
+     *          'PicUrl'=>'http://www.domain.com/1.jpg',
+     *          'Url'=>'http://www.domain.com/1.html'
+     *      ),
+     *      "1"=>....
+     *  )
+     */
+    public function news($newsData=array())
+    {
+        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $count = count($newsData);
 
-		$msg = array(
-			'ToUserName' => $this->getRevFrom(),
-			'FromUserName'=>$this->getRevTo(),
-			'MsgType'=>self::MSGTYPE_NEWS,
-			'CreateTime'=>time(),
-			'ArticleCount'=>$count,
-			'Articles'=>$newsData,
-			'FuncFlag'=>$FuncFlag
-		);
-		$this->Message($msg);
-		return $this;
-	}
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName'=>$this->getRevTo(),
+            'MsgType'=>self::MSGTYPE_NEWS,
+            'CreateTime'=>time(),
+            'ArticleCount'=>$count,
+            'Articles'=>$newsData,
+            'FuncFlag'=>$FuncFlag
+        );
+        $this->Message($msg);
+        return $this;
+    }
 
-	/**
-	 *
-	 * 回复微信服务器, 此函数支持链式操作
-	 * Example: $this->text('msg tips')->reply();
-	 * @param string $msg 要发送的信息, 默认取$this->_msg
-	 * @param bool $return 是否返回信息而不抛出到浏览器 默认:否
-	 */
-	public function reply($msg=array(),$return = false)
-	{
-		if (empty($msg)) {
-		    if (empty($this->_msg))   //防止不先设置回复内容，直接调用reply方法导致异常
-		        return false;
-			$msg = $this->_msg;
-		}
-		$xmldata=  $this->xml_encode($msg);
-		$this->log($xmldata);
-		if ($this->encrypt_type == 'aes') { //如果来源消息为加密方式
-		    $pc = new Prpcrypt($this->encodingAesKey);
-		    $array = $pc->encrypt($xmldata, $this->appid);
-		    $ret = $array[0];
-		    if ($ret != 0) {
-		        $this->log('encrypt err!');
-		        return false;
-		    }
-		    $timestamp = time();
-		    $nonce = rand(77,999)*rand(605,888)*rand(11,99);
-		    $encrypt = $array[1];
-		    $tmpArr = array($this->token, $timestamp, $nonce,$encrypt);//比普通公众平台多了一个加密的密文
-		    sort($tmpArr, SORT_STRING);
-		    $signature = implode($tmpArr);
-		    $signature = sha1($signature);
-		    $xmldata = $this->generate($encrypt, $signature, $timestamp, $nonce);
-		    $this->log($xmldata);
-		}
-		if ($return)
-			return $xmldata;
-		else
-			echo $xmldata;
-	}
+    /**
+     *
+     * 回复微信服务器, 此函数支持链式操作
+     * Example: $this->text('msg tips')->reply();
+     * @param string $msg 要发送的信息, 默认取$this->_msg
+     * @param bool $return 是否返回信息而不抛出到浏览器 默认:否
+     */
+    public function reply($msg=array(),$return = false)
+    {
+        if (empty($msg)) {
+            if (empty($this->_msg))   //防止不先设置回复内容，直接调用reply方法导致异常
+                return false;
+            $msg = $this->_msg;
+        }
+        $xmldata=  $this->xml_encode($msg);
+        $this->log($xmldata);
+        if ($this->encrypt_type == 'aes') { //如果来源消息为加密方式
+            $pc = new Prpcrypt($this->encodingAesKey);
+            $array = $pc->encrypt($xmldata, $this->appid);
+            $ret = $array[0];
+            if ($ret != 0) {
+                $this->log('encrypt err!');
+                return false;
+            }
+            $timestamp = time();
+            $nonce = rand(77,999)*rand(605,888)*rand(11,99);
+            $encrypt = $array[1];
+            $tmpArr = array($this->token, $timestamp, $nonce,$encrypt);//比普通公众平台多了一个加密的密文
+            sort($tmpArr, SORT_STRING);
+            $signature = implode($tmpArr);
+            $signature = sha1($signature);
+            $xmldata = $this->generate($encrypt, $signature, $timestamp, $nonce);
+            $this->log($xmldata);
+        }
+        if ($return)
+            return $xmldata;
+        else
+            echo $xmldata;
+    }
 
     /**
      * xml格式加密，仅请求为加密方式时再用
      */
-	private function generate($encrypt, $signature, $timestamp, $nonce)
-	{
-	    //格式化加密信息
-	    $format = "<xml>
+    private function generate($encrypt, $signature, $timestamp, $nonce)
+    {
+        //格式化加密信息
+        $format = "<xml>
 <Encrypt><![CDATA[%s]]></Encrypt>
 <MsgSignature><![CDATA[%s]]></MsgSignature>
 <TimeStamp>%s</TimeStamp>
 <Nonce><![CDATA[%s]]></Nonce>
 </xml>";
-	    return sprintf($format, $encrypt, $signature, $timestamp, $nonce);
-	}
+        return sprintf($format, $encrypt, $signature, $timestamp, $nonce);
+    }
 
-	/**
-	 * GET 请求
-	 * @param string $url
-	 */
-	private function http_get($url){
-		$oCurl = curl_init();
-		if(stripos($url,"https://")!==FALSE){
-			curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
-			curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, FALSE);
-			curl_setopt($oCurl, CURLOPT_SSLVERSION, 1); //CURL_SSLVERSION_TLSv1
-		}
-		curl_setopt($oCurl, CURLOPT_URL, $url);
-		curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
-		$sContent = curl_exec($oCurl);
-		$aStatus = curl_getinfo($oCurl);
-		curl_close($oCurl);
-		if(intval($aStatus["http_code"])==200){
-			return $sContent;
-		}else{
-			return false;
-		}
-	}
+    /**
+     * GET 请求
+     * @param string $url
+     */
+    private function http_get($url){
+        $oCurl = curl_init();
+        if(stripos($url,"https://")!==FALSE){
+            curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, FALSE);
+            curl_setopt($oCurl, CURLOPT_SSLVERSION, 1); //CURL_SSLVERSION_TLSv1
+        }
+        curl_setopt($oCurl, CURLOPT_URL, $url);
+        curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
+        $sContent = curl_exec($oCurl);
+        $aStatus = curl_getinfo($oCurl);
+        curl_close($oCurl);
+        if(intval($aStatus["http_code"])==200){
+            return $sContent;
+        }else{
+            return false;
+        }
+    }
 
-	/**
-	 * POST 请求
-	 * @param string $url
-	 * @param array $param
-	 * @param boolean $post_file 是否文件上传
-	 * @return string content
-	 */
-	private function http_post($url,$param,$post_file=false){
-		$oCurl = curl_init();
-		if(stripos($url,"https://")!==FALSE){
-			curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
-			curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, false);
-			curl_setopt($oCurl, CURLOPT_SSLVERSION, 1); //CURL_SSLVERSION_TLSv1
-		}
-	        if (PHP_VERSION_ID >= 50500 && class_exists('\CURLFile')) {
-	            	$is_curlFile = true;
-	        } else {
-	        	$is_curlFile = false;
-	            	if (defined('CURLOPT_SAFE_UPLOAD')) {
-	                	curl_setopt($oCurl, CURLOPT_SAFE_UPLOAD, false);
-	            	}
-	        }
-		if (is_string($param)) {
-	            	$strPOST = $param;
-	        }elseif($post_file) {
-	            	if($is_curlFile) {
-		                foreach ($param as $key => $val) {
-		                    	if (substr($val, 0, 1) == '@') {
-		                        	$param[$key] = new \CURLFile(realpath(substr($val,1)));
-		                    	}
-		                }
-	            	}
-			$strPOST = $param;
-		} else {
-			$aPOST = array();
-			foreach($param as $key=>$val){
-				$aPOST[] = $key."=".urlencode($val);
-			}
-			$strPOST =  join("&", $aPOST);
-		}
-		curl_setopt($oCurl, CURLOPT_URL, $url);
-		curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt($oCurl, CURLOPT_POST,true);
-		curl_setopt($oCurl, CURLOPT_POSTFIELDS,$strPOST);
-		$sContent = curl_exec($oCurl);
-		$aStatus = curl_getinfo($oCurl);
-		curl_close($oCurl);
-		if(intval($aStatus["http_code"])==200){
-			return $sContent;
-		}else{
-			return false;
-		}
-	}
+    /**
+     * POST 请求
+     * @param string $url
+     * @param array $param
+     * @param boolean $post_file 是否文件上传
+     * @return string content
+     */
+    private function http_post($url,$param,$post_file=false){
+        $oCurl = curl_init();
+        if(stripos($url,"https://")!==FALSE){
+            curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($oCurl, CURLOPT_SSLVERSION, 1); //CURL_SSLVERSION_TLSv1
+        }
+            if (PHP_VERSION_ID >= 50500 && class_exists('\CURLFile')) {
+                    $is_curlFile = true;
+            } else {
+                $is_curlFile = false;
+                    if (defined('CURLOPT_SAFE_UPLOAD')) {
+                        curl_setopt($oCurl, CURLOPT_SAFE_UPLOAD, false);
+                    }
+            }
+        if (is_string($param)) {
+                    $strPOST = $param;
+            }elseif($post_file) {
+                    if($is_curlFile) {
+                        foreach ($param as $key => $val) {
+                                if (substr($val, 0, 1) == '@') {
+                                    $param[$key] = new \CURLFile(realpath(substr($val,1)));
+                                }
+                        }
+                    }
+            $strPOST = $param;
+        } else {
+            $aPOST = array();
+            foreach($param as $key=>$val){
+                $aPOST[] = $key."=".urlencode($val);
+            }
+            $strPOST =  join("&", $aPOST);
+        }
+        curl_setopt($oCurl, CURLOPT_URL, $url);
+        curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt($oCurl, CURLOPT_POST,true);
+        curl_setopt($oCurl, CURLOPT_POSTFIELDS,$strPOST);
+        $sContent = curl_exec($oCurl);
+        $aStatus = curl_getinfo($oCurl);
+        curl_close($oCurl);
+        if(intval($aStatus["http_code"])==200){
+            return $sContent;
+        }else{
+            return false;
+        }
+    }
 
-	/**
-	 * 设置缓存，按需重载
-	 * @param string $cachename
-	 * @param mixed $value
-	 * @param int $expired
-	 * @return boolean
-	 */
-	protected function setCache($cachename,$value,$expired){
-		//TODO: set cache implementation
-		return false;
-	}
+    /**
+     * 设置缓存，按需重载
+     * @param string $cachename
+     * @param mixed $value
+     * @param int $expired
+     * @return boolean
+     */
+    protected function setCache($cachename,$value,$expired){
+        //TODO: set cache implementation
+        return false;
+    }
 
-	/**
-	 * 获取缓存，按需重载
-	 * @param string $cachename
-	 * @return mixed
-	 */
-	protected function getCache($cachename){
-		//TODO: get cache implementation
-		return false;
-	}
+    /**
+     * 获取缓存，按需重载
+     * @param string $cachename
+     * @return mixed
+     */
+    protected function getCache($cachename){
+        //TODO: get cache implementation
+        return false;
+    }
 
-	/**
-	 * 清除缓存，按需重载
-	 * @param string $cachename
-	 * @return boolean
-	 */
-	protected function removeCache($cachename){
-		//TODO: remove cache implementation
-		return false;
-	}
+    /**
+     * 清除缓存，按需重载
+     * @param string $cachename
+     * @return boolean
+     */
+    protected function removeCache($cachename){
+        //TODO: remove cache implementation
+        return false;
+    }
 
-	/**
-	 * 获取access_token
-	 * @param string $appid 如在类初始化时已提供，则可为空
-	 * @param string $appsecret 如在类初始化时已提供，则可为空
-	 * @param string $token 手动指定access_token，非必要情况不建议用
-	 */
-	public function checkAuth($appid='',$appsecret='',$token=''){
-		if (!$appid || !$appsecret) {
-			$appid = $this->appid;
-			$appsecret = $this->appsecret;
-		}
-		if ($token) { //手动指定token，优先使用
-		    $this->access_token=$token;
-		    return $this->access_token;
-		}
+    /**
+     * 获取access_token
+     * @param string $appid 如在类初始化时已提供，则可为空
+     * @param string $appsecret 如在类初始化时已提供，则可为空
+     * @param string $token 手动指定access_token，非必要情况不建议用
+     */
+    public function checkAuth($appid='',$appsecret='',$token=''){
+        if (!$appid || !$appsecret) {
+            $appid = $this->appid;
+            $appsecret = $this->appsecret;
+        }
+        if ($token) { //手动指定token，优先使用
+            $this->access_token=$token;
+            return $this->access_token;
+        }
 
-		$authname = 'wechat_access_token'.$appid;
-		if ($rs = $this->getCache($authname))  {
-			$this->access_token = $rs;
-			return $rs;
-		}
+        $authname = 'wechat_access_token'.$appid;
+        if ($rs = $this->getCache($authname))  {
+            $this->access_token = $rs;
+            return $rs;
+        }
 
-		$result = $this->http_get(self::API_URL_PREFIX.self::AUTH_URL.'appid='.$appid.'&secret='.$appsecret);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || isset($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			$this->access_token = $json['access_token'];
-			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
-			$this->setCache($authname,$this->access_token,$expire);
-			return $this->access_token;
-		}
-		return false;
-	}
+        $result = $this->http_get(self::API_URL_PREFIX.self::AUTH_URL.'appid='.$appid.'&secret='.$appsecret);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || isset($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            $this->access_token = $json['access_token'];
+            $expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
+            $this->setCache($authname,$this->access_token,$expire);
+            return $this->access_token;
+        }
+        return false;
+    }
 
-	/**
-	 * 删除验证数据
-	 * @param string $appid
-	 */
-	public function resetAuth($appid=''){
-		if (!$appid) $appid = $this->appid;
-		$this->access_token = '';
-		$authname = 'wechat_access_token'.$appid;
-		$this->removeCache($authname);
-		return true;
-	}
+    /**
+     * 删除验证数据
+     * @param string $appid
+     */
+    public function resetAuth($appid=''){
+        if (!$appid) $appid = $this->appid;
+        $this->access_token = '';
+        $authname = 'wechat_access_token'.$appid;
+        $this->removeCache($authname);
+        return true;
+    }
 
-	/**
-	 * 删除JSAPI授权TICKET
-	 * @param string $appid 用于多个appid时使用
-	 */
-	public function resetJsTicket($appid=''){
-		if (!$appid) $appid = $this->appid;
-		$this->jsapi_ticket = '';
-		$authname = 'wechat_jsapi_ticket'.$appid;
-		$this->removeCache($authname);
-		return true;
-	}
+    /**
+     * 删除JSAPI授权TICKET
+     * @param string $appid 用于多个appid时使用
+     */
+    public function resetJsTicket($appid=''){
+        if (!$appid) $appid = $this->appid;
+        $this->jsapi_ticket = '';
+        $authname = 'wechat_jsapi_ticket'.$appid;
+        $this->removeCache($authname);
+        return true;
+    }
 
-	/**
-	 * 获取JSAPI授权TICKET
-	 * @param string $appid 用于多个appid时使用,可空
-	 * @param string $jsapi_ticket 手动指定jsapi_ticket，非必要情况不建议用
-	 */
-	public function getJsTicket($appid='',$jsapi_ticket=''){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		if (!$appid) $appid = $this->appid;
-		if ($jsapi_ticket) { //手动指定token，优先使用
-		    $this->jsapi_ticket = $jsapi_ticket;
-		    return $this->jsapi_ticket;
-		}
-		$authname = 'wechat_jsapi_ticket'.$appid;
-		if ($rs = $this->getCache($authname))  {
-			$this->jsapi_ticket = $rs;
-			return $rs;
-		}
-		$result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=jsapi');
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			$this->jsapi_ticket = $json['ticket'];
-			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
-			$this->setCache($authname,$this->jsapi_ticket,$expire);
-			return $this->jsapi_ticket;
-		}
-		return false;
-	}
+    /**
+     * 获取JSAPI授权TICKET
+     * @param string $appid 用于多个appid时使用,可空
+     * @param string $jsapi_ticket 手动指定jsapi_ticket，非必要情况不建议用
+     */
+    public function getJsTicket($appid='',$jsapi_ticket=''){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        if (!$appid) $appid = $this->appid;
+        if ($jsapi_ticket) { //手动指定token，优先使用
+            $this->jsapi_ticket = $jsapi_ticket;
+            return $this->jsapi_ticket;
+        }
+        $authname = 'wechat_jsapi_ticket'.$appid;
+        if ($rs = $this->getCache($authname))  {
+            $this->jsapi_ticket = $rs;
+            return $rs;
+        }
+        $result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=jsapi');
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            $this->jsapi_ticket = $json['ticket'];
+            $expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
+            $this->setCache($authname,$this->jsapi_ticket,$expire);
+            return $this->jsapi_ticket;
+        }
+        return false;
+    }
 
 
-	/**
-	 * 获取JsApi使用签名
-	 * @param string $url 网页的URL，自动处理#及其后面部分
-	 * @param string $timestamp 当前时间戳 (为空则自动生成)
-	 * @param string $noncestr 随机串 (为空则自动生成)
-	 * @param string $appid 用于多个appid时使用,可空
-	 * @return array|bool 返回签名字串
-	 */
-	public function getJsSign($url, $timestamp=0, $noncestr='', $appid=''){
-	    if (!$this->jsapi_ticket && !$this->getJsTicket($appid) || !$url) return false;
-	    if (!$timestamp)
-	        $timestamp = time();
-	    if (!$noncestr)
-	        $noncestr = $this->generateNonceStr();
-	    $ret = strpos($url,'#');
-	    if ($ret)
-	        $url = substr($url,0,$ret);
-	    $url = trim($url);
-	    if (empty($url))
-	        return false;
-	    $arrdata = array("timestamp" => $timestamp, "noncestr" => $noncestr, "url" => $url, "jsapi_ticket" => $this->jsapi_ticket);
-	    $sign = $this->getSignature($arrdata);
-	    if (!$sign)
-	        return false;
-	    $signPackage = array(
-	            "appId"     => $this->appid,
-	            "nonceStr"  => $noncestr,
-	            "timestamp" => $timestamp,
-	            "url"       => $url,
-	            "signature" => $sign
-	    );
-	    return $signPackage;
-	}
+    /**
+     * 获取JsApi使用签名
+     * @param string $url 网页的URL，自动处理#及其后面部分
+     * @param string $timestamp 当前时间戳 (为空则自动生成)
+     * @param string $noncestr 随机串 (为空则自动生成)
+     * @param string $appid 用于多个appid时使用,可空
+     * @return array|bool 返回签名字串
+     */
+    public function getJsSign($url, $timestamp=0, $noncestr='', $appid=''){
+        if (!$this->jsapi_ticket && !$this->getJsTicket($appid) || !$url) return false;
+        if (!$timestamp)
+            $timestamp = time();
+        if (!$noncestr)
+            $noncestr = $this->generateNonceStr();
+        $ret = strpos($url,'#');
+        if ($ret)
+            $url = substr($url,0,$ret);
+        $url = trim($url);
+        if (empty($url))
+            return false;
+        $arrdata = array("timestamp" => $timestamp, "noncestr" => $noncestr, "url" => $url, "jsapi_ticket" => $this->jsapi_ticket);
+        $sign = $this->getSignature($arrdata);
+        if (!$sign)
+            return false;
+        $signPackage = array(
+                "appId"     => $this->appid,
+                "nonceStr"  => $noncestr,
+                "timestamp" => $timestamp,
+                "url"       => $url,
+                "signature" => $sign
+        );
+        return $signPackage;
+    }
 
     /**
      * 获取卡券签名cardSign
@@ -1364,206 +1364,165 @@ class Wechat
         return $signPackage;
     }
 
-	/**
-	 * 微信api不支持中文转义的json结构
-	 * @param array $arr
-	 */
-	static function json_encode($arr) {
-		if (count($arr) == 0) return "[]";
-		$parts = array ();
-		$is_list = false;
-		//Find out if the given array is a numerical array
-		$keys = array_keys ( $arr );
-		$max_length = count ( $arr ) - 1;
-		if (($keys [0] === 0) && ($keys [$max_length] === $max_length )) { //See if the first key is 0 and last key is length - 1
-			$is_list = true;
-			for($i = 0; $i < count ( $keys ); $i ++) { //See if each key correspondes to its position
-				if ($i != $keys [$i]) { //A key fails at position check.
-					$is_list = false; //It is an associative array.
-					break;
-				}
-			}
-		}
-		foreach ( $arr as $key => $value ) {
-			if (is_array ( $value )) { //Custom handling for arrays
-				if ($is_list)
-					$parts [] = self::json_encode ( $value ); /* :RECURSION: */
-				else
-					$parts [] = '"' . $key . '":' . self::json_encode ( $value ); /* :RECURSION: */
-			} else {
-				$str = '';
-				if (! $is_list)
-					$str = '"' . $key . '":';
-				//Custom handling for multiple data types
-				if (!is_string ( $value ) && is_numeric ( $value ) && $value<2000000000)
-					$str .= $value; //Numbers
-				elseif ($value === false)
-				$str .= 'false'; //The booleans
-				elseif ($value === true)
-				$str .= 'true';
-				else
-					$str .= '"' . addslashes ( $value ) . '"'; //All other things
-				// :TODO: Is there any more datatype we should be in the lookout for? (Object?)
-				$parts [] = $str;
-			}
-		}
-		$json = implode ( ',', $parts );
-		if ($is_list)
-			return '[' . $json . ']'; //Return numerical JSON
-		return '{' . $json . '}'; //Return associative JSON
-	}
+    /**
+     * 微信api不支持中文转义的json结构
+     * @param array $arr
+     */
+    static function json_encode($arr) {
+        return json_encode($arr, JSON_UNESCAPED_UNICODE);
+    }
 
-	/**
-	 * 获取签名
-	 * @param array $arrdata 签名数组
-	 * @param string $method 签名方法
-	 * @return boolean|string 签名值
-	 */
-	public function getSignature($arrdata,$method="sha1") {
-		if (!function_exists($method)) return false;
-		ksort($arrdata);
-		$paramstring = "";
-		foreach($arrdata as $key => $value)
-		{
-			if(strlen($paramstring) == 0)
-				$paramstring .= $key . "=" . $value;
-			else
-				$paramstring .= "&" . $key . "=" . $value;
-		}
-		$Sign = $method($paramstring);
-		return $Sign;
-	}
+    /**
+     * 获取签名
+     * @param array $arrdata 签名数组
+     * @param string $method 签名方法
+     * @return boolean|string 签名值
+     */
+    public function getSignature($arrdata,$method="sha1") {
+        if (!function_exists($method)) return false;
+        ksort($arrdata);
+        $paramstring = "";
+        foreach($arrdata as $key => $value)
+        {
+            if(strlen($paramstring) == 0)
+                $paramstring .= $key . "=" . $value;
+            else
+                $paramstring .= "&" . $key . "=" . $value;
+        }
+        $Sign = $method($paramstring);
+        return $Sign;
+    }
 
-	/**
-	 * 获取微信卡券api_ticket
-	 * @param string $appid 用于多个appid时使用,可空
-	 * @param string $api_ticket 手动指定api_ticket，非必要情况不建议用
-	 */
-	public function getJsCardTicket($appid='',$api_ticket=''){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		if (!$appid) $appid = $this->appid;
-		if ($api_ticket) { //手动指定token，优先使用
-		    $this->api_ticket = $api_ticket;
-		    return $this->api_ticket;
-		}
-		$authname = 'wechat_api_ticket_wxcard'.$appid;
-		if ($rs = $this->getCache($authname))  {
-			$this->api_ticket = $rs;
-			return $rs;
-		}
-		$result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=wx_card');
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			$this->api_ticket = $json['ticket'];
-			$expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
-			$this->setCache($authname,$this->api_ticket,$expire);
-			return $this->api_ticket;
-		}
-		return false;
-	}
+    /**
+     * 获取微信卡券api_ticket
+     * @param string $appid 用于多个appid时使用,可空
+     * @param string $api_ticket 手动指定api_ticket，非必要情况不建议用
+     */
+    public function getJsCardTicket($appid='',$api_ticket=''){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        if (!$appid) $appid = $this->appid;
+        if ($api_ticket) { //手动指定token，优先使用
+            $this->api_ticket = $api_ticket;
+            return $this->api_ticket;
+        }
+        $authname = 'wechat_api_ticket_wxcard'.$appid;
+        if ($rs = $this->getCache($authname))  {
+            $this->api_ticket = $rs;
+            return $rs;
+        }
+        $result = $this->http_get(self::API_URL_PREFIX.self::GET_TICKET_URL.'access_token='.$this->access_token.'&type=wx_card');
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            $this->api_ticket = $json['ticket'];
+            $expire = $json['expires_in'] ? intval($json['expires_in'])-100 : 3600;
+            $this->setCache($authname,$this->api_ticket,$expire);
+            return $this->api_ticket;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取微信卡券签名
-	 * @param array $arrdata 签名数组
-	 * @param string $method 签名方法
-	 * @return boolean|string 签名值
-	 */
-	public function getTicketSignature($arrdata,$method="sha1") {
-		if (!function_exists($method)) return false;
-		$newArray = array();
-		foreach($arrdata as $key => $value)
-		{
-			array_push($newArray,(string)$value);
-		}
-		sort($newArray,SORT_STRING);
-		return $method(implode($newArray));
-	}
+    /**
+     * 获取微信卡券签名
+     * @param array $arrdata 签名数组
+     * @param string $method 签名方法
+     * @return boolean|string 签名值
+     */
+    public function getTicketSignature($arrdata,$method="sha1") {
+        if (!function_exists($method)) return false;
+        $newArray = array();
+        foreach($arrdata as $key => $value)
+        {
+            array_push($newArray,(string)$value);
+        }
+        sort($newArray,SORT_STRING);
+        return $method(implode($newArray));
+    }
 
-	/**
-	 * 生成随机字串
-	 * @param number $length 长度，默认为16，最长为32字节
-	 * @return string
-	 */
-	public function generateNonceStr($length=16){
-		// 密码字符集，可任意添加你需要的字符
-		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		$str = "";
-		for($i = 0; $i < $length; $i++)
-		{
-			$str .= $chars[mt_rand(0, strlen($chars) - 1)];
-		}
-		return $str;
-	}
+    /**
+     * 生成随机字串
+     * @param number $length 长度，默认为16，最长为32字节
+     * @return string
+     */
+    public function generateNonceStr($length=16){
+        // 密码字符集，可任意添加你需要的字符
+        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $str = "";
+        for($i = 0; $i < $length; $i++)
+        {
+            $str .= $chars[mt_rand(0, strlen($chars) - 1)];
+        }
+        return $str;
+    }
 
-	/**
-	 * 获取微信服务器IP地址列表
-	 * @return array('127.0.0.1','127.0.0.1')
-	 */
-	public function getServerIp(){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::CALLBACKSERVER_GET_URL.'access_token='.$this->access_token);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || isset($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json['ip_list'];
-		}
-		return false;
-	}
+    /**
+     * 获取微信服务器IP地址列表
+     * @return array('127.0.0.1','127.0.0.1')
+     */
+    public function getServerIp(){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::CALLBACKSERVER_GET_URL.'access_token='.$this->access_token);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || isset($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json['ip_list'];
+        }
+        return false;
+    }
 
-	/**
-	 * 创建菜单(认证后的订阅号可用)
-	 * @param array $data 菜单数组数据
-	 * example:
-     * 	array (
-     * 	    'button' => array (
-     * 	      0 => array (
-     * 	        'name' => '扫码',
-     * 	        'sub_button' => array (
-     * 	            0 => array (
-     * 	              'type' => 'scancode_waitmsg',
-     * 	              'name' => '扫码带提示',
-     * 	              'key' => 'rselfmenu_0_0',
-     * 	            ),
-     * 	            1 => array (
-     * 	              'type' => 'scancode_push',
-     * 	              'name' => '扫码推事件',
-     * 	              'key' => 'rselfmenu_0_1',
-     * 	            ),
-     * 	        ),
-     * 	      ),
-     * 	      1 => array (
-     * 	        'name' => '发图',
-     * 	        'sub_button' => array (
-     * 	            0 => array (
-     * 	              'type' => 'pic_sysphoto',
-     * 	              'name' => '系统拍照发图',
-     * 	              'key' => 'rselfmenu_1_0',
-     * 	            ),
-     * 	            1 => array (
-     * 	              'type' => 'pic_photo_or_album',
-     * 	              'name' => '拍照或者相册发图',
-     * 	              'key' => 'rselfmenu_1_1',
-     * 	            )
-     * 	        ),
-     * 	      ),
-     * 	      2 => array (
-     * 	        'type' => 'location_select',
-     * 	        'name' => '发送位置',
-     * 	        'key' => 'rselfmenu_2_0'
-     * 	      ),
-     * 	    ),
-     * 	)
+    /**
+     * 创建菜单(认证后的订阅号可用)
+     * @param array $data 菜单数组数据
+     * example:
+     *  array (
+     *      'button' => array (
+     *        0 => array (
+     *          'name' => '扫码',
+     *          'sub_button' => array (
+     *              0 => array (
+     *                'type' => 'scancode_waitmsg',
+     *                'name' => '扫码带提示',
+     *                'key' => 'rselfmenu_0_0',
+     *              ),
+     *              1 => array (
+     *                'type' => 'scancode_push',
+     *                'name' => '扫码推事件',
+     *                'key' => 'rselfmenu_0_1',
+     *              ),
+     *          ),
+     *        ),
+     *        1 => array (
+     *          'name' => '发图',
+     *          'sub_button' => array (
+     *              0 => array (
+     *                'type' => 'pic_sysphoto',
+     *                'name' => '系统拍照发图',
+     *                'key' => 'rselfmenu_1_0',
+     *              ),
+     *              1 => array (
+     *                'type' => 'pic_photo_or_album',
+     *                'name' => '拍照或者相册发图',
+     *                'key' => 'rselfmenu_1_1',
+     *              )
+     *          ),
+     *        ),
+     *        2 => array (
+     *          'type' => 'location_select',
+     *          'name' => '发送位置',
+     *          'key' => 'rselfmenu_2_0'
+     *        ),
+     *      ),
+     *  )
      * type可以选择为以下几种，其中5-8除了收到菜单事件以外，还会单独收到对应类型的信息。
      * 1、click：点击推事件
      * 2、view：跳转URL
@@ -1573,169 +1532,169 @@ class Wechat
      * 6、pic_photo_or_album：弹出拍照或者相册发图
      * 7、pic_weixin：弹出微信相册发图器
      * 8、location_select：弹出地理位置选择器
-	 */
-	public function createMenu($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MENU_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
+     */
+    public function createMenu($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MENU_CREATE_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取菜单(认证后的订阅号可用)
-	 * @return array('menu'=>array(....s))
-	 */
-	public function getMenu(){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::MENU_GET_URL.'access_token='.$this->access_token);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || isset($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 获取菜单(认证后的订阅号可用)
+     * @return array('menu'=>array(....s))
+     */
+    public function getMenu(){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::MENU_GET_URL.'access_token='.$this->access_token);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || isset($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 删除菜单(认证后的订阅号可用)
-	 * @return boolean
-	 */
-	public function deleteMenu(){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::MENU_DELETE_URL.'access_token='.$this->access_token);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
+    /**
+     * 删除菜单(认证后的订阅号可用)
+     * @return boolean
+     */
+    public function deleteMenu(){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::MENU_DELETE_URL.'access_token='.$this->access_token);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * 创建个性化菜单(认证后的订阅号可用)
-	 * @param array $data
-	 * @return bool
-	 *
-	 */
-	public function addconditionalMenu($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MENU_ADDCONDITIONAL_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
+    /**
+     * 创建个性化菜单(认证后的订阅号可用)
+     * @param array $data
+     * @return bool
+     *
+     */
+    public function addconditionalMenu($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MENU_ADDCONDITIONAL_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * 删除个性化菜单(认证后的订阅号可用)
-	 * @param $data {"menuid":"208379533"}
-	 *
-	 * @return bool
-	 */
-	public function delconditionalMenu($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MENU_DELCONDITIONAL_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
+    /**
+     * 删除个性化菜单(认证后的订阅号可用)
+     * @param $data {"menuid":"208379533"}
+     *
+     * @return bool
+     */
+    public function delconditionalMenu($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MENU_DELCONDITIONAL_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * 测试个性化菜单匹配结果(认证后的订阅号可用)
-	 * @param $data {"user_id":"weixin"} user_id可以是粉丝的OpenID，也可以是粉丝的微信号
-	 *
-	 * @return bool|array('button'=>array(....s))
-	 */
-	public function trymatchMenu($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MENU_TRYMATCH_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 测试个性化菜单匹配结果(认证后的订阅号可用)
+     * @param $data {"user_id":"weixin"} user_id可以是粉丝的OpenID，也可以是粉丝的微信号
+     *
+     * @return bool|array('button'=>array(....s))
+     */
+    public function trymatchMenu($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MENU_TRYMATCH_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 上传临时素材，有效期为3天(认证后的订阅号可用)
-	 * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
-	 * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义
+    /**
+     * 上传临时素材，有效期为3天(认证后的订阅号可用)
+     * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
+     * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义
      * 注意：临时素材的media_id是可复用的！
-	 * @param array $data {"media":'@Path\filename.jpg'}
-	 * @param type 类型：图片:image 语音:voice 视频:video 缩略图:thumb
-	 * @return boolean|array
-	 */
-	public function uploadMedia($data, $type){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		//原先的上传多媒体文件接口使用 self::UPLOAD_MEDIA_URL 前缀
-		$result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_UPLOAD_URL.'access_token='.$this->access_token.'&type='.$type,$data,true);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+     * @param array $data {"media":'@Path\filename.jpg'}
+     * @param type 类型：图片:image 语音:voice 视频:video 缩略图:thumb
+     * @return boolean|array
+     */
+    public function uploadMedia($data, $type){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        //原先的上传多媒体文件接口使用 self::UPLOAD_MEDIA_URL 前缀
+        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_UPLOAD_URL.'access_token='.$this->access_token.'&type='.$type,$data,true);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取临时素材(认证后的订阅号可用)
-	 * @param string $media_id 媒体文件id
-	 * @param boolean $is_video 是否为视频文件，默认为否
-	 * @return raw data
-	 */
-	public function getMedia($media_id,$is_video=false){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		//原先的上传多媒体文件接口使用 self::UPLOAD_MEDIA_URL 前缀
-		//如果要获取的素材是视频文件时，不能使用https协议，必须更换成http协议
-		$url_prefix = $is_video?str_replace('https','http',self::API_URL_PREFIX):self::API_URL_PREFIX;
-		$result = $this->http_get($url_prefix.self::MEDIA_GET_URL.'access_token='.$this->access_token.'&media_id='.$media_id);
-		if ($result)
-		{
+    /**
+     * 获取临时素材(认证后的订阅号可用)
+     * @param string $media_id 媒体文件id
+     * @param boolean $is_video 是否为视频文件，默认为否
+     * @return raw data
+     */
+    public function getMedia($media_id,$is_video=false){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        //原先的上传多媒体文件接口使用 self::UPLOAD_MEDIA_URL 前缀
+        //如果要获取的素材是视频文件时，不能使用https协议，必须更换成http协议
+        $url_prefix = $is_video?str_replace('https','http',self::API_URL_PREFIX):self::API_URL_PREFIX;
+        $result = $this->http_get($url_prefix.self::MEDIA_GET_URL.'access_token='.$this->access_token.'&media_id='.$media_id);
+        if ($result)
+        {
             if (is_string($result)) {
                 $json = json_decode($result,true);
                 if (isset($json['errcode'])) {
@@ -1744,35 +1703,35 @@ class Wechat
                     return false;
                 }
             }
-			return $result;
-		}
-		return false;
-	}
+            return $result;
+        }
+        return false;
+    }
 
-	/**
-	 * 上传图片，本接口所上传的图片不占用公众号的素材库中图片数量的5000个的限制。图片仅支持jpg/png格式，大小必须在1MB以下。 (认证后的订阅号可用)
-	 * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
-	 * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义      
-	 * @param array $data {"media":'@Path\filename.jpg'}
-	 * 
-	 * @return boolean|array
-	 */
-	public function uploadImg($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		//原先的上传多媒体文件接口使用 self::UPLOAD_MEDIA_URL 前缀
-		$result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_UPLOADIMG_URL.'access_token='.$this->access_token,$data,true);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 上传图片，本接口所上传的图片不占用公众号的素材库中图片数量的5000个的限制。图片仅支持jpg/png格式，大小必须在1MB以下。 (认证后的订阅号可用)
+     * 注意：上传大文件时可能需要先调用 set_time_limit(0) 避免超时
+     * 注意：数组的键值任意，但文件名前必须加@，使用单引号以避免本地路径斜杠被转义
+     * @param array $data {"media":'@Path\filename.jpg'}
+     *
+     * @return boolean|array
+     */
+    public function uploadImg($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        //原先的上传多媒体文件接口使用 self::UPLOAD_MEDIA_URL 前缀
+        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_UPLOADIMG_URL.'access_token='.$this->access_token,$data,true);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
 
     /**
@@ -1792,7 +1751,7 @@ class Wechat
         //如果要获取的素材是视频文件时，不能使用https协议，必须更换成http协议
         //$url_prefix = $is_video?str_replace('https','http',self::API_URL_PREFIX):self::API_URL_PREFIX;
         //当上传视频文件时，附加视频文件信息
-        if ($is_video) $data['description'] = self::json_encode($video_info);
+        if ($is_video) $data['description'] = static::json_encode($video_info);
         $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_UPLOAD_URL.'access_token='.$this->access_token.'&type='.$type,$data,true);
         if ($result)
         {
@@ -1815,7 +1774,7 @@ class Wechat
      */
     public function uploadForeverArticles($data){
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_NEWS_UPLOAD_URL.'access_token='.$this->access_token,self::json_encode($data));
+        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_NEWS_UPLOAD_URL.'access_token='.$this->access_token,static::json_encode($data));
         if ($result)
         {
             $json = json_decode($result,true);
@@ -1841,7 +1800,7 @@ class Wechat
         if (!$this->access_token && !$this->checkAuth()) return false;
         if (!isset($data['media_id'])) $data['media_id'] = $media_id;
         if (!isset($data['index'])) $data['index'] = $index;
-        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_NEWS_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
+        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_NEWS_UPDATE_URL.'access_token='.$this->access_token,static::json_encode($data));
         if ($result)
         {
             $json = json_decode($result,true);
@@ -1868,7 +1827,7 @@ class Wechat
         //#TODO 暂不确定此接口是否需要让视频文件走http协议
         //如果要获取的素材是视频文件时，不能使用https协议，必须更换成http协议
         //$url_prefix = $is_video?str_replace('https','http',self::API_URL_PREFIX):self::API_URL_PREFIX;
-        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_GET_URL.'access_token='.$this->access_token,self::json_encode($data));
+        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_GET_URL.'access_token='.$this->access_token,static::json_encode($data));
         if ($result)
         {
             if (is_string($result)) {
@@ -1897,7 +1856,7 @@ class Wechat
     public function delForeverMedia($media_id){
         if (!$this->access_token && !$this->checkAuth()) return false;
         $data = array('media_id' => $media_id);
-        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_DEL_URL.'access_token='.$this->access_token,self::json_encode($data));
+        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_DEL_URL.'access_token='.$this->access_token,static::json_encode($data));
         if ($result)
         {
             $json = json_decode($result,true);
@@ -1931,7 +1890,7 @@ class Wechat
             'offset' => $offset,
             'count' => $count,
         );
-        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_BATCHGET_URL.'access_token='.$this->access_token,self::json_encode($data));
+        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_FOREVER_BATCHGET_URL.'access_token='.$this->access_token,static::json_encode($data));
         if ($result)
         {
             $json = json_decode($result,true);
@@ -1972,1181 +1931,1181 @@ class Wechat
         return false;
     }
 
-	/**
-	 * 上传图文消息素材，用于群发(认证后的订阅号可用)
-	 * @param array $data 消息结构{"articles":[{...}]}
-	 * @return boolean|array
-	 */
-	public function uploadArticles($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_UPLOADNEWS_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 上传图文消息素材，用于群发(认证后的订阅号可用)
+     * @param array $data 消息结构{"articles":[{...}]}
+     * @return boolean|array
+     */
+    public function uploadArticles($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MEDIA_UPLOADNEWS_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 上传视频素材(认证后的订阅号可用)
-	 * @param array $data 消息结构
-	 * {
-	 *     "media_id"=>"",     //通过上传媒体接口得到的MediaId
-	 *     "title"=>"TITLE",    //视频标题
-	 *     "description"=>"Description"        //视频描述
-	 * }
-	 * @return boolean|array
-	 * {
-	 *     "type":"video",
-	 *     "media_id":"mediaid",
-	 *     "created_at":1398848981
-	 *  }
-	 */
-	public function uploadMpVideo($data){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::UPLOAD_MEDIA_URL.self::MEDIA_VIDEO_UPLOAD.'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 上传视频素材(认证后的订阅号可用)
+     * @param array $data 消息结构
+     * {
+     *     "media_id"=>"",     //通过上传媒体接口得到的MediaId
+     *     "title"=>"TITLE",    //视频标题
+     *     "description"=>"Description"        //视频描述
+     * }
+     * @return boolean|array
+     * {
+     *     "type":"video",
+     *     "media_id":"mediaid",
+     *     "created_at":1398848981
+     *  }
+     */
+    public function uploadMpVideo($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::UPLOAD_MEDIA_URL.self::MEDIA_VIDEO_UPLOAD.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 高级群发消息, 根据OpenID列表群发图文消息(订阅号不可用)
-	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
-	 *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
-	 * @param array $data 消息结构
-	 * {
-	 *     "touser"=>array(
-	 *         "OPENID1",
-	 *         "OPENID2"
-	 *     ),
-	 *      "msgtype"=>"mpvideo",
-	 *      // 在下面5种类型中选择对应的参数内容
-	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
-	 *      // text => array ( "content" => "hello")
-	 * }
-	 * @return boolean|array
-	 */
-	public function sendMassMessage($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 高级群发消息, 根据OpenID列表群发图文消息(订阅号不可用)
+     *  注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
+     *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
+     * @param array $data 消息结构
+     * {
+     *     "touser"=>array(
+     *         "OPENID1",
+     *         "OPENID2"
+     *     ),
+     *      "msgtype"=>"mpvideo",
+     *      // 在下面5种类型中选择对应的参数内容
+     *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
+     *      // text => array ( "content" => "hello")
+     * }
+     * @return boolean|array
+     */
+    public function sendMassMessage($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MASS_SEND_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 高级群发消息, 根据群组id群发图文消息(认证后的订阅号可用)
-	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
-	 *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
-	 * @param array $data 消息结构
-	 * {
-	 *     "filter"=>array(
-	 *         "is_to_all"=>False,     //是否群发给所有用户.True不用分组id，False需填写分组id
-	 *         "group_id"=>"2"     //群发的分组id
-	 *     ),
-	 *      "msgtype"=>"mpvideo",
-	 *      // 在下面5种类型中选择对应的参数内容
-	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
-	 *      // text => array ( "content" => "hello")
-	 * }
-	 * @return boolean|array
-	 */
-	public function sendGroupMassMessage($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_SEND_GROUP_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 高级群发消息, 根据群组id群发图文消息(认证后的订阅号可用)
+     *  注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
+     *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
+     * @param array $data 消息结构
+     * {
+     *     "filter"=>array(
+     *         "is_to_all"=>False,     //是否群发给所有用户.True不用分组id，False需填写分组id
+     *         "group_id"=>"2"     //群发的分组id
+     *     ),
+     *      "msgtype"=>"mpvideo",
+     *      // 在下面5种类型中选择对应的参数内容
+     *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
+     *      // text => array ( "content" => "hello")
+     * }
+     * @return boolean|array
+     */
+    public function sendGroupMassMessage($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MASS_SEND_GROUP_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 高级群发消息, 删除群发图文消息(认证后的订阅号可用)
-	 * @param int $msg_id 消息id
-	 * @return boolean|array
-	 */
-	public function deleteMassMessage($msg_id){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_DELETE_URL.'access_token='.$this->access_token,self::json_encode(array('msg_id'=>$msg_id)));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
+    /**
+     * 高级群发消息, 删除群发图文消息(认证后的订阅号可用)
+     * @param int $msg_id 消息id
+     * @return boolean|array
+     */
+    public function deleteMassMessage($msg_id){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MASS_DELETE_URL.'access_token='.$this->access_token,static::json_encode(array('msg_id'=>$msg_id)));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * 高级群发消息, 预览群发消息(认证后的订阅号可用)
-	 * 	注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
-	 *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
-	 * @param array $data 消息结构
-	 * {
-	 *     "touser"=>"OPENID",
-	 *      "msgtype"=>"mpvideo",
-	 *      // 在下面5种类型中选择对应的参数内容
-	 *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
-	 *      // text => array ( "content" => "hello")
-	 * }
-	 * @return boolean|array
-	 */
-	public function previewMassMessage($data){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_URL_PREFIX.self::MASS_PREVIEW_URL.'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 高级群发消息, 预览群发消息(认证后的订阅号可用)
+     *  注意：视频需要在调用uploadMedia()方法后，再使用 uploadMpVideo() 方法生成，
+     *             然后获得的 mediaid 才能用于群发，且消息类型为 mpvideo 类型。
+     * @param array $data 消息结构
+     * {
+     *     "touser"=>"OPENID",
+     *      "msgtype"=>"mpvideo",
+     *      // 在下面5种类型中选择对应的参数内容
+     *      // mpnews | voice | image | mpvideo => array( "media_id"=>"MediaId")
+     *      // text => array ( "content" => "hello")
+     * }
+     * @return boolean|array
+     */
+    public function previewMassMessage($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MASS_PREVIEW_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 高级群发消息, 查询群发消息发送状态(认证后的订阅号可用)
-	 * @param int $msg_id 消息id
-	 * @return boolean|array
-	 * {
-	 *     "msg_id":201053012,     //群发消息后返回的消息id
-	 *     "msg_status":"SEND_SUCCESS" //消息发送后的状态，SENDING表示正在发送 SEND_SUCCESS表示发送成功
-	 * }
-	 */
-	public function queryMassMessage($msg_id){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::MASS_QUERY_URL.'access_token='.$this->access_token,self::json_encode(array('msg_id'=>$msg_id)));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 高级群发消息, 查询群发消息发送状态(认证后的订阅号可用)
+     * @param int $msg_id 消息id
+     * @return boolean|array
+     * {
+     *     "msg_id":201053012,     //群发消息后返回的消息id
+     *     "msg_status":"SEND_SUCCESS" //消息发送后的状态，SENDING表示正在发送 SEND_SUCCESS表示发送成功
+     * }
+     */
+    public function queryMassMessage($msg_id){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::MASS_QUERY_URL.'access_token='.$this->access_token,static::json_encode(array('msg_id'=>$msg_id)));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 创建二维码ticket
-	 * @param int|string $scene_id 自定义追踪id,临时二维码只能用数值型
-	 * @param int $type 0:临时二维码；1:数值型永久二维码(此时expire参数无效)；2:字符串型永久二维码(此时expire参数无效)
-	 * @param int $expire 临时二维码有效期，最大为604800秒
-	 * @return array('ticket'=>'qrcode字串','expire_seconds'=>604800,'url'=>'二维码图片解析后的地址')
-	 */
-	public function getQRCode($scene_id,$type=0,$expire=604800){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		if (!isset($scene_id)) return false;
-		switch ($type) {
-			case '0':
-				if (!is_numeric($scene_id))
-					return false;
-				$action_name = 'QR_SCENE';
-				$action_info = array('scene'=>(array('scene_id'=>$scene_id)));
-				break;
+    /**
+     * 创建二维码ticket
+     * @param int|string $scene_id 自定义追踪id,临时二维码只能用数值型
+     * @param int $type 0:临时二维码；1:数值型永久二维码(此时expire参数无效)；2:字符串型永久二维码(此时expire参数无效)
+     * @param int $expire 临时二维码有效期，最大为604800秒
+     * @return array('ticket'=>'qrcode字串','expire_seconds'=>604800,'url'=>'二维码图片解析后的地址')
+     */
+    public function getQRCode($scene_id,$type=0,$expire=604800){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        if (!isset($scene_id)) return false;
+        switch ($type) {
+            case '0':
+                if (!is_numeric($scene_id))
+                    return false;
+                $action_name = 'QR_SCENE';
+                $action_info = array('scene'=>(array('scene_id'=>$scene_id)));
+                break;
 
-			case '1':
-				if (!is_numeric($scene_id))
-					return false;
-				$action_name = 'QR_LIMIT_SCENE';
-				$action_info = array('scene'=>(array('scene_id'=>$scene_id)));
-				break;
+            case '1':
+                if (!is_numeric($scene_id))
+                    return false;
+                $action_name = 'QR_LIMIT_SCENE';
+                $action_info = array('scene'=>(array('scene_id'=>$scene_id)));
+                break;
 
-			case '2':
-				if (!is_string($scene_id))
-					return false;
-				$action_name = 'QR_LIMIT_STR_SCENE';
-				$action_info = array('scene'=>(array('scene_str'=>$scene_id)));
-				break;
+            case '2':
+                if (!is_string($scene_id))
+                    return false;
+                $action_name = 'QR_LIMIT_STR_SCENE';
+                $action_info = array('scene'=>(array('scene_str'=>$scene_id)));
+                break;
 
-			default:
-				return false;
-		}
+            default:
+                return false;
+        }
 
-		$data = array(
-			'action_name'    => $action_name,
-			'expire_seconds' => $expire,
-			'action_info'    => $action_info
-		);
-		if ($type) {
-			unset($data['expire_seconds']);
-		}
+        $data = array(
+            'action_name'    => $action_name,
+            'expire_seconds' => $expire,
+            'action_info'    => $action_info
+        );
+        if ($type) {
+            unset($data['expire_seconds']);
+        }
 
-		$result = $this->http_post(self::API_URL_PREFIX.self::QRCODE_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result) {
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+        $result = $this->http_post(self::API_URL_PREFIX.self::QRCODE_CREATE_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result) {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取二维码图片
-	 * @param string $ticket 传入由getQRCode方法生成的ticket参数
-	 * @return string url 返回http地址
-	 */
-	public function getQRUrl($ticket) {
-		return self::QRCODE_IMG_URL.urlencode($ticket);
-	}
+    /**
+     * 获取二维码图片
+     * @param string $ticket 传入由getQRCode方法生成的ticket参数
+     * @return string url 返回http地址
+     */
+    public function getQRUrl($ticket) {
+        return self::QRCODE_IMG_URL.urlencode($ticket);
+    }
 
-	/**
-	 * 长链接转短链接接口
-	 * @param string $long_url 传入要转换的长url
-	 * @return boolean|string url 成功则返回转换后的短url
-	 */
-	public function getShortUrl($long_url){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $data = array(
+    /**
+     * 长链接转短链接接口
+     * @param string $long_url 传入要转换的长url
+     * @return boolean|string url 成功则返回转换后的短url
+     */
+    public function getShortUrl($long_url){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $data = array(
             'action'=>'long2short',
             'long_url'=>$long_url
-	    );
-	    $result = $this->http_post(self::API_URL_PREFIX.self::SHORT_URL.'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json['short_url'];
-	    }
-	    return false;
-	}
+        );
+        $result = $this->http_post(self::API_URL_PREFIX.self::SHORT_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json['short_url'];
+        }
+        return false;
+    }
 
-	/**
-	 * 获取统计数据
-	 * @param string $type  数据分类(user|article|upstreammsg|interface)分别为(用户分析|图文分析|消息分析|接口分析)
-	 * @param string $subtype   数据子分类，参考 DATACUBE_URL_ARR 常量定义部分 或者README.md说明文档
-	 * @param string $begin_date 开始时间
-	 * @param string $end_date   结束时间
-	 * @return boolean|array 成功返回查询结果数组，其定义请看官方文档
-	 */
-	public function getDatacube($type,$subtype,$begin_date,$end_date=''){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-		if (!isset(self::$DATACUBE_URL_ARR[$type]) || !isset(self::$DATACUBE_URL_ARR[$type][$subtype]))
-			return false;
-	    $data = array(
+    /**
+     * 获取统计数据
+     * @param string $type  数据分类(user|article|upstreammsg|interface)分别为(用户分析|图文分析|消息分析|接口分析)
+     * @param string $subtype   数据子分类，参考 DATACUBE_URL_ARR 常量定义部分 或者README.md说明文档
+     * @param string $begin_date 开始时间
+     * @param string $end_date   结束时间
+     * @return boolean|array 成功返回查询结果数组，其定义请看官方文档
+     */
+    public function getDatacube($type,$subtype,$begin_date,$end_date=''){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        if (!isset(self::$DATACUBE_URL_ARR[$type]) || !isset(self::$DATACUBE_URL_ARR[$type][$subtype]))
+            return false;
+        $data = array(
             'begin_date'=>$begin_date,
             'end_date'=>$end_date?$end_date:$begin_date
-	    );
-	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::$DATACUBE_URL_ARR[$type][$subtype].'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return isset($json['list'])?$json['list']:$json;
-	    }
-	    return false;
-	}
+        );
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::$DATACUBE_URL_ARR[$type][$subtype].'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return isset($json['list'])?$json['list']:$json;
+        }
+        return false;
+    }
 
-	/**
-	 * 批量获取关注用户列表
-	 * @param unknown $next_openid
-	 */
-	public function getUserList($next_openid=''){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::USER_GET_URL.'access_token='.$this->access_token.'&next_openid='.$next_openid);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (isset($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 批量获取关注用户列表
+     * @param unknown $next_openid
+     */
+    public function getUserList($next_openid=''){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::USER_GET_URL.'access_token='.$this->access_token.'&next_openid='.$next_openid);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (isset($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取关注者详细信息
-	 * @param string $openid
-	 * @param string $lang 返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
-	 * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
-	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
-	 */
-	public function getUserInfo($openid, $lang = 'zh_CN'){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::USER_INFO_URL.'access_token='.$this->access_token.'&openid='.$openid.'&lang='.$lang);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (isset($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
-	/**
-	 * 批量获取关注者详细信息
-	 * @param array $openids user_list{{'openid:xxxxxx'},{},{}}
-	 * @return array user_info_list{subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}{}{}...
-	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
-	 */
-	public function getUsersInfo($openids){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::USERS_INFO_URL.'access_token='.$this->access_token,json_encode($openids));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (isset($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 获取关注者详细信息
+     * @param string $openid
+     * @param string $lang 返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
+     * @return array {subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}
+     * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
+     */
+    public function getUserInfo($openid, $lang = 'zh_CN'){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::USER_INFO_URL.'access_token='.$this->access_token.'&openid='.$openid.'&lang='.$lang);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (isset($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
+    /**
+     * 批量获取关注者详细信息
+     * @param array $openids user_list{{'openid:xxxxxx'},{},{}}
+     * @return array user_info_list{subscribe,openid,nickname,sex,city,province,country,language,headimgurl,subscribe_time,[unionid]}{}{}...
+     * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
+     */
+    public function getUsersInfo($openids){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::USERS_INFO_URL.'access_token='.$this->access_token,json_encode($openids));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (isset($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 设置用户备注名
-	 * @param string $openid
-	 * @param string $remark 备注名
-	 * @return boolean|array
-	 */
-	public function updateUserRemark($openid,$remark){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $data = array(
-			'openid'=>$openid,
-			'remark'=>$remark
-	    );
-	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_UPDATEREMARK_URL.'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 设置用户备注名
+     * @param string $openid
+     * @param string $remark 备注名
+     * @return boolean|array
+     */
+    public function updateUserRemark($openid,$remark){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $data = array(
+            'openid'=>$openid,
+            'remark'=>$remark
+        );
+        $result = $this->http_post(self::API_URL_PREFIX.self::USER_UPDATEREMARK_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取用户分组列表
-	 * @return boolean|array
-	 */
-	public function getGroup(){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::GROUP_GET_URL.'access_token='.$this->access_token);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (isset($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 获取用户分组列表
+     * @return boolean|array
+     */
+    public function getGroup(){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::GROUP_GET_URL.'access_token='.$this->access_token);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (isset($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取用户所在分组
-	 * @param string $openid
-	 * @return boolean|int 成功则返回用户分组id
-	 */
-	public function getUserGroup($openid){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $data = array(
-	            'openid'=>$openid
-	    );
-	    $result = $this->http_post(self::API_URL_PREFIX.self::USER_GROUP_URL.'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        } else
+    /**
+     * 获取用户所在分组
+     * @param string $openid
+     * @return boolean|int 成功则返回用户分组id
+     */
+    public function getUserGroup($openid){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $data = array(
+                'openid'=>$openid
+        );
+        $result = $this->http_post(self::API_URL_PREFIX.self::USER_GROUP_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            } else
                 if (isset($json['groupid'])) return $json['groupid'];
-	    }
-	    return false;
-	}
+        }
+        return false;
+    }
 
-	/**
-	 * 新增自定分组
-	 * @param string $name 分组名称
-	 * @return boolean|array
-	 */
-	public function createGroup($name){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$data = array(
-				'group'=>array('name'=>$name)
-		);
-		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_CREATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 新增自定分组
+     * @param string $name 分组名称
+     * @return boolean|array
+     */
+    public function createGroup($name){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $data = array(
+                'group'=>array('name'=>$name)
+        );
+        $result = $this->http_post(self::API_URL_PREFIX.self::GROUP_CREATE_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 更改分组名称
-	 * @param int $groupid 分组id
-	 * @param string $name 分组名称
-	 * @return boolean|array
-	 */
-	public function updateGroup($groupid,$name){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$data = array(
-				'group'=>array('id'=>$groupid,'name'=>$name)
-		);
-		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 更改分组名称
+     * @param int $groupid 分组id
+     * @param string $name 分组名称
+     * @return boolean|array
+     */
+    public function updateGroup($groupid,$name){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $data = array(
+                'group'=>array('id'=>$groupid,'name'=>$name)
+        );
+        $result = $this->http_post(self::API_URL_PREFIX.self::GROUP_UPDATE_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 移动用户分组
-	 * @param int $groupid 分组id
-	 * @param string $openid 用户openid
-	 * @return boolean|array
-	 */
-	public function updateGroupMembers($groupid,$openid){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$data = array(
-				'openid'=>$openid,
-				'to_groupid'=>$groupid
-		);
-		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_MEMBER_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 移动用户分组
+     * @param int $groupid 分组id
+     * @param string $openid 用户openid
+     * @return boolean|array
+     */
+    public function updateGroupMembers($groupid,$openid){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $data = array(
+                'openid'=>$openid,
+                'to_groupid'=>$groupid
+        );
+        $result = $this->http_post(self::API_URL_PREFIX.self::GROUP_MEMBER_UPDATE_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 批量移动用户分组
-	 * @param int $groupid 分组id
-	 * @param string $openid_list 用户openid数组,一次不能超过50个
-	 * @return boolean|array
-	 */
-	public function batchUpdateGroupMembers($groupid,$openid_list){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$data = array(
-				'openid_list'=>$openid_list,
-				'to_groupid'=>$groupid
-		);
-		$result = $this->http_post(self::API_URL_PREFIX.self::GROUP_MEMBER_BATCHUPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 批量移动用户分组
+     * @param int $groupid 分组id
+     * @param string $openid_list 用户openid数组,一次不能超过50个
+     * @return boolean|array
+     */
+    public function batchUpdateGroupMembers($groupid,$openid_list){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $data = array(
+                'openid_list'=>$openid_list,
+                'to_groupid'=>$groupid
+        );
+        $result = $this->http_post(self::API_URL_PREFIX.self::GROUP_MEMBER_BATCHUPDATE_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 发送客服消息
-	 * @param array $data 消息结构{"touser":"OPENID","msgtype":"news","news":{...}}
-	 * @return boolean|array
-	 */
-	public function sendCustomMessage($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 发送客服消息
+     * @param array $data 消息结构{"touser":"OPENID","msgtype":"news","news":{...}}
+     * @return boolean|array
+     */
+    public function sendCustomMessage($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SEND_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * oauth 授权跳转接口
-	 * @param string $callback 回调URI
-	 * @return string
-	 */
-	public function getOauthRedirect($callback,$state='',$scope='snsapi_userinfo'){
-		return self::OAUTH_PREFIX.self::OAUTH_AUTHORIZE_URL.'appid='.$this->appid.'&redirect_uri='.urlencode($callback).'&response_type=code&scope='.$scope.'&state='.$state.'#wechat_redirect';
-	}
+    /**
+     * oauth 授权跳转接口
+     * @param string $callback 回调URI
+     * @return string
+     */
+    public function getOauthRedirect($callback,$state='',$scope='snsapi_userinfo'){
+        return self::OAUTH_PREFIX.self::OAUTH_AUTHORIZE_URL.'appid='.$this->appid.'&redirect_uri='.urlencode($callback).'&response_type=code&scope='.$scope.'&state='.$state.'#wechat_redirect';
+    }
 
-	/**
-	 * 通过code获取Access Token
-	 * @return array {access_token,expires_in,refresh_token,openid,scope}
-	 */
-	public function getOauthAccessToken(){
-		$code = isset($_GET['code'])?$_GET['code']:'';
-		if (!$code) return false;
-		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_TOKEN_URL.'appid='.$this->appid.'&secret='.$this->appsecret.'&code='.$code.'&grant_type=authorization_code');
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			$this->user_token = $json['access_token'];
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 通过code获取Access Token
+     * @return array {access_token,expires_in,refresh_token,openid,scope}
+     */
+    public function getOauthAccessToken(){
+        $code = isset($_GET['code'])?$_GET['code']:'';
+        if (!$code) return false;
+        $result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_TOKEN_URL.'appid='.$this->appid.'&secret='.$this->appsecret.'&code='.$code.'&grant_type=authorization_code');
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            $this->user_token = $json['access_token'];
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 刷新access token并续期
-	 * @param string $refresh_token
-	 * @return boolean|mixed
-	 */
-	public function getOauthRefreshToken($refresh_token){
-		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_REFRESH_URL.'appid='.$this->appid.'&grant_type=refresh_token&refresh_token='.$refresh_token);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			$this->user_token = $json['access_token'];
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 刷新access token并续期
+     * @param string $refresh_token
+     * @return boolean|mixed
+     */
+    public function getOauthRefreshToken($refresh_token){
+        $result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_REFRESH_URL.'appid='.$this->appid.'&grant_type=refresh_token&refresh_token='.$refresh_token);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            $this->user_token = $json['access_token'];
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取授权后的用户资料
-	 * @param string $access_token
-	 * @param string $openid
-	 * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege,[unionid]}
-	 * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
-	 */
-	public function getOauthUserinfo($access_token,$openid){
-		$result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 获取授权后的用户资料
+     * @param string $access_token
+     * @param string $openid
+     * @return array {openid,nickname,sex,province,city,country,headimgurl,privilege,[unionid]}
+     * 注意：unionid字段 只有在用户将公众号绑定到微信开放平台账号后，才会出现。建议调用前用isset()检测一下
+     */
+    public function getOauthUserinfo($access_token,$openid){
+        $result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_USERINFO_URL.'access_token='.$access_token.'&openid='.$openid);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 检验授权凭证是否有效
-	 * @param string $access_token
-	 * @param string $openid
-	 * @return boolean 是否有效
-	 */
-	public function getOauthAuth($access_token,$openid){
-	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        } else
-	          if ($json['errcode']==0) return true;
-	    }
-	    return false;
-	}
+    /**
+     * 检验授权凭证是否有效
+     * @param string $access_token
+     * @param string $openid
+     * @return boolean 是否有效
+     */
+    public function getOauthAuth($access_token,$openid){
+        $result = $this->http_get(self::API_BASE_URL_PREFIX.self::OAUTH_AUTH_URL.'access_token='.$access_token.'&openid='.$openid);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            } else
+              if ($json['errcode']==0) return true;
+        }
+        return false;
+    }
 
-	/**
-	 * 模板消息 设置所属行业
-	 * @param int $id1  公众号模板消息所属行业编号，参看官方开发文档 行业代码
-	 * @param int $id2  同$id1。但如果只有一个行业，此参数可省略
-	 * @return boolean|array
-	 */
-	public function setTMIndustry($id1,$id2=''){
-	    if ($id1) $data['industry_id1'] = $id1;
-	    if ($id2) $data['industry_id2'] = $id2;
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SET_INDUSTRY_URL.'access_token='.$this->access_token,self::json_encode($data));
-	    if($result){
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 模板消息 设置所属行业
+     * @param int $id1  公众号模板消息所属行业编号，参看官方开发文档 行业代码
+     * @param int $id2  同$id1。但如果只有一个行业，此参数可省略
+     * @return boolean|array
+     */
+    public function setTMIndustry($id1,$id2=''){
+        if ($id1) $data['industry_id1'] = $id1;
+        if ($id2) $data['industry_id2'] = $id2;
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SET_INDUSTRY_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if($result){
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 模板消息 添加消息模板
-	 * 成功返回消息模板的调用id
-	 * @param string $tpl_id 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式
-	 * @return boolean|string
-	 */
-	public function addTemplateMessage($tpl_id){
-	    $data = array ('template_id_short' =>$tpl_id);
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_ADD_TPL_URL.'access_token='.$this->access_token,self::json_encode($data));
-	    if($result){
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json['template_id'];
-	    }
-	    return false;
-	}
+    /**
+     * 模板消息 添加消息模板
+     * 成功返回消息模板的调用id
+     * @param string $tpl_id 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式
+     * @return boolean|string
+     */
+    public function addTemplateMessage($tpl_id){
+        $data = array ('template_id_short' =>$tpl_id);
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_ADD_TPL_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if($result){
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json['template_id'];
+        }
+        return false;
+    }
 
-	/**
-	 * 发送模板消息
-	 * @param array $data 消息结构
-	 * ｛
-			"touser":"OPENID",
-			"template_id":"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY",
-			"url":"http://weixin.qq.com/download",
-			"topcolor":"#FF0000",
-			"data":{
-				"参数名1": {
-					"value":"参数",
-					"color":"#173177"	 //参数颜色
-					},
-				"Date":{
-					"value":"06月07日 19时24分",
-					"color":"#173177"
-					},
-				"CardNumber":{
-					"value":"0426",
-					"color":"#173177"
-					},
-				"Type":{
-					"value":"消费",
-					"color":"#173177"
-					}
-			}
-		}
-	 * @return boolean|array
-	 */
-	public function sendTemplateMessage($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SEND_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if($result){
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 发送模板消息
+     * @param array $data 消息结构
+     * ｛
+            "touser":"OPENID",
+            "template_id":"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY",
+            "url":"http://weixin.qq.com/download",
+            "topcolor":"#FF0000",
+            "data":{
+                "参数名1": {
+                    "value":"参数",
+                    "color":"#173177"    //参数颜色
+                    },
+                "Date":{
+                    "value":"06月07日 19时24分",
+                    "color":"#173177"
+                    },
+                "CardNumber":{
+                    "value":"0426",
+                    "color":"#173177"
+                    },
+                "Type":{
+                    "value":"消费",
+                    "color":"#173177"
+                    }
+            }
+        }
+     * @return boolean|array
+     */
+    public function sendTemplateMessage($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::TEMPLATE_SEND_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if($result){
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取多客服会话记录
-	 * @param array $data 数据结构{"starttime":123456789,"endtime":987654321,"openid":"OPENID","pagesize":10,"pageindex":1,}
-	 * @return boolean|array
-	 */
-	public function getCustomServiceMessage($data){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_RECORD.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 获取多客服会话记录
+     * @param array $data 数据结构{"starttime":123456789,"endtime":987654321,"openid":"OPENID","pagesize":10,"pageindex":1,}
+     * @return boolean|array
+     */
+    public function getCustomServiceMessage($data){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_RECORD.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 转发多客服消息
-	 * Example: $obj->transfer_customer_service($customer_account)->reply();
-	 * @param string $customer_account 转发到指定客服帐号：test1@test
-	 */
-	public function transfer_customer_service($customer_account = '')
-	{
-		$msg = array(
-			'ToUserName' => $this->getRevFrom(),
-			'FromUserName'=>$this->getRevTo(),
-			'CreateTime'=>time(),
-			'MsgType'=>'transfer_customer_service',
-		);
-		if ($customer_account) {
-			$msg['TransInfo'] = array('KfAccount'=>$customer_account);
-		}
-		$this->Message($msg);
-		return $this;
-	}
+    /**
+     * 转发多客服消息
+     * Example: $obj->transfer_customer_service($customer_account)->reply();
+     * @param string $customer_account 转发到指定客服帐号：test1@test
+     */
+    public function transfer_customer_service($customer_account = '')
+    {
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName'=>$this->getRevTo(),
+            'CreateTime'=>time(),
+            'MsgType'=>'transfer_customer_service',
+        );
+        if ($customer_account) {
+            $msg['TransInfo'] = array('KfAccount'=>$customer_account);
+        }
+        $this->Message($msg);
+        return $this;
+    }
 
-	/**
-	 * 获取多客服客服基本信息
-	 *
-	 * @return boolean|array
-	 */
-	public function getCustomServiceKFlist(){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_KFLIST.'access_token='.$this->access_token);
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 获取多客服客服基本信息
+     *
+     * @return boolean|array
+     */
+    public function getCustomServiceKFlist(){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_KFLIST.'access_token='.$this->access_token);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取多客服在线客服接待信息
-	 *
-	 * @return boolean|array {
-	 "kf_online_list": [
-	 {
-	 "kf_account": "test1@test",	//客服账号@微信别名
-	 "status": 1,			//客服在线状态 1：pc在线，2：手机在线,若pc和手机同时在线则为 1+2=3
-	 "kf_id": "1001",		//客服工号
-	 "auto_accept": 0,		//客服设置的最大自动接入数
-	 "accepted_case": 1		//客服当前正在接待的会话数
-	 }
-	 ]
-	 }
-	 */
-	public function getCustomServiceOnlineKFlist(){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 获取多客服在线客服接待信息
+     *
+     * @return boolean|array {
+     "kf_online_list": [
+     {
+     "kf_account": "test1@test",    //客服账号@微信别名
+     "status": 1,           //客服在线状态 1：pc在线，2：手机在线,若pc和手机同时在线则为 1+2=3
+     "kf_id": "1001",       //客服工号
+     "auto_accept": 0,      //客服设置的最大自动接入数
+     "accepted_case": 1     //客服当前正在接待的会话数
+     }
+     ]
+     }
+     */
+    public function getCustomServiceOnlineKFlist(){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_URL_PREFIX.self::CUSTOM_SERVICE_GET_ONLINEKFLIST.'access_token='.$this->access_token);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 创建指定多客服会话
-	 * @tutorial 当用户已被其他客服接待或指定客服不在线则会失败
-	 * @param string $openid           //用户openid
-	 * @param string $kf_account     //客服账号
-	 * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
-	 * @return boolean | array            //成功返回json数组
-	 * {
-	 *   "errcode": 0,
-	 *   "errmsg": "ok",
-	 * }
-	 */
-	public function createKFSession($openid,$kf_account,$text=''){
-	    $data=array(
-	    	"openid" =>$openid,
-	        "kf_account" => $kf_account
-	    );
-	    if ($text) $data["text"] = $text;
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_CREATE.'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 创建指定多客服会话
+     * @tutorial 当用户已被其他客服接待或指定客服不在线则会失败
+     * @param string $openid           //用户openid
+     * @param string $kf_account     //客服账号
+     * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
+     * @return boolean | array            //成功返回json数组
+     * {
+     *   "errcode": 0,
+     *   "errmsg": "ok",
+     * }
+     */
+    public function createKFSession($openid,$kf_account,$text=''){
+        $data=array(
+            "openid" =>$openid,
+            "kf_account" => $kf_account
+        );
+        if ($text) $data["text"] = $text;
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_CREATE.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 关闭指定多客服会话
-	 * @tutorial 当用户被其他客服接待时则会失败
-	 * @param string $openid           //用户openid
-	 * @param string $kf_account     //客服账号
-	 * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
-	 * @return boolean | array            //成功返回json数组
-	 * {
-	 *   "errcode": 0,
-	 *   "errmsg": "ok",
-	 * }
-	 */
-	public function closeKFSession($openid,$kf_account,$text=''){
-	    $data=array(
-	    	"openid" =>$openid,
-	        "kf_account" => $kf_account
-	    );
-	    if ($text) $data["text"] = $text;
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_CLOSE .'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 关闭指定多客服会话
+     * @tutorial 当用户被其他客服接待时则会失败
+     * @param string $openid           //用户openid
+     * @param string $kf_account     //客服账号
+     * @param string $text                 //附加信息，文本会展示在客服人员的多客服客户端，可为空
+     * @return boolean | array            //成功返回json数组
+     * {
+     *   "errcode": 0,
+     *   "errmsg": "ok",
+     * }
+     */
+    public function closeKFSession($openid,$kf_account,$text=''){
+        $data=array(
+            "openid" =>$openid,
+            "kf_account" => $kf_account
+        );
+        if ($text) $data["text"] = $text;
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_CLOSE .'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取用户会话状态
-	 * @param string $openid           //用户openid
-	 * @return boolean | array            //成功返回json数组
-	 * {
-	 *     "errcode" : 0,
-	 *     "errmsg" : "ok",
-	 *     "kf_account" : "test1@test",    //正在接待的客服
-	 *     "createtime": 123456789,        //会话接入时间
-	 *  }
-	 */
-	public function getKFSession($openid){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET .'access_token='.$this->access_token.'&openid='.$openid);
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 获取用户会话状态
+     * @param string $openid           //用户openid
+     * @return boolean | array            //成功返回json数组
+     * {
+     *     "errcode" : 0,
+     *     "errmsg" : "ok",
+     *     "kf_account" : "test1@test",    //正在接待的客服
+     *     "createtime": 123456789,        //会话接入时间
+     *  }
+     */
+    public function getKFSession($openid){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET .'access_token='.$this->access_token.'&openid='.$openid);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取指定客服的会话列表
-	 * @param string $openid           //用户openid
-	 * @return boolean | array            //成功返回json数组
-	 *  array(
-	 *     'sessionlist' => array (
-	 *         array (
-	 *             'openid'=>'OPENID',             //客户 openid
-	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
-	 *         ),
-	 *         array (
-	 *             'openid'=>'OPENID',             //客户 openid
-	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
-	 *         ),
-	 *     )
-	 *  )
-	 */
-	public function getKFSessionlist($kf_account){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET_LIST .'access_token='.$this->access_token.'&kf_account='.$kf_account);
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 获取指定客服的会话列表
+     * @param string $openid           //用户openid
+     * @return boolean | array            //成功返回json数组
+     *  array(
+     *     'sessionlist' => array (
+     *         array (
+     *             'openid'=>'OPENID',             //客户 openid
+     *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
+     *         ),
+     *         array (
+     *             'openid'=>'OPENID',             //客户 openid
+     *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
+     *         ),
+     *     )
+     *  )
+     */
+    public function getKFSessionlist($kf_account){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET_LIST .'access_token='.$this->access_token.'&kf_account='.$kf_account);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 获取未接入会话列表
-	 * @param string $openid           //用户openid
-	 * @return boolean | array            //成功返回json数组
-	 *  array (
-	 *     'count' => 150 ,                            //未接入会话数量
-	 *     'waitcaselist' => array (
-	 *         array (
-	 *             'openid'=>'OPENID',             //客户 openid
-	 *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
-	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
-	 *         ),
-	 *         array (
-	 *             'openid'=>'OPENID',             //客户 openid
-	 *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
-	 *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
-	 *         )
-	 *     )
-	 *  )
-	 */
-	public function getKFSessionWait(){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET_WAIT .'access_token='.$this->access_token);
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 获取未接入会话列表
+     * @param string $openid           //用户openid
+     * @return boolean | array            //成功返回json数组
+     *  array (
+     *     'count' => 150 ,                            //未接入会话数量
+     *     'waitcaselist' => array (
+     *         array (
+     *             'openid'=>'OPENID',             //客户 openid
+     *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
+     *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
+     *         ),
+     *         array (
+     *             'openid'=>'OPENID',             //客户 openid
+     *             'kf_account ' =>'',                   //指定接待的客服，为空则未指定
+     *             'createtime'=>123456789,  //会话创建时间，UNIX 时间戳
+     *         )
+     *     )
+     *  )
+     */
+    public function getKFSessionWait(){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CUSTOM_SESSION_GET_WAIT .'access_token='.$this->access_token);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 添加客服账号
-	 *
-	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
-	 * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
-	 * @param string $password     //客服账号明文登录密码，会自动加密
-	 * @return boolean|array
-	 * 成功返回结果
-	 * {
-	 *   "errcode": 0,
-	 *   "errmsg": "ok",
-	 * }
-	 */
-	public function addKFAccount($account,$nickname,$password){
-	    $data=array(
-	    	"kf_account" =>$account,
-	        "nickname" => $nickname,
-	        "password" => md5($password)
-	    );
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_ADD_URL.'access_token='.$this->access_token,self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (!$json || !empty($json['errcode'])) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json;
-		}
-		return false;
-	}
+    /**
+     * 添加客服账号
+     *
+     * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+     * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
+     * @param string $password     //客服账号明文登录密码，会自动加密
+     * @return boolean|array
+     * 成功返回结果
+     * {
+     *   "errcode": 0,
+     *   "errmsg": "ok",
+     * }
+     */
+    public function addKFAccount($account,$nickname,$password){
+        $data=array(
+            "kf_account" =>$account,
+            "nickname" => $nickname,
+            "password" => md5($password)
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_ADD_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 修改客服账号信息
-	 *
-	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
-	 * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
-	 * @param string $password     //客服账号明文登录密码，会自动加密
-	 * @return boolean|array
-	 * 成功返回结果
-	 * {
-	 *   "errcode": 0,
-	 *   "errmsg": "ok",
-	 * }
-	 */
-	public function updateKFAccount($account,$nickname,$password){
-	    $data=array(
-	            "kf_account" =>$account,
-	            "nickname" => $nickname,
-	            "password" => md5($password)
-	    );
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_UPDATE_URL.'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 修改客服账号信息
+     *
+     * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+     * @param string $nickname     //客服昵称，最长6个汉字或12个英文字符
+     * @param string $password     //客服账号明文登录密码，会自动加密
+     * @return boolean|array
+     * 成功返回结果
+     * {
+     *   "errcode": 0,
+     *   "errmsg": "ok",
+     * }
+     */
+    public function updateKFAccount($account,$nickname,$password){
+        $data=array(
+                "kf_account" =>$account,
+                "nickname" => $nickname,
+                "password" => md5($password)
+        );
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_UPDATE_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 删除客服账号
-	 *
-	 * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
-	 * @return boolean|array
-	 * 成功返回结果
-	 * {
-	 *   "errcode": 0,
-	 *   "errmsg": "ok",
-	 * }
-	 */
-	public function deleteKFAccount($account){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_DEL_URL.'access_token='.$this->access_token.'&kf_account='.$account);
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 删除客服账号
+     *
+     * @param string $account      //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+     * @return boolean|array
+     * 成功返回结果
+     * {
+     *   "errcode": 0,
+     *   "errmsg": "ok",
+     * }
+     */
+    public function deleteKFAccount($account){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_get(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_DEL_URL.'access_token='.$this->access_token.'&kf_account='.$account);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 上传客服头像
-	 *
-	 * @param string $account //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
-	 * @param string $imgfile //头像文件完整路径,如：'D:\user.jpg'。头像文件必须JPG格式，像素建议640*640
-	 * @return boolean|array
-	 * 成功返回结果
-	 * {
-	 *   "errcode": 0,
-	 *   "errmsg": "ok",
-	 * }
-	 */
-	public function setKFHeadImg($account,$imgfile){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL.'access_token='.$this->access_token.'&kf_account='.$account,array('media'=>'@'.$imgfile),true);
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 上传客服头像
+     *
+     * @param string $account //完整客服账号，格式为：账号前缀@公众号微信号，账号前缀最多10个字符，必须是英文或者数字字符
+     * @param string $imgfile //头像文件完整路径,如：'D:\user.jpg'。头像文件必须JPG格式，像素建议640*640
+     * @return boolean|array
+     * 成功返回结果
+     * {
+     *   "errcode": 0,
+     *   "errmsg": "ok",
+     * }
+     */
+    public function setKFHeadImg($account,$imgfile){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::CS_KF_ACCOUNT_UPLOAD_HEADIMG_URL.'access_token='.$this->access_token.'&kf_account='.$account,array('media'=>'@'.$imgfile),true);
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
-	/**
-	 * 语义理解接口
-	 * @param String $uid      用户唯一id（非开发者id），用户区分公众号下的不同用户（建议填入用户openid）
-	 * @param String $query    输入文本串
-	 * @param String $category 需要使用的服务类型，多个用“，”隔开，不能为空
-	 * @param Float $latitude  纬度坐标，与经度同时传入；与城市二选一传入
-	 * @param Float $longitude 经度坐标，与纬度同时传入；与城市二选一传入
-	 * @param String $city     城市名称，与经纬度二选一传入
-	 * @param String $region   区域名称，在城市存在的情况下可省略；与经纬度二选一传入
-	 * @return boolean|array
-	 */
-	public function querySemantic($uid,$query,$category,$latitude=0,$longitude=0,$city="",$region=""){
-	    if (!$this->access_token && !$this->checkAuth()) return false;
-	    $data=array(
-	            'query' => $query,
-	            'category' => $category,
-	            'appid' => $this->appid,
-	            'uid' => ''
-	    );
-	    //地理坐标或城市名称二选一
-	    if ($latitude) {
-	        $data['latitude'] = $latitude;
-	        $data['longitude'] = $longitude;
-	    } elseif ($city) {
-	        $data['city'] = $city;
-	    } elseif ($region) {
-	        $data['region'] = $region;
-	    }
-	    $result = $this->http_post(self::API_BASE_URL_PREFIX.self::SEMANTIC_API_URL.'access_token='.$this->access_token,self::json_encode($data));
-	    if ($result)
-	    {
-	        $json = json_decode($result,true);
-	        if (!$json || !empty($json['errcode'])) {
-	            $this->errCode = $json['errcode'];
-	            $this->errMsg = $json['errmsg'];
-	            return false;
-	        }
-	        return $json;
-	    }
-	    return false;
-	}
+    /**
+     * 语义理解接口
+     * @param String $uid      用户唯一id（非开发者id），用户区分公众号下的不同用户（建议填入用户openid）
+     * @param String $query    输入文本串
+     * @param String $category 需要使用的服务类型，多个用“，”隔开，不能为空
+     * @param Float $latitude  纬度坐标，与经度同时传入；与城市二选一传入
+     * @param Float $longitude 经度坐标，与纬度同时传入；与城市二选一传入
+     * @param String $city     城市名称，与经纬度二选一传入
+     * @param String $region   区域名称，在城市存在的情况下可省略；与经纬度二选一传入
+     * @return boolean|array
+     */
+    public function querySemantic($uid,$query,$category,$latitude=0,$longitude=0,$city="",$region=""){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $data=array(
+                'query' => $query,
+                'category' => $category,
+                'appid' => $this->appid,
+                'uid' => ''
+        );
+        //地理坐标或城市名称二选一
+        if ($latitude) {
+            $data['latitude'] = $latitude;
+            $data['longitude'] = $longitude;
+        } elseif ($city) {
+            $data['city'] = $city;
+        } elseif ($region) {
+            $data['region'] = $region;
+        }
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::SEMANTIC_API_URL.'access_token='.$this->access_token,static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json;
+        }
+        return false;
+    }
 
     /**
      * 创建卡券
@@ -3155,7 +3114,7 @@ class Wechat
      */
     public function createCard($data) {
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CREATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CREATE . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3176,7 +3135,7 @@ class Wechat
      */
     public function updateCard($data) {
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_UPDATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_UPDATE . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3201,7 +3160,7 @@ class Wechat
             'card_id' => $card_id,
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_DELETE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_DELETE . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3224,7 +3183,7 @@ class Wechat
             'card_id' => $card_id,
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_GET . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_GET . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3258,7 +3217,7 @@ class Wechat
             'card_id' => $card_id
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_USER_GETCARDLIST . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_USER_GETCARDLIST . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3273,8 +3232,8 @@ class Wechat
 
     /**
      * 获取颜色列表
-	 * 获得卡券的最新颜色列表，用于创建卡券
-	 * @return boolean|array   返回数组请参看 微信卡券接口文档 的json格式
+     * 获得卡券的最新颜色列表，用于创建卡券
+     * @return boolean|array   返回数组请参看 微信卡券接口文档 的json格式
      */
     public function getCardColors() {
         if (!$this->access_token && !$this->checkAuth()) return false;
@@ -3293,18 +3252,18 @@ class Wechat
 
     /**
      * 拉取门店列表
-	 * 获取在公众平台上申请创建的门店列表
-	 * @param int $offset  开始拉取的偏移，默认为0从头开始
-	 * @param int $count   拉取的数量，默认为0拉取全部
-	 * @return boolean|array   返回数组请参看 微信卡券接口文档 的json格式
+     * 获取在公众平台上申请创建的门店列表
+     * @param int $offset  开始拉取的偏移，默认为0从头开始
+     * @param int $count   拉取的数量，默认为0拉取全部
+     * @return boolean|array   返回数组请参看 微信卡券接口文档 的json格式
      */
     public function getCardLocations($offset=0,$count=0) {
-	    $data=array(
-	    	'offset'=>$offset,
-	        'count'=>$count
-	    );
+        $data=array(
+            'offset'=>$offset,
+            'count'=>$count
+        );
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LOCATION_BATCHGET . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LOCATION_BATCHGET . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3319,13 +3278,13 @@ class Wechat
 
     /**
      * 批量导入门店信息
-	 * @tutorial 返回插入的门店id列表，以逗号分隔。如果有插入失败的，则为-1，请自行核查是哪个插入失败
-	 * @param array $data    数组形式的json数据，由于内容较多，具体内容格式请查看 微信卡券接口文档
-	 * @return boolean|string 成功返回插入的门店id列表
+     * @tutorial 返回插入的门店id列表，以逗号分隔。如果有插入失败的，则为-1，请自行核查是哪个插入失败
+     * @param array $data    数组形式的json数据，由于内容较多，具体内容格式请查看 微信卡券接口文档
+     * @return boolean|string 成功返回插入的门店id列表
      */
     public function addCardLocations($data) {
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LOCATION_BATCHADD . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LOCATION_BATCHADD . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3340,14 +3299,14 @@ class Wechat
 
     /**
      * 生成卡券二维码
-	 * 成功则直接返回ticket值，可以用 getQRUrl($ticket) 换取二维码url
-	 *
-	 * @param string $cardid 卡券ID 必须
-	 * @param string $code 指定卡券 code 码，只能被领一次。use_custom_code 字段为 true 的卡券必须填写，非自定义 code 不必填写。
-	 * @param string $openid 指定领取者的 openid，只有该用户能领取。bind_openid 字段为 true 的卡券必须填写，非自定义 openid 不必填写。
-	 * @param int $expire_seconds 指定二维码的有效时间，范围是 60 ~ 1800 秒。不填默认为永久有效。
-	 * @param boolean $is_unique_code 指定下发二维码，生成的二维码随机分配一个 code，领取后不可再次扫描。填写 true 或 false。默认 false。
-	 * @param string $balance 红包余额，以分为单位。红包类型必填（LUCKY_MONEY），其他卡券类型不填。
+     * 成功则直接返回ticket值，可以用 getQRUrl($ticket) 换取二维码url
+     *
+     * @param string $cardid 卡券ID 必须
+     * @param string $code 指定卡券 code 码，只能被领一次。use_custom_code 字段为 true 的卡券必须填写，非自定义 code 不必填写。
+     * @param string $openid 指定领取者的 openid，只有该用户能领取。bind_openid 字段为 true 的卡券必须填写，非自定义 openid 不必填写。
+     * @param int $expire_seconds 指定二维码的有效时间，范围是 60 ~ 1800 秒。不填默认为永久有效。
+     * @param boolean $is_unique_code 指定下发二维码，生成的二维码随机分配一个 code，领取后不可再次扫描。填写 true 或 false。默认 false。
+     * @param string $balance 红包余额，以分为单位。红包类型必填（LUCKY_MONEY），其他卡券类型不填。
      * @return boolean|string
      */
     public function createCardQrcode($card_id,$code='',$openid='',$expire_seconds=0,$is_unique_code=false,$balance='') {
@@ -3369,7 +3328,7 @@ class Wechat
             $data['expire_seconds'] = $expire_seconds;
         $data['action_info'] = array('card' => $card);
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_QRCODE_CREATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_QRCODE_CREATE . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3401,7 +3360,7 @@ class Wechat
         if ($card_id)
             $data['card_id'] = $card_id;
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_CONSUME . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_CONSUME . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3429,7 +3388,7 @@ class Wechat
             'encrypt_code' => $encrypt_code,
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_DECRYPT . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_DECRYPT . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3462,7 +3421,7 @@ class Wechat
             'code' => $code,
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_GET . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_GET . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3477,8 +3436,8 @@ class Wechat
 
     /**
      * 批量查询卡列表
-	 * @param $offset  开始拉取的偏移，默认为0从头开始
-	 * @param $count   需要查询的卡片的数量（数量最大50,默认50）
+     * @param $offset  开始拉取的偏移，默认为0从头开始
+     * @param $count   需要查询的卡片的数量（数量最大50,默认50）
      * @return boolean|array
      * {
      *  "errcode":0,
@@ -3495,7 +3454,7 @@ class Wechat
             'count'  => $count,
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_BATCHGET . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_BATCHGET . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3524,7 +3483,7 @@ class Wechat
             'new_code' => $new_code,
         );
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_UPDATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_UPDATE . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3551,7 +3510,7 @@ class Wechat
         if ($card_id)
             $data['card_id'] = $card_id;
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_UNAVAILABLE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_CODE_UNAVAILABLE . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3571,7 +3530,7 @@ class Wechat
      */
     public function modifyCardStock($data) {
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MODIFY_STOCK . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MODIFY_STOCK . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3591,7 +3550,7 @@ class Wechat
      */
     public function updateMeetingCard($data) {
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEETINGCARD_UPDATEUSER . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEETINGCARD_UPDATEUSER . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3611,7 +3570,7 @@ class Wechat
      */
     public function activateMemberCard($data) {
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEMBERCARD_ACTIVATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEMBERCARD_ACTIVATE . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3632,7 +3591,7 @@ class Wechat
      */
     public function updateMemberCard($data) {
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEMBERCARD_UPDATEUSER . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_MEMBERCARD_UPDATEUSER . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3660,7 +3619,7 @@ class Wechat
         if ($card_id)
             $data['card_id'] = $card_id;
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LUCKYMONEY_UPDATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_LUCKYMONEY_UPDATE . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3686,7 +3645,7 @@ class Wechat
         if (count($user) > 0)
             $data['username'] = $user;
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_TESTWHILELIST_SET . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::CARD_TESTWHILELIST_SET . 'access_token=' . $this->access_token, static::json_encode($data));
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3741,7 +3700,7 @@ class Wechat
      */
     public function applyShakeAroundDevice($data){
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_APPLYID . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_APPLYID . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -3761,10 +3720,10 @@ class Wechat
      * @param array $data
      * array(
      *      "device_identifier" => array(
-     *          		"device_id" => 10011,   //当提供了device_id则不需要使用uuid、major、minor，反之亦然
-     *          		"uuid" => "FDA50693-A4E2-4FB1-AFCF-C6EB07647825",
-     *          		"major" => 1002,
-     *          		"minor" => 1223
+     *                  "device_id" => 10011,   //当提供了device_id则不需要使用uuid、major、minor，反之亦然
+     *                  "uuid" => "FDA50693-A4E2-4FB1-AFCF-C6EB07647825",
+     *                  "major" => 1002,
+     *                  "minor" => 1223
      *      ),
      *      "comment" => "测试专用", //备注(非必填)
      * )
@@ -3779,9 +3738,9 @@ class Wechat
      * @version 2015-4-20 23:45:00
      */
     public function updateShakeAroundDevice($data){
-    	if (!$this->access_token && !$this->checkAuth()) return false;
-    	$result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_UPDATE . 'access_token=' . $this->access_token, self::json_encode($data));
-    	$this->log($result);
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_UPDATE . 'access_token=' . $this->access_token, static::json_encode($data));
+        $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
             if (!$json || !empty($json['errcode'])) {
@@ -3867,7 +3826,7 @@ class Wechat
      */
     public function searchShakeAroundDevice($data){
         if (!$this->access_token && !$this->checkAuth()) return false;
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_SEARCH . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_SEARCH . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -3921,7 +3880,7 @@ class Wechat
             'device_identifier' => $device_identifier,
             'poi_id' => $poi_id
         );
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_BINDLOCATION . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_BINDLOCATION . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -3982,7 +3941,7 @@ class Wechat
             'bind' => $bind,
             'append' => $append
         );
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_BINDPAGE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_BINDPAGE . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -4058,7 +4017,7 @@ class Wechat
             "page_url" => $page_url,
             "comment" => $comment
         );
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_PAGE_ADD . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_PAGE_ADD . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -4104,7 +4063,7 @@ class Wechat
             "page_url" => $page_url,
             "comment" => $comment
         );
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_PAGE_UPDATE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_PAGE_UPDATE . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -4187,7 +4146,7 @@ class Wechat
                 'count' => $count
             );
         }
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_PAGE_SEARCH . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_PAGE_SEARCH . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -4226,7 +4185,7 @@ class Wechat
         $data = array(
             'page_ids' => $page_ids
         );
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_PAGE_DELETE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_PAGE_DELETE . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -4274,7 +4233,7 @@ class Wechat
     public function getShakeInfoShakeAroundUser($ticket){
         if (!$this->access_token && !$this->checkAuth()) return false;
         $data = array('ticket' => $ticket);
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_USER_GETSHAKEINFO . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_USER_GETSHAKEINFO . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -4351,7 +4310,7 @@ class Wechat
             'begin_date' => $begin_date,
             'end_date' => $end_date
         );
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_STATISTICS_DEVICE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_STATISTICS_DEVICE . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -4410,7 +4369,7 @@ class Wechat
             'begin_date' => $begin_date,
             'end_date' => $end_date
         );
-        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_STATISTICS_DEVICE . 'access_token=' . $this->access_token, self::json_encode($data));
+        $result = $this->http_post(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_STATISTICS_DEVICE . 'access_token=' . $this->access_token, static::json_encode($data));
         $this->log($result);
         if ($result) {
             $json = json_decode($result, true);
@@ -4424,156 +4383,156 @@ class Wechat
         return false;
     }
 
-	/**
-	 * 根据订单ID获取订单详情
-	 * @param string $order_id 订单ID
-	 * @return order array|bool
-	 */
-	public function getOrderByID($order_id){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		if (!$order_id) return false;
+    /**
+     * 根据订单ID获取订单详情
+     * @param string $order_id 订单ID
+     * @return order array|bool
+     */
+    public function getOrderByID($order_id){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        if (!$order_id) return false;
 
-		$data = array(
-			'order_id'=>$order_id
-		);
-		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_GETBYID.'access_token='.$this->access_token, self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (isset($json['errcode']) && $json['errcode']) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json['order'];
-		}
-		return false;
-	}
+        $data = array(
+            'order_id'=>$order_id
+        );
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_GETBYID.'access_token='.$this->access_token, static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (isset($json['errcode']) && $json['errcode']) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json['order'];
+        }
+        return false;
+    }
 
-	/**
-	 * 根据订单状态/创建时间获取订单详情
-	 * @param int $status 订单状态(不带该字段-全部状态, 2-待发货, 3-已发货, 5-已完成, 8-维权中, )
-	 * @param int $begintime 订单创建时间起始时间(不带该字段则不按照时间做筛选)
-	 * @param int $endtime 订单创建时间终止时间(不带该字段则不按照时间做筛选)
-	 * @return order list array|bool
-	 */
-	public function getOrderByFilter($status = null, $begintime = null, $endtime = null){
-		if (!$this->access_token && !$this->checkAuth()) return false;
+    /**
+     * 根据订单状态/创建时间获取订单详情
+     * @param int $status 订单状态(不带该字段-全部状态, 2-待发货, 3-已发货, 5-已完成, 8-维权中, )
+     * @param int $begintime 订单创建时间起始时间(不带该字段则不按照时间做筛选)
+     * @param int $endtime 订单创建时间终止时间(不带该字段则不按照时间做筛选)
+     * @return order list array|bool
+     */
+    public function getOrderByFilter($status = null, $begintime = null, $endtime = null){
+        if (!$this->access_token && !$this->checkAuth()) return false;
 
-		$data = array();
+        $data = array();
 
-		$valid_status = array(2, 3, 5, 8);
-		if (is_numeric($status) && in_array($status, $valid_status)) {
-			$data['status'] = $status;
-		}
+        $valid_status = array(2, 3, 5, 8);
+        if (is_numeric($status) && in_array($status, $valid_status)) {
+            $data['status'] = $status;
+        }
 
-		if (is_numeric($begintime) && is_numeric($endtime)) {
-			$data['begintime'] = $begintime;
-			$data['endtime'] = $endtime;
-		}
-		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_GETBYFILTER.'access_token='.$this->access_token, self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (isset($json['errcode']) && $json['errcode']) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return $json['order_list'];
-		}
-		return false;
-	}
+        if (is_numeric($begintime) && is_numeric($endtime)) {
+            $data['begintime'] = $begintime;
+            $data['endtime'] = $endtime;
+        }
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_GETBYFILTER.'access_token='.$this->access_token, static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (isset($json['errcode']) && $json['errcode']) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return $json['order_list'];
+        }
+        return false;
+    }
 
-	/**
-	 * 设置订单发货信息
-	 * @param string $order_id 订单 ID
-	 * @param int $need_delivery 商品是否需要物流(0-不需要，1-需要)
-	 * @param string $delivery_company 物流公司 ID
-	 * @param string $delivery_track_no 运单 ID
-	 * @param int $is_others 是否为 6.4.5 表之外的其它物流公司(0-否，1-是)
-	 * @return bool
-	 */
-	public function setOrderDelivery($order_id, $need_delivery = 0, $delivery_company = null, $delivery_track_no = null, $is_others = 0){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		if (!$order_id) return false;
+    /**
+     * 设置订单发货信息
+     * @param string $order_id 订单 ID
+     * @param int $need_delivery 商品是否需要物流(0-不需要，1-需要)
+     * @param string $delivery_company 物流公司 ID
+     * @param string $delivery_track_no 运单 ID
+     * @param int $is_others 是否为 6.4.5 表之外的其它物流公司(0-否，1-是)
+     * @return bool
+     */
+    public function setOrderDelivery($order_id, $need_delivery = 0, $delivery_company = null, $delivery_track_no = null, $is_others = 0){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        if (!$order_id) return false;
 
-		$data = array();
-		$data['order_id'] = $order_id;
-		if ($need_delivery) {
-			$data['delivery_company'] = $delivery_company;
-			$data['delivery_track_no'] = $delivery_track_no;
-			$data['is_others'] = $is_others;
-		}
-		else {
-			$data['need_delivery'] = $need_delivery;
-		}
+        $data = array();
+        $data['order_id'] = $order_id;
+        if ($need_delivery) {
+            $data['delivery_company'] = $delivery_company;
+            $data['delivery_track_no'] = $delivery_track_no;
+            $data['is_others'] = $is_others;
+        }
+        else {
+            $data['need_delivery'] = $need_delivery;
+        }
 
-		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_SETDELIVERY.'access_token='.$this->access_token, self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (isset($json['errcode']) && $json['errcode']) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_SETDELIVERY.'access_token='.$this->access_token, static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (isset($json['errcode']) && $json['errcode']) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * 关闭订单
-	 * @param string $order_id 订单 ID
-	 * @return bool
-	 */
-	public function closeOrder($order_id){
-		if (!$this->access_token && !$this->checkAuth()) return false;
-		if (!$order_id) return false;
+    /**
+     * 关闭订单
+     * @param string $order_id 订单 ID
+     * @return bool
+     */
+    public function closeOrder($order_id){
+        if (!$this->access_token && !$this->checkAuth()) return false;
+        if (!$order_id) return false;
 
-		$data = array(
-			'order_id'=>$order_id
-		);
+        $data = array(
+            'order_id'=>$order_id
+        );
 
-		$result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_CLOSE.'access_token='.$this->access_token, self::json_encode($data));
-		if ($result)
-		{
-			$json = json_decode($result,true);
-			if (isset($json['errcode']) && $json['errcode']) {
-				$this->errCode = $json['errcode'];
-				$this->errMsg = $json['errmsg'];
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
+        $result = $this->http_post(self::API_BASE_URL_PREFIX.self::MERCHANT_ORDER_CLOSE.'access_token='.$this->access_token, static::json_encode($data));
+        if ($result)
+        {
+            $json = json_decode($result,true);
+            if (isset($json['errcode']) && $json['errcode']) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 
-	private function parseSkuInfo($skuInfo) {
-		$skuInfo = str_replace("\$", "", $skuInfo);
-		$matches = explode(";", $skuInfo);
+    private function parseSkuInfo($skuInfo) {
+        $skuInfo = str_replace("\$", "", $skuInfo);
+        $matches = explode(";", $skuInfo);
 
-		$result = array();
-		foreach ($matches as $matche) {
-			$arrs = explode(":", $matche);
-			$result[$arrs[0]] = $arrs[1];
-		}
+        $result = array();
+        foreach ($matches as $matche) {
+            $arrs = explode(":", $matche);
+            $result[$arrs[0]] = $arrs[1];
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
-	/**
-	 * 获取订单SkuInfo - 订单付款通知
-	 * 当Event为 merchant_order(订单付款通知)
-	 * @return array|boolean
-	 */
-	public function getRevOrderSkuInfo(){
-		if (isset($this->_receive['SkuInfo']))     //订单 SkuInfo
-			return $this->parseSkuInfo($this->_receive['SkuInfo']);
-		else
-			return false;
-	}
+    /**
+     * 获取订单SkuInfo - 订单付款通知
+     * 当Event为 merchant_order(订单付款通知)
+     * @return array|boolean
+     */
+    public function getRevOrderSkuInfo(){
+        if (isset($this->_receive['SkuInfo']))     //订单 SkuInfo
+            return $this->parseSkuInfo($this->_receive['SkuInfo']);
+        else
+            return false;
+    }
 }
 /**
  * PKCS7Encoder class
@@ -4670,7 +4629,7 @@ class Prpcrypt
             mcrypt_generic_deinit($module);
             mcrypt_module_close($module);
 
-            //			print(base64_encode($encrypted));
+            //          print(base64_encode($encrypted));
             //使用BASE64对加密后的字符串进行编码
             return array(ErrorCode::$OK, base64_encode($encrypted));
         } catch (Exception $e) {
